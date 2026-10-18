@@ -5,11 +5,14 @@ import { fetchGeneratedPuzzle, fetchDailyPuzzle, verifyPuzzleOnline } from './se
 import { Header } from './components/Header';
 import { CrosswordGrid } from './components/CrosswordGrid';
 import { ClueList } from './components/ClueList';
+import { TenaliRamaStoryClue } from './components/TenaliRamaStoryClue';
+import { ClueListDrawer } from './components/ClueListDrawer';
 import { TeluguKeypad } from './components/TeluguKeypad';
 import { GamifiedHints } from './components/GamifiedHints';
 import { TopUpModal } from './components/TopUpModal';
 import { TRANSLATIONS, type Language } from './utils/translations';
 import { speakTeluguText, startTeluguListening } from './utils/speech';
+import { templeAudio } from './utils/templeAudio';
 import { Volume2, Mic, Eye, X } from 'lucide-react';
 
 const INITIAL_HINTS: HintOption[] = [
@@ -100,6 +103,10 @@ export function App() {
 
   // Vocal Feature: Voice Input Listening State
   const [isListening, setIsListening] = useState(false);
+
+  // Clue Presentation Modes: 'narrator' (Tenali Rama Mascot Clue Speaker) vs 'list' (Full Classical Table)
+  const [clueViewMode, setClueViewMode] = useState<'narrator' | 'list'>('narrator');
+  const [isClueListDrawerOpen, setIsClueListDrawerOpen] = useState(false);
 
   useEffect(() => {
     loadPuzzle(difficulty);
@@ -221,6 +228,7 @@ export function App() {
 
   const handleInsertSyllable = (syl: string) => {
     if (!puzzle) return;
+    templeAudio.playTileTap();
     const { r, c } = selectedCell;
     const nextGrid = userGrid.map(row => [...row]);
     nextGrid[r][c] = syl;
@@ -242,6 +250,7 @@ export function App() {
 
   const handleBackspace = () => {
     if (!puzzle) return;
+    templeAudio.playTileTap();
     const { r, c } = selectedCell;
     const nextGrid = userGrid.map(row => [...row]);
 
@@ -321,6 +330,7 @@ export function App() {
 
     if (result.is_complete) {
       setIsSolved(true);
+      templeAudio.playSuccessFanfare();
       const targetTime = TARGET_TIMES[difficulty];
       const isUnderTime = timerSeconds <= targetTime;
       const speedBonusCoins = isUnderTime ? 5 : 0;
@@ -347,6 +357,7 @@ export function App() {
 
       setStatusMessage(message);
     } else {
+      templeAudio.playWrongChime();
       const message = result.correct_cells > 0
         ? t.tryAgainMsg.replace('{total}', String(result.total_cells)).replace('{correct}', String(result.correct_cells))
         : t.incorrectMsg;
@@ -629,15 +640,58 @@ export function App() {
                   />
                 </div>
 
-                {/* Clues Column */}
-                <div className="flex-1 w-full min-w-0 flex flex-col">
-                  <ClueList
-                    clues={puzzle.clues}
-                    activeClue={activeClue}
-                    direction={direction}
-                    language={language}
-                    onSelectClue={handleSelectClue}
-                  />
+                {/* Clues & Tenali Story Narrator Column */}
+                <div className="flex-1 w-full min-w-0 flex flex-col gap-2.5">
+                  {/* View Mode Toggle: Tenali Rama Story Narrator vs Full Clues List */}
+                  <div className="flex items-center justify-between bg-stone-100 p-1 rounded-xl border border-stone-200">
+                    <button
+                      type="button"
+                      onClick={() => setClueViewMode('narrator')}
+                      className={`flex-1 py-1 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+                        clueViewMode === 'narrator'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                      }`}
+                    >
+                      <span>🎭</span>
+                      <span>{language === 'te' ? 'తెనాలి రామకృష్ణుడు (ఆస్థాన నిరూపణ)' : 'Tenali Narrator'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setClueViewMode('list')}
+                      className={`flex-1 py-1 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+                        clueViewMode === 'list'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                      }`}
+                    >
+                      <span>📜</span>
+                      <span>{language === 'te' ? 'పూర్తి జాబితా (Full Clues)' : 'Full Clue Table'}</span>
+                    </button>
+                  </div>
+
+                  {clueViewMode === 'narrator' ? (
+                    <TenaliRamaStoryClue
+                      activeClue={activeClue}
+                      direction={direction}
+                      selectedCell={selectedCell}
+                      userGrid={userGrid}
+                      allClues={puzzle.clues}
+                      language={language}
+                      onToggleDirection={() => setDirection(d => (d === 'across' ? 'down' : 'across'))}
+                      onSelectAlternateClue={(clue, dir) => handleSelectClue(clue, dir)}
+                      onOpenFullClues={() => setIsClueListDrawerOpen(true)}
+                      onUseHint={() => handleUseHint('reveal_syllable')}
+                    />
+                  ) : (
+                    <ClueList
+                      clues={puzzle.clues}
+                      activeClue={activeClue}
+                      direction={direction}
+                      language={language}
+                      onSelectClue={handleSelectClue}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -854,6 +908,19 @@ export function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Full Clue List Drawer (Quick Modal Access from Tenali Clue Box) */}
+      {puzzle && (
+        <ClueListDrawer
+          isOpen={isClueListDrawerOpen}
+          onClose={() => setIsClueListDrawerOpen(false)}
+          clues={puzzle.clues}
+          activeClue={activeClue}
+          direction={direction}
+          language={language}
+          onSelectClue={handleSelectClue}
+        />
       )}
 
       <footer className="mt-5 text-center text-xs text-stone-500 font-sans print:hidden">

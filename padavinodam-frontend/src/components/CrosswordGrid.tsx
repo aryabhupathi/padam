@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import type { PuzzleData, ClueItem } from '../types/puzzle';
 import { TRANSLATIONS, type Language } from '../utils/translations';
+import { templeAudio } from '../utils/templeAudio';
 
 interface CrosswordGridProps {
   puzzle: PuzzleData;
@@ -184,7 +185,10 @@ export const CrosswordGrid: React.FC<CrosswordGridProps> = ({
             return (
               <div
                 key={`${r}-${c}`}
-                onClick={() => onSelectCell(r, c)}
+                onClick={() => {
+                  templeAudio.playTileTap();
+                  onSelectCell(r, c);
+                }}
                 className={`${dims.cellClass} relative aspect-square flex items-center justify-center cursor-pointer select-none transition-colors ${
                   isSelected
                     ? 'bg-amber-100 ring-2 ring-amber-500 ring-inset z-10'

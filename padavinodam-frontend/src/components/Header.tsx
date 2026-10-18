@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { GameDifficulty } from '../types/puzzle';
 import { TRANSLATIONS, type Language } from '../utils/translations';
-import { RefreshCw, Calendar, Printer, CheckCircle, Eye, Trophy, Zap, Languages, Lock, Clock } from 'lucide-react';
+import { RefreshCw, Calendar, Printer, CheckCircle, Eye, Trophy, Zap, Languages, Lock, Clock, Bell, BellOff } from 'lucide-react';
+import { templeAudio } from '../utils/templeAudio';
 
 interface HeaderProps {
   onNewPuzzle: () => void;
@@ -45,6 +46,15 @@ export const Header: React.FC<HeaderProps> = ({
   isSolved
 }) => {
   const t = TRANSLATIONS[language];
+  const [isMuted, setIsMuted] = useState(templeAudio.isMuted());
+
+  const handleToggleSound = () => {
+    const next = templeAudio.toggleMute();
+    setIsMuted(next);
+    if (!next) {
+      templeAudio.playTempleBell();
+    }
+  };
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -93,6 +103,21 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Languages size={14} className="text-amber-700" />
             <span className="font-sans">{language === 'te' ? 'English' : 'తెలుగు'}</span>
+          </button>
+
+          {/* Temple Sound Toggle Button */}
+          <button
+            type="button"
+            onClick={handleToggleSound}
+            className={`inline-flex items-center gap-1 px-2.5 py-1.5 border rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 ${
+              !isMuted
+                ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300'
+                : 'bg-stone-100 hover:bg-stone-200 text-stone-500 border-stone-300'
+            }`}
+            title={!isMuted ? 'ధ్వని ఆన్ (Temple Chimes On)' : 'ధ్వని మ్యూట్ (Muted)'}
+          >
+            {!isMuted ? <Bell size={14} className="text-amber-600" /> : <BellOff size={14} className="text-stone-400" />}
+            <span className="hidden sm:inline font-sans">{!isMuted ? 'ధ్వని' : 'మ్యూట్'}</span>
           </button>
 
           {/* Energy Points Wallet Button */}
