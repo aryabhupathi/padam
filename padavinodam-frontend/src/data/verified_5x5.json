@@ -1,0 +1,256 @@
+{
+  "size": 5,
+  "mask": [
+    [
+      false,
+      true,
+      false,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      true,
+      false,
+      true,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      false,
+      true,
+      false
+    ]
+  ],
+  "numbers": {
+    "0,1": 1,
+    "0,3": 2,
+    "1,0": 3,
+    "1,2": 4,
+    "2,4": 5,
+    "3,1": 6,
+    "3,3": 7,
+    "4,0": 8
+  },
+  "clues": {
+    "across": [
+      {
+        "id": "across_2",
+        "number": 2,
+        "row": 0,
+        "col": 3,
+        "length": 2,
+        "word": "పంక్తి",
+        "syllables": [
+          "పం",
+          "క్తి"
+        ],
+        "clue": "వరుస, భోజనం చేసే సమూహం",
+        "category": "సంప్రదాయం"
+      },
+      {
+        "id": "across_3",
+        "number": 3,
+        "row": 1,
+        "col": 0,
+        "length": 4,
+        "word": "భరతుడు",
+        "syllables": [
+          "భ",
+          "ర",
+          "తు",
+          "డు"
+        ],
+        "clue": "రాముని పాదుకలను పూజించిన సోదరుడు",
+        "category": "రామాయణం"
+      },
+      {
+        "id": "across_6",
+        "number": 6,
+        "row": 3,
+        "col": 1,
+        "length": 4,
+        "word": "చందమామ",
+        "syllables": [
+          "చం",
+          "ద",
+          "మా",
+          "మ"
+        ],
+        "clue": "జాబిల్లి, చంద్రుడు",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_8",
+        "number": 8,
+        "row": 4,
+        "col": 0,
+        "length": 2,
+        "word": "నిద్ర",
+        "syllables": [
+          "ని",
+          "ద్ర"
+        ],
+        "clue": "శయనం, విశ్రాంతి",
+        "category": "సాధారణం"
+      }
+    ],
+    "down": [
+      {
+        "id": "down_1",
+        "number": 1,
+        "row": 0,
+        "col": 1,
+        "length": 2,
+        "word": "తార",
+        "syllables": [
+          "తా",
+          "ర"
+        ],
+        "clue": "ఆకాశంలో మెరిసే నక్షత్రం",
+        "category": "ఖగోళం"
+      },
+      {
+        "id": "down_2",
+        "number": 2,
+        "row": 0,
+        "col": 3,
+        "length": 2,
+        "word": "పండు",
+        "syllables": [
+          "పం",
+          "డు"
+        ],
+        "clue": "చెట్టు ఇచ్చే మధురమైన ఫలం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_3",
+        "number": 3,
+        "row": 1,
+        "col": 0,
+        "length": 2,
+        "word": "భక్తి",
+        "syllables": [
+          "భ",
+          "క్తి"
+        ],
+        "clue": "దైవంపై చూపే పరమ పూజ్య భావం",
+        "category": "భక్తి"
+      },
+      {
+        "id": "down_4",
+        "number": 4,
+        "row": 1,
+        "col": 2,
+        "length": 3,
+        "word": "తుమ్మెద",
+        "syllables": [
+          "తు",
+          "మ్మె",
+          "ద"
+        ],
+        "clue": "పూలలోని తేనెను గ్రోలే కీటకం",
+        "category": "కీటకాలు"
+      },
+      {
+        "id": "down_5",
+        "number": 5,
+        "row": 2,
+        "col": 4,
+        "length": 2,
+        "word": "మామ",
+        "syllables": [
+          "మా",
+          "మ"
+        ],
+        "clue": "మేనమామ",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_6",
+        "number": 6,
+        "row": 3,
+        "col": 1,
+        "length": 2,
+        "word": "చంద్ర",
+        "syllables": [
+          "చం",
+          "ద్ర"
+        ],
+        "clue": "జాబిల్లి, శశి",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_7",
+        "number": 7,
+        "row": 3,
+        "col": 3,
+        "length": 2,
+        "word": "మార్గం",
+        "syllables": [
+          "మా",
+          "ర్గం"
+        ],
+        "clue": "త్రోవ, దారి, అనుసరించే పద్ధతి",
+        "category": "సాధారణం"
+      }
+    ]
+  },
+  "solution": [
+    [
+      null,
+      "తా",
+      null,
+      "పం",
+      "క్తి"
+    ],
+    [
+      "భ",
+      "ర",
+      "తు",
+      "డు",
+      null
+    ],
+    [
+      "క్తి",
+      null,
+      "మ్మె",
+      null,
+      "మా"
+    ],
+    [
+      null,
+      "చం",
+      "ద",
+      "మా",
+      "మ"
+    ],
+    [
+      "ని",
+      "ద్ర",
+      null,
+      "ర్గం",
+      null
+    ]
+  ],
+  "meta": {
+    "total_words": 11,
+    "is_authentic_newspaper_grid": true
+  }
+}

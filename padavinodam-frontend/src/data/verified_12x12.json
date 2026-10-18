@@ -1,0 +1,1488 @@
+{
+  "size": 12,
+  "mask": [
+    [
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false
+    ],
+    [
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false
+    ],
+    [
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    [
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false
+    ],
+    [
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true
+    ]
+  ],
+  "numbers": {
+    "0,0": 1,
+    "0,3": 2,
+    "0,6": 3,
+    "0,7": 4,
+    "0,9": 5,
+    "0,11": 6,
+    "1,2": 7,
+    "1,5": 8,
+    "1,7": 9,
+    "1,8": 10,
+    "2,1": 11,
+    "2,4": 12,
+    "2,6": 13,
+    "2,10": 14,
+    "3,0": 15,
+    "3,3": 16,
+    "3,6": 17,
+    "3,9": 18,
+    "3,11": 19,
+    "4,2": 20,
+    "4,5": 21,
+    "4,8": 22,
+    "5,1": 23,
+    "5,4": 24,
+    "5,6": 25,
+    "5,7": 26,
+    "5,10": 27,
+    "6,0": 28,
+    "6,3": 29,
+    "6,5": 30,
+    "6,9": 31,
+    "7,2": 32,
+    "7,5": 33,
+    "7,8": 34,
+    "7,11": 35,
+    "8,0": 36,
+    "8,1": 37,
+    "8,4": 38,
+    "8,7": 39,
+    "8,10": 40,
+    "9,3": 41,
+    "9,5": 42,
+    "9,6": 43,
+    "9,9": 44,
+    "10,0": 45,
+    "10,2": 46,
+    "10,4": 47,
+    "10,8": 48,
+    "10,11": 49,
+    "11,0": 50,
+    "11,4": 51,
+    "11,7": 52,
+    "11,10": 53
+  },
+  "clues": {
+    "across": [
+      {
+        "id": "across_1",
+        "number": 1,
+        "row": 0,
+        "col": 0,
+        "length": 2,
+        "word": "గువ్వ",
+        "syllables": [
+          "గు",
+          "వ్వ"
+        ],
+        "clue": "శాంతికి చిహ్నమైన పావురం లేదా చిన్న పక్షి",
+        "category": "పక్షులు"
+      },
+      {
+        "id": "across_2",
+        "number": 2,
+        "row": 0,
+        "col": 3,
+        "length": 2,
+        "word": "పాల",
+        "syllables": [
+          "పా",
+          "ల"
+        ],
+        "clue": "తెల్లని అమృతధార వంటి పాలు",
+        "category": "ఆహారం"
+      },
+      {
+        "id": "across_3",
+        "number": 3,
+        "row": 0,
+        "col": 6,
+        "length": 2,
+        "word": "క్షీరం",
+        "syllables": [
+          "క్షీ",
+          "రం"
+        ],
+        "clue": "పోషకాలనిచ్చే తెల్లని పాలు",
+        "category": "ఆహారం"
+      },
+      {
+        "id": "across_5",
+        "number": 5,
+        "row": 0,
+        "col": 9,
+        "length": 3,
+        "word": "ఆదేశం",
+        "syllables": [
+          "ఆ",
+          "దే",
+          "శం"
+        ],
+        "clue": "ఆజ్ఞ, ఉత్తర్వు",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_7",
+        "number": 7,
+        "row": 1,
+        "col": 2,
+        "length": 2,
+        "word": "నోము",
+        "syllables": [
+          "నో",
+          "ము"
+        ],
+        "clue": "తెలుగు స్త్రీలు నోచుకునే మంగళకరమైన పూజ",
+        "category": "సంప్రదాయం"
+      },
+      {
+        "id": "across_9",
+        "number": 9,
+        "row": 1,
+        "col": 7,
+        "length": 3,
+        "word": "గురువు",
+        "syllables": [
+          "గు",
+          "రు",
+          "వు"
+        ],
+        "clue": "అజ్ఞానాన్ని తొలగించే విద్యా ప్రదాత",
+        "category": "విద్య"
+      },
+      {
+        "id": "across_11",
+        "number": 11,
+        "row": 2,
+        "col": 1,
+        "length": 2,
+        "word": "నీరు",
+        "syllables": [
+          "నీ",
+          "రు"
+        ],
+        "clue": "జలం, ప్రాణాధార పానీయం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "across_12",
+        "number": 12,
+        "row": 2,
+        "col": 4,
+        "length": 3,
+        "word": "అడవి",
+        "syllables": [
+          "అ",
+          "డ",
+          "వి"
+        ],
+        "clue": "వృక్షాలు, వన్యప్రాణులతో కూడిన అరణ్యం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "across_15",
+        "number": 15,
+        "row": 3,
+        "col": 0,
+        "length": 2,
+        "word": "వాడ",
+        "syllables": [
+          "వా",
+          "డ"
+        ],
+        "clue": "నగరంలో లేదా ఊరిలో ఒక నివాస ప్రాంతం",
+        "category": "భౌగోళికం"
+      },
+      {
+        "id": "across_16",
+        "number": 16,
+        "row": 3,
+        "col": 3,
+        "length": 2,
+        "word": "బామ్మ",
+        "syllables": [
+          "బా",
+          "మ్మ"
+        ],
+        "clue": "పితామహి, అమ్మమ్మ",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_17",
+        "number": 17,
+        "row": 3,
+        "col": 6,
+        "length": 2,
+        "word": "నాగు",
+        "syllables": [
+          "నా",
+          "గు"
+        ],
+        "clue": "పుట్టలో నివసించే విష సర్పం",
+        "category": "జంతువులు"
+      },
+      {
+        "id": "across_18",
+        "number": 18,
+        "row": 3,
+        "col": 9,
+        "length": 3,
+        "word": "తారక",
+        "syllables": [
+          "తా",
+          "ర",
+          "క"
+        ],
+        "clue": "రాత్రి వేళ మెరిసే చుక్క",
+        "category": "ఖగోళం"
+      },
+      {
+        "id": "across_20",
+        "number": 20,
+        "row": 4,
+        "col": 2,
+        "length": 2,
+        "word": "గుణం",
+        "syllables": [
+          "గు",
+          "ణం"
+        ],
+        "clue": "మనిషి స్వభావం, లక్షణం",
+        "category": "వ్యక్తిత్వం"
+      },
+      {
+        "id": "across_21",
+        "number": 21,
+        "row": 4,
+        "col": 5,
+        "length": 2,
+        "word": "కాయ",
+        "syllables": [
+          "కా",
+          "య"
+        ],
+        "clue": "పండుగా మారకముందు ఉండే పచ్చి కాయ",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "across_22",
+        "number": 22,
+        "row": 4,
+        "col": 8,
+        "length": 2,
+        "word": "కవి",
+        "syllables": [
+          "క",
+          "వి"
+        ],
+        "clue": "రచయిత, పద్యకారుడు",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_23",
+        "number": 23,
+        "row": 5,
+        "col": 1,
+        "length": 2,
+        "word": "బడి",
+        "syllables": [
+          "బ",
+          "డి"
+        ],
+        "clue": "పాఠశాల, విద్యామందిరం",
+        "category": "విద్య"
+      },
+      {
+        "id": "across_25",
+        "number": 25,
+        "row": 5,
+        "col": 6,
+        "length": 3,
+        "word": "కమలం",
+        "syllables": [
+          "క",
+          "మ",
+          "లం"
+        ],
+        "clue": "భారత జాతీయ పుష్పం, తామర",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "across_27",
+        "number": 27,
+        "row": 5,
+        "col": 10,
+        "length": 2,
+        "word": "తోడు",
+        "syllables": [
+          "తో",
+          "డు"
+        ],
+        "clue": "కష్టసుఖాలలో వెన్నంటే ఉండే భాగస్వామ్యం",
+        "category": "జీవితం"
+      },
+      {
+        "id": "across_28",
+        "number": 28,
+        "row": 6,
+        "col": 0,
+        "length": 2,
+        "word": "కాలం",
+        "syllables": [
+          "కా",
+          "లం"
+        ],
+        "clue": "గడిచే సమయం, మూడు కాలాలు",
+        "category": "సమయం"
+      },
+      {
+        "id": "across_29",
+        "number": 29,
+        "row": 6,
+        "col": 3,
+        "length": 3,
+        "word": "దసరా",
+        "syllables": [
+          "ద",
+          "స",
+          "రా"
+        ],
+        "clue": "చెడుపై మంచి సాధించిన విజయానికి ప్రతీకగా విజయదశమి",
+        "category": "పండుగలు"
+      },
+      {
+        "id": "across_31",
+        "number": 31,
+        "row": 6,
+        "col": 9,
+        "length": 2,
+        "word": "కాయం",
+        "syllables": [
+          "కా",
+          "యం"
+        ],
+        "clue": "శరీరం లేదా తనువు",
+        "category": "శరీరం"
+      },
+      {
+        "id": "across_32",
+        "number": 32,
+        "row": 7,
+        "col": 2,
+        "length": 2,
+        "word": "జయ",
+        "syllables": [
+          "జ",
+          "య"
+        ],
+        "clue": "శుభప్రదమైన విజయం",
+        "category": "విజయం"
+      },
+      {
+        "id": "across_33",
+        "number": 33,
+        "row": 7,
+        "col": 5,
+        "length": 2,
+        "word": "జపం",
+        "syllables": [
+          "జ",
+          "పం"
+        ],
+        "clue": "ఏకాగ్రతతో దైవ నామాన్ని స్మరించడం",
+        "category": "భక్తి"
+      },
+      {
+        "id": "across_34",
+        "number": 34,
+        "row": 7,
+        "col": 8,
+        "length": 2,
+        "word": "స్వరం",
+        "syllables": [
+          "స్వ",
+          "రం"
+        ],
+        "clue": "సంగీతంలో సప్తస్వరాలు / గొంతు",
+        "category": "సంగీతం"
+      },
+      {
+        "id": "across_36",
+        "number": 36,
+        "row": 8,
+        "col": 0,
+        "length": 3,
+        "word": "వలయం",
+        "syllables": [
+          "వ",
+          "ల",
+          "యం"
+        ],
+        "clue": "గుండ్రంగా చుట్టుముట్టే చక్రం",
+        "category": "గణితం"
+      },
+      {
+        "id": "across_38",
+        "number": 38,
+        "row": 8,
+        "col": 4,
+        "length": 2,
+        "word": "హంస",
+        "syllables": [
+          "హం",
+          "స"
+        ],
+        "clue": "పాల నుండి నీటిని వేరుచేసే సరస్వతీ వాహనం",
+        "category": "పక్షులు"
+      },
+      {
+        "id": "across_39",
+        "number": 39,
+        "row": 8,
+        "col": 7,
+        "length": 2,
+        "word": "వర్గం",
+        "syllables": [
+          "వ",
+          "ర్గం"
+        ],
+        "clue": "సమూహం, తరగతి",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_40",
+        "number": 40,
+        "row": 8,
+        "col": 10,
+        "length": 2,
+        "word": "నిద్ర",
+        "syllables": [
+          "ని",
+          "ద్ర"
+        ],
+        "clue": "శయనం, విశ్రాంతి",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_42",
+        "number": 42,
+        "row": 9,
+        "col": 5,
+        "length": 3,
+        "word": "భవనం",
+        "syllables": [
+          "భ",
+          "వ",
+          "నం"
+        ],
+        "clue": "అందమైన పెద్ద మేడ, గృహం",
+        "category": "నిర్మాణాలు"
+      },
+      {
+        "id": "across_44",
+        "number": 44,
+        "row": 9,
+        "col": 9,
+        "length": 2,
+        "word": "పప్పు",
+        "syllables": [
+          "ప",
+          "ప్పు"
+        ],
+        "clue": "ఆంధ్రుల భోజనంలో మొదటి ముద్ద",
+        "category": "ఆహారం"
+      },
+      {
+        "id": "across_46",
+        "number": 46,
+        "row": 10,
+        "col": 2,
+        "length": 3,
+        "word": "కవిత",
+        "syllables": [
+          "క",
+          "వి",
+          "త"
+        ],
+        "clue": "రసజ్ఞులను అలరించే చక్కని భావకవిత",
+        "category": "సాహిత్యం"
+      },
+      {
+        "id": "across_48",
+        "number": 48,
+        "row": 10,
+        "col": 8,
+        "length": 2,
+        "word": "రథం",
+        "syllables": [
+          "ర",
+          "థం"
+        ],
+        "clue": "దేవుడి ఊరేగింపు వాహనం",
+        "category": "భక్తి"
+      },
+      {
+        "id": "across_50",
+        "number": 50,
+        "row": 11,
+        "col": 0,
+        "length": 3,
+        "word": "మంగళ",
+        "syllables": [
+          "మం",
+          "గ",
+          "ళ"
+        ],
+        "clue": "మంగళగిరి పానకాల నరసింహస్వామి కొండ",
+        "category": "పుణ్యక్షేత్రాలు"
+      },
+      {
+        "id": "across_51",
+        "number": 51,
+        "row": 11,
+        "col": 4,
+        "length": 2,
+        "word": "పండు",
+        "syllables": [
+          "పం",
+          "డు"
+        ],
+        "clue": "చెట్టు ఇచ్చే మధురమైన ఫలం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "across_52",
+        "number": 52,
+        "row": 11,
+        "col": 7,
+        "length": 2,
+        "word": "పంక్తి",
+        "syllables": [
+          "పం",
+          "క్తి"
+        ],
+        "clue": "వరుస, భోజనం చేసే సమూహం",
+        "category": "సంప్రదాయం"
+      },
+      {
+        "id": "across_53",
+        "number": 53,
+        "row": 11,
+        "col": 10,
+        "length": 2,
+        "word": "ప్రాణం",
+        "syllables": [
+          "ప్రా",
+          "ణం"
+        ],
+        "clue": "జీవించటానికి అవసరమైన శ్వాస",
+        "category": "ఆరోగ్యం"
+      }
+    ],
+    "down": [
+      {
+        "id": "down_1",
+        "number": 1,
+        "row": 0,
+        "col": 0,
+        "length": 2,
+        "word": "గుర్రం",
+        "syllables": [
+          "గు",
+          "ర్రం"
+        ],
+        "clue": "వేగంగా పరిగెత్తే అశ్వం",
+        "category": "జంతువులు"
+      },
+      {
+        "id": "down_2",
+        "number": 2,
+        "row": 0,
+        "col": 3,
+        "length": 2,
+        "word": "పాము",
+        "syllables": [
+          "పా",
+          "ము"
+        ],
+        "clue": "బుసకొట్టే సర్పం, భుజంగం",
+        "category": "సరీసృపాలు"
+      },
+      {
+        "id": "down_4",
+        "number": 4,
+        "row": 0,
+        "col": 7,
+        "length": 2,
+        "word": "రంగు",
+        "syllables": [
+          "రం",
+          "గు"
+        ],
+        "clue": "వర్ణం, కాంతి",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_5",
+        "number": 5,
+        "row": 0,
+        "col": 9,
+        "length": 2,
+        "word": "ఆవు",
+        "syllables": [
+          "ఆ",
+          "వు"
+        ],
+        "clue": "గోమాత, పాలు ఇచ్చే పవిత్ర జంతువు",
+        "category": "జంతువులు"
+      },
+      {
+        "id": "down_6",
+        "number": 6,
+        "row": 0,
+        "col": 11,
+        "length": 2,
+        "word": "శంఖం",
+        "syllables": [
+          "శం",
+          "ఖం"
+        ],
+        "clue": "పూజలలో ఊదే సముద్రపు గుల్ల",
+        "category": "భక్తి"
+      },
+      {
+        "id": "down_7",
+        "number": 7,
+        "row": 1,
+        "col": 2,
+        "length": 2,
+        "word": "నోరు",
+        "syllables": [
+          "నో",
+          "రు"
+        ],
+        "clue": "మాట్లాడటానికి ఉపయోగపడే ముఖ భాగం",
+        "category": "శరీరం"
+      },
+      {
+        "id": "down_8",
+        "number": 8,
+        "row": 1,
+        "col": 5,
+        "length": 2,
+        "word": "దూడ",
+        "syllables": [
+          "దూ",
+          "డ"
+        ],
+        "clue": "ఆవు లేదా గేదె చిన్న బిడ్డ",
+        "category": "జంతువులు"
+      },
+      {
+        "id": "down_10",
+        "number": 10,
+        "row": 1,
+        "col": 8,
+        "length": 2,
+        "word": "రుణం",
+        "syllables": [
+          "రు",
+          "ణం"
+        ],
+        "clue": "తీర్చుకోవలసిన అప్పు, బాకీ",
+        "category": "ఆర్థికం"
+      },
+      {
+        "id": "down_11",
+        "number": 11,
+        "row": 2,
+        "col": 1,
+        "length": 2,
+        "word": "నీడ",
+        "syllables": [
+          "నీ",
+          "డ"
+        ],
+        "clue": "చెట్టు లేదా గోడ ఇచ్చే చల్లదనం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_12",
+        "number": 12,
+        "row": 2,
+        "col": 4,
+        "length": 2,
+        "word": "అమ్మ",
+        "syllables": [
+          "అ",
+          "మ్మ"
+        ],
+        "clue": "జన్మనిచ్చిన తల్లి",
+        "category": "కుటుంబం"
+      },
+      {
+        "id": "down_13",
+        "number": 13,
+        "row": 2,
+        "col": 6,
+        "length": 4,
+        "word": "వినాయక",
+        "syllables": [
+          "వి",
+          "నా",
+          "య",
+          "క"
+        ],
+        "clue": "సిద్ధి బుద్ధులను ప్రసాదించే లంబోదరుడు",
+        "category": "పురాణం"
+      },
+      {
+        "id": "down_14",
+        "number": 14,
+        "row": 2,
+        "col": 10,
+        "length": 2,
+        "word": "తార",
+        "syllables": [
+          "తా",
+          "ర"
+        ],
+        "clue": "ఆకాశంలో మెరిసే నక్షత్రం",
+        "category": "ఖగోళం"
+      },
+      {
+        "id": "down_15",
+        "number": 15,
+        "row": 3,
+        "col": 0,
+        "length": 2,
+        "word": "వారం",
+        "syllables": [
+          "వా",
+          "రం"
+        ],
+        "clue": "ఏడు రోజుల కాల వ్యవధి",
+        "category": "సమయం"
+      },
+      {
+        "id": "down_16",
+        "number": 16,
+        "row": 3,
+        "col": 3,
+        "length": 2,
+        "word": "బాణం",
+        "syllables": [
+          "బా",
+          "ణం"
+        ],
+        "clue": "విల్లు నుండి దూసుకుపోయే శరం",
+        "category": "పురాణం"
+      },
+      {
+        "id": "down_18",
+        "number": 18,
+        "row": 3,
+        "col": 9,
+        "length": 2,
+        "word": "తావి",
+        "syllables": [
+          "తా",
+          "వి"
+        ],
+        "clue": "సువాసన, పరిమళం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_19",
+        "number": 19,
+        "row": 3,
+        "col": 11,
+        "length": 3,
+        "word": "కర్ణుడు",
+        "syllables": [
+          "క",
+          "ర్ణు",
+          "డు"
+        ],
+        "clue": "దానగుణంలో సాటిలేని సూర్యపుత్రుడు",
+        "category": "మహాభారతం"
+      },
+      {
+        "id": "down_20",
+        "number": 20,
+        "row": 4,
+        "col": 2,
+        "length": 2,
+        "word": "గుడి",
+        "syllables": [
+          "గు",
+          "డి"
+        ],
+        "clue": "దేవాలయం, కోవెల",
+        "category": "భక్తి"
+      },
+      {
+        "id": "down_22",
+        "number": 22,
+        "row": 4,
+        "col": 8,
+        "length": 2,
+        "word": "కలం",
+        "syllables": [
+          "క",
+          "లం"
+        ],
+        "clue": "రచయిత చేతి ఆయుధం, లేఖిని",
+        "category": "సాహిత్యం"
+      },
+      {
+        "id": "down_23",
+        "number": 23,
+        "row": 5,
+        "col": 1,
+        "length": 2,
+        "word": "బలం",
+        "syllables": [
+          "బ",
+          "లం"
+        ],
+        "clue": "శక్తి, సత్తువ",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_24",
+        "number": 24,
+        "row": 5,
+        "col": 4,
+        "length": 2,
+        "word": "శ్వాస",
+        "syllables": [
+          "శ్వా",
+          "స"
+        ],
+        "clue": "ఊపిరితిత్తులలోకి పీల్చే గాలి",
+        "category": "ఆరోగ్యం"
+      },
+      {
+        "id": "down_26",
+        "number": 26,
+        "row": 5,
+        "col": 7,
+        "length": 2,
+        "word": "మతం",
+        "syllables": [
+          "మ",
+          "తం"
+        ],
+        "clue": "దైవ విశ్వాసం, సంప్రదాయం",
+        "category": "సంస్కృతి"
+      },
+      {
+        "id": "down_27",
+        "number": 27,
+        "row": 5,
+        "col": 10,
+        "length": 2,
+        "word": "తోయం",
+        "syllables": [
+          "తో",
+          "యం"
+        ],
+        "clue": "పవిత్ర తీర్థం, నీరు",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_28",
+        "number": 28,
+        "row": 6,
+        "col": 0,
+        "length": 3,
+        "word": "కాలువ",
+        "syllables": [
+          "కా",
+          "లు",
+          "వ"
+        ],
+        "clue": "పొలాలకు నీరు తెచ్చే నీటి దారి",
+        "category": "వ్యవసాయం"
+      },
+      {
+        "id": "down_29",
+        "number": 29,
+        "row": 6,
+        "col": 3,
+        "length": 2,
+        "word": "దయ",
+        "syllables": [
+          "ద",
+          "య"
+        ],
+        "clue": "కరుణ, జాలి, కనికరం",
+        "category": "గుణాలు"
+      },
+      {
+        "id": "down_30",
+        "number": 30,
+        "row": 6,
+        "col": 5,
+        "length": 4,
+        "word": "రాజసభ",
+        "syllables": [
+          "రా",
+          "జ",
+          "స",
+          "భ"
+        ],
+        "clue": "చక్రవర్తి కొలువుదీరిన పండిత ఆస్థానం",
+        "category": "చరిత్ర"
+      },
+      {
+        "id": "down_31",
+        "number": 31,
+        "row": 6,
+        "col": 9,
+        "length": 2,
+        "word": "కారం",
+        "syllables": [
+          "కా",
+          "రం"
+        ],
+        "clue": "మిరపకాయల ఘాటైన రుచి",
+        "category": "రుచులు"
+      },
+      {
+        "id": "down_32",
+        "number": 32,
+        "row": 7,
+        "col": 2,
+        "length": 2,
+        "word": "జయం",
+        "syllables": [
+          "జ",
+          "యం"
+        ],
+        "clue": "విజయం, గెలుపు",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_34",
+        "number": 34,
+        "row": 7,
+        "col": 8,
+        "length": 2,
+        "word": "స్వర్గం",
+        "syllables": [
+          "స్వ",
+          "ర్గం"
+        ],
+        "clue": "ఇంద్రుని నివాసం, పుణ్యలోకం",
+        "category": "పురాణాలు"
+      },
+      {
+        "id": "down_35",
+        "number": 35,
+        "row": 7,
+        "col": 11,
+        "length": 2,
+        "word": "చంద్ర",
+        "syllables": [
+          "చం",
+          "ద్ర"
+        ],
+        "clue": "జాబిల్లి, శశి",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_37",
+        "number": 37,
+        "row": 8,
+        "col": 1,
+        "length": 2,
+        "word": "లక్ష్యం",
+        "syllables": [
+          "ల",
+          "క్ష్యం"
+        ],
+        "clue": "పట్టుదలతో సాధించాల్సిన ధ్యేయం",
+        "category": "వ్యక్తిత్వం"
+      },
+      {
+        "id": "down_39",
+        "number": 39,
+        "row": 8,
+        "col": 7,
+        "length": 2,
+        "word": "వనం",
+        "syllables": [
+          "వ",
+          "నం"
+        ],
+        "clue": "తోట, అడవి, వృక్షాల సమూహం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_40",
+        "number": 40,
+        "row": 8,
+        "col": 10,
+        "length": 2,
+        "word": "నిప్పు",
+        "syllables": [
+          "ని",
+          "ప్పు"
+        ],
+        "clue": "అగ్ని, మంట",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_41",
+        "number": 41,
+        "row": 9,
+        "col": 3,
+        "length": 2,
+        "word": "చెవి",
+        "syllables": [
+          "చె",
+          "వి"
+        ],
+        "clue": "కర్ణం, శ్రోత్రం",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_43",
+        "number": 43,
+        "row": 9,
+        "col": 6,
+        "length": 2,
+        "word": "వరి",
+        "syllables": [
+          "వ",
+          "రి"
+        ],
+        "clue": "తెలుగు ప్రజల ప్రధాన ఆహార పంట",
+        "category": "వ్యవసాయం"
+      },
+      {
+        "id": "down_44",
+        "number": 44,
+        "row": 9,
+        "col": 9,
+        "length": 2,
+        "word": "పథం",
+        "syllables": [
+          "ప",
+          "థం"
+        ],
+        "clue": "ధర్మ మార్గం లేదా ప్రయాణించే తోవ",
+        "category": "నీతి"
+      },
+      {
+        "id": "down_45",
+        "number": 45,
+        "row": 10,
+        "col": 0,
+        "length": 2,
+        "word": "గ్రామం",
+        "syllables": [
+          "గ్రా",
+          "మం"
+        ],
+        "clue": "పచ్చని పైర్లు, స్వచ్ఛమైన గాలితో కూడిన పల్లె",
+        "category": "భౌగోళికం"
+      },
+      {
+        "id": "down_46",
+        "number": 46,
+        "row": 10,
+        "col": 2,
+        "length": 2,
+        "word": "కళ",
+        "syllables": [
+          "క",
+          "ళ"
+        ],
+        "clue": "సంగీతం, నాట్యం, శిల్పం వంటి లలిత కళలు",
+        "category": "కళలు"
+      },
+      {
+        "id": "down_47",
+        "number": 47,
+        "row": 10,
+        "col": 4,
+        "length": 2,
+        "word": "తపం",
+        "syllables": [
+          "త",
+          "పం"
+        ],
+        "clue": "భగవత్ సాక్షాత్కారం కోసం చేసే కఠిన సాధన",
+        "category": "భక్తి"
+      },
+      {
+        "id": "down_48",
+        "number": 48,
+        "row": 10,
+        "col": 8,
+        "length": 2,
+        "word": "రక్తి",
+        "syllables": [
+          "ర",
+          "క్తి"
+        ],
+        "clue": "ఆసక్తి, ప్రీతి",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_49",
+        "number": 49,
+        "row": 10,
+        "col": 11,
+        "length": 2,
+        "word": "క్షణం",
+        "syllables": [
+          "క్ష",
+          "ణం"
+        ],
+        "clue": "రెప్పపాటు కాలం, అత్యల్ప సమయం",
+        "category": "సమయం"
+      }
+    ]
+  },
+  "solution": [
+    [
+      "గు",
+      "వ్వ",
+      null,
+      "పా",
+      "ల",
+      null,
+      "క్షీ",
+      "రం",
+      null,
+      "ఆ",
+      "దే",
+      "శం"
+    ],
+    [
+      "ర్రం",
+      null,
+      "నో",
+      "ము",
+      null,
+      "దూ",
+      null,
+      "గు",
+      "రు",
+      "వు",
+      null,
+      "ఖం"
+    ],
+    [
+      null,
+      "నీ",
+      "రు",
+      null,
+      "అ",
+      "డ",
+      "వి",
+      null,
+      "ణం",
+      null,
+      "తా",
+      null
+    ],
+    [
+      "వా",
+      "డ",
+      null,
+      "బా",
+      "మ్మ",
+      null,
+      "నా",
+      "గు",
+      null,
+      "తా",
+      "ర",
+      "క"
+    ],
+    [
+      "రం",
+      null,
+      "గు",
+      "ణం",
+      null,
+      "కా",
+      "య",
+      null,
+      "క",
+      "వి",
+      null,
+      "ర్ణు"
+    ],
+    [
+      null,
+      "బ",
+      "డి",
+      null,
+      "శ్వా",
+      null,
+      "క",
+      "మ",
+      "లం",
+      null,
+      "తో",
+      "డు"
+    ],
+    [
+      "కా",
+      "లం",
+      null,
+      "ద",
+      "స",
+      "రా",
+      null,
+      "తం",
+      null,
+      "కా",
+      "యం",
+      null
+    ],
+    [
+      "లు",
+      null,
+      "జ",
+      "య",
+      null,
+      "జ",
+      "పం",
+      null,
+      "స్వ",
+      "రం",
+      null,
+      "చం"
+    ],
+    [
+      "వ",
+      "ల",
+      "యం",
+      null,
+      "హం",
+      "స",
+      null,
+      "వ",
+      "ర్గం",
+      null,
+      "ని",
+      "ద్ర"
+    ],
+    [
+      null,
+      "క్ష్యం",
+      null,
+      "చె",
+      null,
+      "భ",
+      "వ",
+      "నం",
+      null,
+      "ప",
+      "ప్పు",
+      null
+    ],
+    [
+      "గ్రా",
+      null,
+      "క",
+      "వి",
+      "త",
+      null,
+      "రి",
+      null,
+      "ర",
+      "థం",
+      null,
+      "క్ష"
+    ],
+    [
+      "మం",
+      "గ",
+      "ళ",
+      null,
+      "పం",
+      "డు",
+      null,
+      "పం",
+      "క్తి",
+      null,
+      "ప్రా",
+      "ణం"
+    ]
+  ],
+  "meta": {
+    "total_words": 76,
+    "is_authentic_newspaper_grid": true
+  }
+}

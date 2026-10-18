@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --font-telugu: "Mandali", "Tiro Telugu", "Suranna", serif;
+}
+
+:root {
+  font-family: var(--font-telugu), system-ui, sans-serif;
+  background-color: #faf6ee;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #faf6ee;
+  color: #1c1917;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom visible scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1ede4;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #a89887;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #786857;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a89887 #f1ede4;
+}

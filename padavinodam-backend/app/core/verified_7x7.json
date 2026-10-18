@@ -1,0 +1,456 @@
+{
+  "size": 7,
+  "mask": [
+    [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    [
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true
+    ],
+    [
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  ],
+  "numbers": {
+    "0,0": 1,
+    "0,2": 2,
+    "0,5": 3,
+    "0,6": 4,
+    "1,4": 5,
+    "2,0": 6,
+    "2,3": 7,
+    "3,2": 8,
+    "3,6": 9,
+    "4,1": 10,
+    "4,5": 11,
+    "5,0": 12,
+    "5,4": 13,
+    "6,0": 14,
+    "6,3": 15
+  },
+  "clues": {
+    "across": [
+      {
+        "id": "across_1",
+        "number": 1,
+        "row": 0,
+        "col": 0,
+        "length": 4,
+        "word": "వరంగల్లు",
+        "syllables": [
+          "వ",
+          "రం",
+          "గ",
+          "ల్లు"
+        ],
+        "clue": "కాకతీయుల రాజధాని, వేయి స్తంభాల గుడి నగరం",
+        "category": "చరిత్ర"
+      },
+      {
+        "id": "across_3",
+        "number": 3,
+        "row": 0,
+        "col": 5,
+        "length": 2,
+        "word": "వాగు",
+        "syllables": [
+          "వా",
+          "గు"
+        ],
+        "clue": "వర్షాకాలంలో పారే చిన్న సెలయేరు",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "across_5",
+        "number": 5,
+        "row": 1,
+        "col": 4,
+        "length": 3,
+        "word": "తారణం",
+        "syllables": [
+          "తా",
+          "ర",
+          "ణం"
+        ],
+        "clue": "దాటించడం, తరింపజేయడం",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_6",
+        "number": 6,
+        "row": 2,
+        "col": 0,
+        "length": 2,
+        "word": "కాలు",
+        "syllables": [
+          "కా",
+          "లు"
+        ],
+        "clue": "నడవడానికి ఉపయోగపడే అంగం, పాదం",
+        "category": "శరీరం"
+      },
+      {
+        "id": "across_7",
+        "number": 7,
+        "row": 2,
+        "col": 3,
+        "length": 3,
+        "word": "మరణం",
+        "syllables": [
+          "మ",
+          "ర",
+          "ణం"
+        ],
+        "clue": "దేహం చాలించడం, చావు",
+        "category": "జీవితం"
+      },
+      {
+        "id": "across_10",
+        "number": 10,
+        "row": 4,
+        "col": 1,
+        "length": 3,
+        "word": "గరుడ",
+        "syllables": [
+          "గ",
+          "రు",
+          "డ"
+        ],
+        "clue": "విష్ణుమూర్తి వాహనం",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "across_11",
+        "number": 11,
+        "row": 4,
+        "col": 5,
+        "length": 2,
+        "word": "అన్న",
+        "syllables": [
+          "అ",
+          "న్న"
+        ],
+        "clue": "పెద్ద సోదరుడు",
+        "category": "కుటుంబం"
+      },
+      {
+        "id": "across_12",
+        "number": 12,
+        "row": 5,
+        "col": 0,
+        "length": 3,
+        "word": "నగవు",
+        "syllables": [
+          "న",
+          "గ",
+          "వు"
+        ],
+        "clue": "నవ్వు, మందహాసం",
+        "category": "భావాలు"
+      },
+      {
+        "id": "across_14",
+        "number": 14,
+        "row": 6,
+        "col": 0,
+        "length": 2,
+        "word": "దినం",
+        "syllables": [
+          "ది",
+          "నం"
+        ],
+        "clue": "రోజు, పూట, పగలు",
+        "category": "సమయం"
+      },
+      {
+        "id": "across_15",
+        "number": 15,
+        "row": 6,
+        "col": 3,
+        "length": 4,
+        "word": "నమస్కారం",
+        "syllables": [
+          "న",
+          "మ",
+          "స్కా",
+          "రం"
+        ],
+        "clue": "తెలుగువారి సంప్రదాయ వందనం, ప్రణామం",
+        "category": "సంస్కృతి"
+      }
+    ],
+    "down": [
+      {
+        "id": "down_1",
+        "number": 1,
+        "row": 0,
+        "col": 0,
+        "length": 4,
+        "word": "వర్షాకాలం",
+        "syllables": [
+          "వ",
+          "ర్షా",
+          "కా",
+          "లం"
+        ],
+        "clue": "వానలు విరివిగా కురిసే కాలం",
+        "category": "ఋతువులు"
+      },
+      {
+        "id": "down_2",
+        "number": 2,
+        "row": 0,
+        "col": 2,
+        "length": 2,
+        "word": "గర్వం",
+        "syllables": [
+          "గ",
+          "ర్వం"
+        ],
+        "clue": "అహంకారం, పొగరు",
+        "category": "గుణాలు"
+      },
+      {
+        "id": "down_3",
+        "number": 3,
+        "row": 0,
+        "col": 5,
+        "length": 3,
+        "word": "వారణం",
+        "syllables": [
+          "వా",
+          "ర",
+          "ణం"
+        ],
+        "clue": "ఏనుగు లేదా అడ్డుకట్ట",
+        "category": "సాధారణం"
+      },
+      {
+        "id": "down_4",
+        "number": 4,
+        "row": 0,
+        "col": 6,
+        "length": 2,
+        "word": "గుణం",
+        "syllables": [
+          "గు",
+          "ణం"
+        ],
+        "clue": "మనిషి స్వభావం, లక్షణం",
+        "category": "వ్యక్తిత్వం"
+      },
+      {
+        "id": "down_5",
+        "number": 5,
+        "row": 1,
+        "col": 4,
+        "length": 3,
+        "word": "తారక",
+        "syllables": [
+          "తా",
+          "ర",
+          "క"
+        ],
+        "clue": "రాత్రి వేళ మెరిసే చుక్క",
+        "category": "ఖగోళం"
+      },
+      {
+        "id": "down_8",
+        "number": 8,
+        "row": 3,
+        "col": 2,
+        "length": 3,
+        "word": "తరువు",
+        "syllables": [
+          "త",
+          "రు",
+          "వు"
+        ],
+        "clue": "చెట్టు, వృక్షం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_9",
+        "number": 9,
+        "row": 3,
+        "col": 6,
+        "length": 4,
+        "word": "అన్నవరం",
+        "syllables": [
+          "అ",
+          "న్న",
+          "వ",
+          "రం"
+        ],
+        "clue": "శ్రీ సత్యనారాయణ స్వామి కొలువైన రత్నగిరి",
+        "category": "పుణ్యక్షేత్రాలు"
+      },
+      {
+        "id": "down_10",
+        "number": 10,
+        "row": 4,
+        "col": 1,
+        "length": 3,
+        "word": "గగనం",
+        "syllables": [
+          "గ",
+          "గ",
+          "నం"
+        ],
+        "clue": "ఆకాశం, నక్షత్రాల లోకం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_12",
+        "number": 12,
+        "row": 5,
+        "col": 0,
+        "length": 2,
+        "word": "నది",
+        "syllables": [
+          "న",
+          "ది"
+        ],
+        "clue": "సముద్రంలో కలిసే జలప్రవాహం",
+        "category": "ప్రకృతి"
+      },
+      {
+        "id": "down_13",
+        "number": 13,
+        "row": 5,
+        "col": 4,
+        "length": 2,
+        "word": "మామ",
+        "syllables": [
+          "మా",
+          "మ"
+        ],
+        "clue": "మేనమామ",
+        "category": "సాధారణం"
+      }
+    ]
+  },
+  "solution": [
+    [
+      "వ",
+      "రం",
+      "గ",
+      "ల్లు",
+      null,
+      "వా",
+      "గు"
+    ],
+    [
+      "ర్షా",
+      null,
+      "ర్వం",
+      null,
+      "తా",
+      "ర",
+      "ణం"
+    ],
+    [
+      "కా",
+      "లు",
+      null,
+      "మ",
+      "ర",
+      "ణం",
+      null
+    ],
+    [
+      "లం",
+      null,
+      "త",
+      null,
+      "క",
+      null,
+      "అ"
+    ],
+    [
+      null,
+      "గ",
+      "రు",
+      "డ",
+      null,
+      "అ",
+      "న్న"
+    ],
+    [
+      "న",
+      "గ",
+      "వు",
+      null,
+      "మా",
+      null,
+      "వ"
+    ],
+    [
+      "ది",
+      "నం",
+      null,
+      "న",
+      "మ",
+      "స్కా",
+      "రం"
+    ]
+  ],
+  "meta": {
+    "total_words": 20,
+    "is_authentic_newspaper_grid": true
+  }
+}
