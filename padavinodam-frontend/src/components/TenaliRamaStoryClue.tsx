@@ -60,7 +60,7 @@ export const TenaliRamaStoryClue: React.FC<TenaliRamaStoryClueProps> = ({
   useEffect(() => {
     if (activeClue) {
       setMascotMood('speaking');
-      const timer = setTimeout(() => setMascotMood('idle'), 1800);
+      const timer = setTimeout(() => setMascotMood('idle'), 2200);
 
       // Random witty quip change occasionally
       if (Math.random() > 0.4) {
@@ -76,6 +76,16 @@ export const TenaliRamaStoryClue: React.FC<TenaliRamaStoryClueProps> = ({
     }
   }, [activeClue?.id, direction, autoSpeak]);
 
+  // Inactivity detection: Switch to coconut water chill after 14 seconds of silence
+  useEffect(() => {
+    const idleTimer = setTimeout(() => {
+      setMascotMood('chilling_coconut');
+      setWittyDialogue("రాయలవారూ, తీవ్ర ఆలోచనలో ఉన్నారా? నేనీ లోపు తీపి కొబ్బరి నీళ్లు తాగుతాను!");
+    }, 14000);
+
+    return () => clearTimeout(idleTimer);
+  }, [activeClue?.id, selectedCell.r, selectedCell.c, direction]);
+
   const handleSpeakAloud = () => {
     if (activeClue) {
       setMascotMood('speaking');
@@ -86,11 +96,23 @@ export const TenaliRamaStoryClue: React.FC<TenaliRamaStoryClueProps> = ({
 
   const handleMascotClick = () => {
     templeAudio.playTempleBell();
-    setMascotMood('celebrating');
-    const quote = TENALI_QUOTES[Math.floor(Math.random() * TENALI_QUOTES.length)];
-    setWittyDialogue(quote);
-    speakTeluguText(quote);
-    setTimeout(() => setMascotMood('idle'), 2400);
+    // Cycle between funny interactive states
+    if (mascotMood === 'idle' || mascotMood === 'speaking') {
+      setMascotMood('inspecting');
+      setWittyDialogue("ఆగండి! నా భూతద్దంతో ఈ చిక్కు పదాన్ని నిశితంగా పరిశీలిస్తాను!");
+    } else if (mascotMood === 'inspecting') {
+      setMascotMood('hint_casting');
+      setWittyDialogue("ఇదిగో నా మంత్రదండం లాంటి కలం నుంచి దివ్య అక్షర కాంతి!");
+    } else if (mascotMood === 'hint_casting') {
+      setMascotMood('chilling_coconut');
+      setWittyDialogue("ఆహా! కొబ్బరి నీళ్ల రుచే వేరు! మీరు త్వరగా పదాన్ని పూరించండి!");
+    } else {
+      setMascotMood('celebrating');
+      setWittyDialogue("శభాష్! విజయనగర మేధావి మీరే మహారాజా!");
+    }
+    setTimeout(() => {
+      setMascotMood('idle');
+    }, 3500);
   };
 
   // Build the word preview array from userGrid
@@ -153,12 +175,79 @@ export const TenaliRamaStoryClue: React.FC<TenaliRamaStoryClueProps> = ({
 
       {/* Main Content Area: Tenali Mascot on Left + Animated Parchment Speech Bubble */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 md:gap-4 my-1">
-        {/* Animated Tenali Mascot */}
+        {/* Animated Tenali Mascot + Action Pills */}
         <div className="shrink-0 flex flex-col items-center">
           <TenaliRamaMascot mood={mascotMood} onClick={handleMascotClick} />
           <span className="text-[10px] text-amber-800 font-bold mt-0.5 font-telugu opacity-80">
             తెనాలి రామలింగడు
           </span>
+
+          {/* Quick Action Mood Trigger Pills */}
+          <div className="flex flex-wrap gap-1 justify-center mt-2 max-w-[130px]">
+            <button
+              type="button"
+              onClick={() => {
+                setMascotMood('inspecting');
+                setWittyDialogue("భూతద్దంతో పదాన్ని నిశితంగా పరిశీలిస్తున్నాను!");
+              }}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition ${
+                mascotMood === 'inspecting'
+                  ? 'bg-cyan-700 text-white border-cyan-800 shadow-xs'
+                  : 'bg-white/80 hover:bg-cyan-50 text-cyan-900 border-cyan-300'
+              }`}
+              title="భూతద్దం పరిశీలన (Inspect with Magnifying Glass)"
+            >
+              🔍 శోధన
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                templeAudio.playTempleBell();
+                setMascotMood('hint_casting');
+                setWittyDialogue("దివ్య అక్షర వెలుగును ప్రసరింపజేస్తున్నాను!");
+                if (onUseHint) onUseHint();
+              }}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition ${
+                mascotMood === 'hint_casting'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
+                  : 'bg-white/80 hover:bg-amber-50 text-amber-900 border-amber-300'
+              }`}
+              title="దివ్య సూచన మంత్రం (Cast Magic Hint)"
+            >
+              ✨ మంత్రం
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMascotMood('chilling_coconut');
+                setWittyDialogue("చల్లని కొబ్బరి నీటితో సేదతీరుతున్నాను!");
+              }}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition ${
+                mascotMood === 'chilling_coconut'
+                  ? 'bg-emerald-700 text-white border-emerald-800 shadow-xs'
+                  : 'bg-white/80 hover:bg-emerald-50 text-emerald-900 border-emerald-300'
+              }`}
+              title="కొబ్బరి నీళ్లు (Chill with Coconut Water)"
+            >
+              🥥 విశ్రాంతి
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                templeAudio.playSuccessFanfare();
+                setMascotMood('celebrating');
+                setWittyDialogue("శభాష్! విజయనగర సామ్రాజ్యం జయజయధ్వానాలు చేస్తోంది!");
+              }}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition ${
+                mascotMood === 'celebrating'
+                  ? 'bg-yellow-500 text-black border-yellow-600 shadow-xs'
+                  : 'bg-white/80 hover:bg-yellow-50 text-yellow-900 border-yellow-300'
+              }`}
+              title="సంపూర్ణ సంబరం (Celebrate)"
+            >
+              🏆 సంబరం
+            </button>
+          </div>
         </div>
 
         {/* Animated Parchment Speech Scroll */}
