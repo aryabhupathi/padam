@@ -6,6 +6,7 @@ import { Header } from './components/Header';
 import { CrosswordGrid } from './components/CrosswordGrid';
 import { ClueList } from './components/ClueList';
 import { TenaliRamaStoryClue } from './components/TenaliRamaStoryClue';
+import type { MascotMood } from './components/TenaliRamaMascot';
 import { ClueListDrawer } from './components/ClueListDrawer';
 import { TeluguKeypad } from './components/TeluguKeypad';
 import { GamifiedHints } from './components/GamifiedHints';
@@ -77,11 +78,20 @@ export function App() {
   const [language, setLanguage] = useState<Language>('te');
   const t = TRANSLATIONS[language];
 
-  // Gamification & Wallet States
-  const [coins, setCoins] = useState<number>(120);
-  const [score, setScore] = useState<number>(0);
+  // Gamification & Wallet States with Persistence
+  const [coins, setCoins] = useState<number>(() => {
+    const saved = localStorage.getItem('padam_coins');
+    return saved !== null ? parseInt(saved, 10) : 120;
+  });
+  const [score, setScore] = useState<number>(() => {
+    const saved = localStorage.getItem('padam_score');
+    return saved !== null ? parseInt(saved, 10) : 0;
+  });
   const [bonusTimeAlert, setBonusTimeAlert] = useState<string | null>(null);
   const [hintOptions, setHintOptions] = useState<HintOption[]>(INITIAL_HINTS);
+
+  // Mascot Game-Driven Mood Override (celebrate on win, facepalm on error, spellcast on hint)
+  const [mascotMoodOverride, setMascotMoodOverride] = useState<MascotMood | null>(null);
 
   // 100 Points Energy System with 2-Hour Auto-Regen
   const [energyPoints, setEnergyPoints] = useState<number>(() => {
@@ -108,7 +118,53 @@ export function App() {
   const [clueViewMode, setClueViewMode] = useState<'narrator' | 'list'>('narrator');
   const [isClueListDrawerOpen, setIsClueListDrawerOpen] = useState(false);
 
+  // Persist Coins & Score
   useEffect(() => {
+    localStorage.setItem('padam_coins', String(coins));
+  }, [coins]);
+
+  useEffect(() => {
+    localStorage.setItem('padam_score', String(score));
+  }, [score]);
+
+  // Session Auto-Save: Automatically saves active crossword progress on every move or timer tick
+  useEffect(() => {
+    if (puzzle && userGrid.length > 0 && !isSolved) {
+      const hasAnyInput = userGrid.some(row => row.some(cell => cell && cell.trim() !== ''));
+      if (hasAnyInput) {
+        const sessionData = {
+          puzzle,
+          userGrid,
+          timerSeconds,
+          difficulty,
+          selectedCell,
+          direction
+        };
+        localStorage.setItem('padam_active_session', JSON.stringify(sessionData));
+      }
+    }
+  }, [puzzle, userGrid, timerSeconds, difficulty, selectedCell, direction, isSolved]);
+
+  // Session Restore on Initial Mount
+  useEffect(() => {
+    const savedSessionStr = localStorage.getItem('padam_active_session');
+    if (savedSessionStr) {
+      try {
+        const saved = JSON.parse(savedSessionStr);
+        if (saved && saved.puzzle && saved.userGrid) {
+          setPuzzle(saved.puzzle);
+          setUserGrid(saved.userGrid);
+          setTimerSeconds(saved.timerSeconds || 0);
+          setDifficulty(saved.difficulty || 'easy');
+          if (saved.selectedCell) setSelectedCell(saved.selectedCell);
+          if (saved.direction) setDirection(saved.direction);
+          setStatusMessage(language === 'te' ? 'గత ఆట పునరుద్ధరించబడింది! (Progress Restored)' : 'Game progress restored!');
+          return;
+        }
+      } catch (e) {
+        localStorage.removeItem('padam_active_session');
+      }
+    }
     loadPuzzle(difficulty);
   }, []);
 
@@ -157,6 +213,7 @@ export function App() {
   }, [energyPoints]);
 
   const loadPuzzle = async (diff: GameDifficulty) => {
+    localStorage.removeItem('padam_active_session');
     setLoading(true);
     setStatusMessage(t.loadingNew);
     setIncorrectCells([]);
@@ -170,6 +227,7 @@ export function App() {
   };
 
   const loadDailyPuzzle = async () => {
+    localStorage.removeItem('padam_active_session');
     setLoading(true);
     setStatusMessage(t.loadingDaily);
     setIncorrectCells([]);
@@ -330,6 +388,8 @@ export function App() {
 
     if (result.is_complete) {
       setIsSolved(true);
+      localStorage.removeItem('padam_active_session');
+      setMascotMoodOverride('celebrating');
       templeAudio.playSuccessFanfare();
       const targetTime = TARGET_TIMES[difficulty];
       const isUnderTime = timerSeconds <= targetTime;
@@ -357,6 +417,7 @@ export function App() {
 
       setStatusMessage(message);
     } else {
+      setMascotMoodOverride('facepalm');
       templeAudio.playWrongChime();
       const message = result.correct_cells > 0
         ? t.tryAgainMsg.replace('{total}', String(result.total_cells)).replace('{correct}', String(result.correct_cells))
@@ -435,6 +496,8 @@ export function App() {
     }
 
     setCoins(c => c - hint.coinCost);
+    setMascotMoodOverride('hint_casting');
+    templeAudio.playTempleBell();
     setHintOptions(prev =>
       prev.map(h => (h.id === hintType ? { ...h, usedCount: h.usedCount + 1 } : h))
     );
@@ -678,6 +741,7 @@ export function App() {
                       userGrid={userGrid}
                       allClues={puzzle.clues}
                       language={language}
+                      mascotMoodOverride={mascotMoodOverride}
                       onToggleDirection={() => setDirection(d => (d === 'across' ? 'down' : 'across'))}
                       onSelectAlternateClue={(clue, dir) => handleSelectClue(clue, dir)}
                       onOpenFullClues={() => setIsClueListDrawerOpen(true)}
