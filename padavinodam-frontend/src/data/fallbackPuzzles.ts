@@ -1,5 +1,6 @@
 import type { PuzzleData, GameDifficulty } from '../types/puzzle';
 
+import puzzleBank from './puzzle_bank.json';
 import v5 from './verified_5x5.json';
 import v7 from './verified_7x7.json';
 import v9 from './verified_9x9.json';
@@ -21,6 +22,13 @@ function formatFallback(raw: any, id: string): PuzzleData {
   };
 }
 
+const lastSelectedIndices: Record<string, number> = {
+  kids: -1,
+  easy: -1,
+  medium: -1,
+  hard: -1
+};
+
 export const FALLBACK_PUZZLES: Record<string, PuzzleData> = {
   kids: formatFallback(v5, 'padam_dense_kids_5x5'),
   easy: formatFallback(v7, 'padam_dense_easy_7x7'),
@@ -30,6 +38,16 @@ export const FALLBACK_PUZZLES: Record<string, PuzzleData> = {
 };
 
 export function getFallbackPuzzle(difficulty: GameDifficulty, size?: number): PuzzleData {
+  const diffKey = difficulty || (size === 5 ? 'kids' : size === 7 ? 'easy' : size === 9 ? 'medium' : 'hard');
+  const bankList = (puzzleBank as Record<string, any[]>)[diffKey];
+
+  if (bankList && bankList.length > 0) {
+    const nextIdx = (lastSelectedIndices[diffKey] + 1) % bankList.length;
+    lastSelectedIndices[diffKey] = nextIdx;
+    const selected = bankList[nextIdx];
+    return formatFallback(selected, `padam_${diffKey}_bank_${nextIdx + 1}_${Date.now()}`);
+  }
+
   if (difficulty === 'kids' || size === 5) return FALLBACK_PUZZLES.kids;
   if (difficulty === 'easy' || size === 7) return FALLBACK_PUZZLES.easy;
   if (difficulty === 'medium' || size === 9) return FALLBACK_PUZZLES.medium;

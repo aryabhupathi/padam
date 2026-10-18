@@ -68,7 +68,13 @@ export function App() {
   const [selectedCell, setSelectedCell] = useState<{ r: number; c: number }>({ r: 0, c: 0 });
   const [direction, setDirection] = useState<'across' | 'down'>('across');
   const [loading, setLoading] = useState<boolean>(true);
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy');
+  const [difficulty, setDifficulty] = useState<GameDifficulty>(() => {
+    const saved = localStorage.getItem('padam_difficulty');
+    if (saved === 'kids' || saved === 'easy' || saved === 'medium' || saved === 'hard') {
+      return saved;
+    }
+    return 'easy';
+  });
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [incorrectCells, setIncorrectCells] = useState<[number, number][]>([]);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
@@ -99,10 +105,8 @@ export function App() {
     return saved !== null ? parseInt(saved, 10) : 100;
   });
 
-  // Kids Mode Lifetime Unlock (One-time ₹49)
-  const [isKidsUnlocked, setIsKidsUnlocked] = useState<boolean>(() => {
-    return localStorage.getItem('padam_kids_unlocked') === 'true';
-  });
+  // Kids Mode Lifetime Unlock (One-time ₹49) - Unlocked for testing
+  const [isKidsUnlocked, setIsKidsUnlocked] = useState<boolean>(true);
 
   // Top-Up Modal State
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
@@ -126,6 +130,11 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('padam_score', String(score));
   }, [score]);
+
+  // Persist Difficulty Choice Across Refreshes
+  useEffect(() => {
+    localStorage.setItem('padam_difficulty', difficulty);
+  }, [difficulty]);
 
   // Session Auto-Save: Automatically saves active crossword progress on every move or timer tick
   useEffect(() => {
@@ -155,7 +164,8 @@ export function App() {
           setPuzzle(saved.puzzle);
           setUserGrid(saved.userGrid);
           setTimerSeconds(saved.timerSeconds || 0);
-          setDifficulty(saved.difficulty || 'easy');
+          const restoredDiff = saved.difficulty || difficulty;
+          setDifficulty(restoredDiff);
           if (saved.selectedCell) setSelectedCell(saved.selectedCell);
           if (saved.direction) setDirection(saved.direction);
           setStatusMessage(language === 'te' ? 'గత ఆట పునరుద్ధరించబడింది! (Progress Restored)' : 'Game progress restored!');
@@ -165,7 +175,8 @@ export function App() {
         localStorage.removeItem('padam_active_session');
       }
     }
-    loadPuzzle(difficulty);
+    const initialDiff = (localStorage.getItem('padam_difficulty') as GameDifficulty) || difficulty;
+    loadPuzzle(initialDiff);
   }, []);
 
   // Timer loop
@@ -328,52 +339,15 @@ export function App() {
     }
   };
 
-  // Rule 1: Starting new puzzle only when incomplete costs 15 points
+  // New puzzle / Mode Switch: Points deductions and payment gates are paused for testing
   const handleRequestNewPuzzle = (targetDiff?: GameDifficulty) => {
     const nextDiff = targetDiff || difficulty;
 
-    // Check Kids mode unlock
-    if (nextDiff === 'kids' && !isKidsUnlocked) {
-      setTopUpInitialMode('kids');
-      setIsTopUpOpen(true);
-      return;
+    if (nextDiff !== difficulty) {
+      setDifficulty(nextDiff);
     }
-
-    // Check if current puzzle was attempted & incomplete
-    const hasStarted = userGrid.some(row => row.some(cell => cell && cell.trim() !== ''));
-    const isAbandoningIncomplete = puzzle !== null && !isSolved && hasStarted;
-
-    if (isAbandoningIncomplete && difficulty !== 'kids') {
-      if (energyPoints < 15) {
-        setStatusMessage(
-          language === 'te'
-            ? '⚡ శక్తి సరిపోదు! అసంపూర్తి పజిల్‌ను వదిలివేయడానికి 15 పాయింట్లు అవసరం.'
-            : '⚡ Not enough energy! Skipping an incomplete puzzle costs 15 points.'
-        );
-        setTopUpInitialMode('points');
-        setIsTopUpOpen(true);
-        return;
-      }
-
-      setEnergyPoints(prev => {
-        const updated = Math.max(0, prev - 15);
-        localStorage.setItem('padam_energy_points', String(updated));
-        return updated;
-      });
-
-      setStatusMessage(
-        language === 'te'
-          ? 'అసంపూర్తి పజిల్‌ను వదిలినందుకు 15 పాయింట్లు తగ్గించబడ్డాయి (-15 ⚡)'
-          : '15 points deducted for skipping incomplete puzzle (-15 ⚡)'
-      );
-    }
-
-    if (targetDiff && targetDiff !== difficulty) {
-      setDifficulty(targetDiff);
-      loadPuzzle(targetDiff);
-    } else {
-      loadPuzzle(difficulty);
-    }
+    localStorage.setItem('padam_difficulty', nextDiff);
+    loadPuzzle(nextDiff);
   };
 
   // Rule 2: Verify & award +5 Speed Coins if within target time

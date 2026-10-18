@@ -9,6 +9,7 @@ import random
 import time
 import json
 import os
+import copy
 from app.services.lexicon import LexiconManager
 
 class DynamicCrosswordGenerator:
@@ -83,15 +84,15 @@ class DynamicCrosswordGenerator:
         - Hard (12x12): 36 Across, 40 Down (76 clues total, >=35 both). 68.1% letter fill, 0 adjacent flower clumps.
         """
         if difficulty == "kids" or size == 5:
-            return self.get_verified_fallback(5)
+            return self.get_verified_fallback(5, "kids")
         elif difficulty == "medium" or size == 9:
-            return self.get_verified_fallback(9)
+            return self.get_verified_fallback(9, "medium")
         elif difficulty == "hard" or (size is not None and size >= 11):
-            return self.get_verified_fallback(12)
+            return self.get_verified_fallback(12, "hard")
         elif difficulty == "easy" or size == 7:
-            return self.get_verified_fallback(7)
+            return self.get_verified_fallback(7, "easy")
         else:
-            return self.get_verified_fallback(7)
+            return self.get_verified_fallback(7, "easy")
 
     def _try_generate_dense_grid(self, size: int, target_across: int, target_down: int) -> Optional[Dict]:
         grid: List[List[Optional[str]]] = [[None for _ in range(size)] for _ in range(size)]
@@ -386,8 +387,21 @@ class DynamicCrosswordGenerator:
 
         return True, "Valid"
 
-    def get_verified_fallback(self, size: int) -> Optional[Dict]:
-        """Loads pre-verified, 100% collision-free fallback puzzle."""
+    def get_verified_fallback(self, size: int, difficulty: str = "easy") -> Optional[Dict]:
+        """Loads pre-verified, 100% collision-free fallback puzzle from rotating bank."""
+        bank_path = os.path.join(self.fallback_dir, "puzzle_bank.json")
+        diff_key = difficulty if difficulty in ["kids", "easy", "medium", "hard"] else ("kids" if size <= 5 else ("easy" if size <= 7 else ("medium" if size <= 9 else "hard")))
+
+        if os.path.exists(bank_path):
+            try:
+                with open(bank_path, "r", encoding="utf-8") as f:
+                    bank = json.load(f)
+                    puzzles = bank.get(diff_key, [])
+                    if puzzles:
+                        return copy.deepcopy(random.choice(puzzles))
+            except Exception:
+                pass
+
         if size <= 5:
             filename = "verified_5x5.json"
         elif size <= 7:

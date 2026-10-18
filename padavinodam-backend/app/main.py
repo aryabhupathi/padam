@@ -82,7 +82,7 @@ def generate_puzzle(
     # Dynamically synthesize a 100% collision-free full-box Telugu crossword
     puzzle_data = generator.generate(size=size, difficulty=difficulty)
     if not puzzle_data:
-        puzzle_data = generator.get_verified_fallback(size)
+        puzzle_data = generator.get_verified_fallback(size, difficulty)
 
     if not puzzle_data:
         raise HTTPException(status_code=500, detail="Could not synthesize crossword for requested parameters.")

@@ -28,7 +28,7 @@ export async function fetchGeneratedPuzzle(difficulty: GameDifficulty = 'easy', 
   const baseUrl = await getWorkingBaseUrl();
 
   try {
-    const res = await fetch(`${baseUrl}/api/puzzle/generate?difficulty=${difficulty}&size=${targetSize}&reveal=true`, {
+    const res = await fetch(`${baseUrl}/api/puzzle/generate?difficulty=${difficulty}&size=${targetSize}&reveal=true&_t=${Date.now()}`, {
       headers: { 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(4000)
     });
