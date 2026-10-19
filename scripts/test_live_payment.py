@@ -1,5 +1,6 @@
 import requests
 import sys
+import time
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -30,7 +31,7 @@ assert res.status_code == 400
 print('PASS: Random uncredited UTR strictly rejected!')
 
 print('\n--- STEP 5: Fire Webhook with SMS containing real UTR ---')
-test_utr = '429819482019'
+test_utr = f'42{int(time.time())}'
 sms_text = f'Dear Customer, Rs 49.00 has been credited to your account **9063 on 19-OCT-26 by UPI/{test_utr} - HDFC Bank'
 res = requests.post(
     f'{RENDER_URL}/api/payment/sms-webhook',
