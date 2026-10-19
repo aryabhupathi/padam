@@ -34,7 +34,7 @@ export async function fetchGeneratedPuzzle(difficulty: GameDifficulty = 'easy', 
   try {
     const res = await fetch(`${baseUrl}/api/puzzle/generate?difficulty=${difficulty}&size=${targetSize}&reveal=true&_t=${Date.now()}`, {
       headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(6500)
+      signal: AbortSignal.timeout(12000)
     });
     if (!res.ok) throw new Error(`API request failed with status: ${res.status}`);
     const data = await res.json();

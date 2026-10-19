@@ -1,0 +1,67 @@
+name: Build Android App (APK & Play Store AAB)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android Bundle and APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: padavinodam-frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: padavinodam-frontend
+        run: npm ci
+
+      - name: Build Web Production Assets
+        working-directory: padavinodam-frontend
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        working-directory: padavinodam-frontend
+        run: npx cap sync android
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant Execute Permission to Gradlew
+        working-directory: padavinodam-frontend/android
+        run: chmod +x gradlew
+
+      - name: Build Debug APK (For Immediate Device Testing)
+        working-directory: padavinodam-frontend/android
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release Bundle (For Google Play Store)
+        working-directory: padavinodam-frontend/android
+        run: ./gradlew bundleRelease --stacktrace
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: padavinodam-debug-apk
+          path: padavinodam-frontend/android/app/build/outputs/apk/debug/*.apk
+
+      - name: Upload Release AAB (Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: padavinodam-release-aab
+          path: padavinodam-frontend/android/app/build/outputs/bundle/release/*.aab
