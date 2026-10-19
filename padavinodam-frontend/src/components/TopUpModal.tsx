@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Zap, CheckCircle2, Sparkles, Baby, Edit2, ExternalLink, Check, Copy, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Zap, CheckCircle2, Sparkles, Baby, Edit2, ExternalLink, Check, Copy } from 'lucide-react';
 import type { Language } from '../utils/translations';
 import { getSavedUpiId, saveUpiId, buildUpiPaymentUrl, buildUpiQrUrl } from '../config/paymentConfig';
-import { verifyPaymentUtr, createPaymentOrder, checkOrderStatus, type UtrVerifyResult, type OrderSession } from '../services/api';
+import { createPaymentOrder, checkOrderStatus, type UtrVerifyResult, type OrderSession } from '../services/api';
 import { templeAudio } from '../utils/templeAudio';
 
 interface TopUpModalProps {
@@ -15,7 +15,6 @@ interface TopUpModalProps {
   onAddPoints: (points: number, coins: number) => void;
   onUnlockKids: () => void;
   initialMode?: 'points' | 'kids';
-  onResetAllData?: () => void;
 }
 
 export const TopUpModal: React.FC<TopUpModalProps> = ({
@@ -27,28 +26,24 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
   language,
   onAddPoints,
   onUnlockKids,
-  initialMode = 'points',
-  onResetAllData
+  initialMode = 'points'
 }) => {
-  const [selectedPack, setSelectedPack] = useState<'p150' | 'p500' | 'kids'>(
-    initialMode === 'kids' && !isKidsUnlocked ? 'kids' : 'p500'
-  );
-  const [utrInput, setUtrInput] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [selectedPack, setSelectedPack] = useState<'p150' | 'p500' | 'kids'>(() => {
+    return initialMode === 'kids' && !isKidsUnlocked ? 'kids' : 'p500';
+  });
   const [successResult, setSuccessResult] = useState<UtrVerifyResult | null>(null);
 
-  // Synchronize selected pack whenever modal opens or initialMode changes
+  // Synchronize selected pack whenever modal opens: If already unlocked, never allow 'kids'
   useEffect(() => {
     if (isOpen) {
       if (initialMode === 'kids' && !isKidsUnlocked) {
         setSelectedPack('kids');
-      } else if (initialMode === 'points') {
-        setSelectedPack('p500');
+      } else {
+        if (selectedPack === 'kids' || isKidsUnlocked) {
+          setSelectedPack('p500');
+        }
       }
-      setErrorMsg(null);
       setSuccessResult(null);
-      setUtrInput('');
     }
   }, [isOpen, initialMode, isKidsUnlocked]);
 
@@ -60,7 +55,6 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
 
   // Automatic SMS Webhook listener state
   const [activeOrder, setActiveOrder] = useState<OrderSession | null>(null);
-  const [showManualUtr, setShowManualUtr] = useState(false);
 
   const packAmount = selectedPack === 'p150' ? 19 : 49;
   const packTitle = selectedPack === 'kids' ? 'Kids Mode Lifetime' : (selectedPack === 'p500' ? '500 Points & Coins' : '150 Points & Coins');
@@ -142,53 +136,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleVerifyAndUnlock = async () => {
-    const cleanUtr = utrInput.trim();
-    setErrorMsg(null);
 
-    if (!cleanUtr) {
-      setErrorMsg(language === 'te' 
-        ? 'దయచేసి మీ Google Pay / PhonePe పేమెంట్ రసీదులోని 12 అంకెల UTR నంబర్‌ను నమోదు చేయండి.' 
-        : 'Please enter the 12-digit UPI Reference / UTR Number from your payment receipt.');
-      return;
-    }
-
-    if (cleanUtr.length !== 12 || !/^\d{12}$/.test(cleanUtr)) {
-      setErrorMsg(language === 'te' 
-        ? 'UTR నంబర్ ఖచ్చితంగా 12 అంకెలు ఉండాలి (ఉదా: 429810394821).' 
-        : 'UTR Number must be exactly 12 numeric digits (e.g., 429810394821).');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      const res = await verifyPaymentUtr(cleanUtr, packAmount, selectedPack, upiId);
-      setIsProcessing(false);
-      setSuccessResult(res);
-      templeAudio.playSuccessFanfare();
-
-      const effectivePack = res.pack || selectedPack;
-      if (effectivePack === 'kids' || res.unlocked_rewards?.kids_unlocked) {
-        onUnlockKids();
-        if (res.unlocked_rewards?.coins || res.unlocked_rewards?.energy) {
-          onAddPoints(res.unlocked_rewards?.energy || 100, res.unlocked_rewards?.coins || 100);
-        }
-      } else if (effectivePack === 'p500') {
-        onAddPoints(500, 500);
-      } else if (effectivePack === 'p150') {
-        onAddPoints(150, 150);
-      }
-
-      setTimeout(() => {
-        setSuccessResult(null);
-        setUtrInput('');
-        onClose();
-      }, 2500);
-    } catch (err: any) {
-      setIsProcessing(false);
-      setErrorMsg(err.message || (language === 'te' ? 'చెల్లింపు ధృవీకరణ విఫలమైంది.' : 'Payment verification failed.'));
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 print:hidden overflow-y-auto">
@@ -278,7 +226,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 {!isKidsUnlocked && (
                   <button
                     type="button"
-                    onClick={() => { setSelectedPack('kids'); setErrorMsg(null); }}
+                    onClick={() => setSelectedPack('kids')}
                     className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       selectedPack === 'kids'
                         ? 'border-purple-500 bg-purple-50/80 ring-2 ring-purple-300 shadow-xs'
@@ -310,7 +258,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 {/* 500 Points & Coins Pack */}
                 <button
                   type="button"
-                  onClick={() => { setSelectedPack('p500'); setErrorMsg(null); }}
+                  onClick={() => setSelectedPack('p500')}
                   className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                     selectedPack === 'p500'
                       ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
@@ -341,7 +289,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 {/* 150 Points & Coins Pack */}
                 <button
                   type="button"
-                  onClick={() => { setSelectedPack('p150'); setErrorMsg(null); }}
+                  onClick={() => setSelectedPack('p150')}
                   className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                     selectedPack === 'p150'
                       ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
@@ -474,89 +422,6 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 </p>
               </div>
 
-              {/* Expandable Manual UTR Fallback */}
-              <div className="border border-stone-200 rounded-xl overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setShowManualUtr(!showManualUtr)}
-                  className="w-full px-3 py-2 bg-stone-50 hover:bg-stone-100 text-left text-xs font-bold text-stone-700 flex items-center justify-between transition cursor-pointer"
-                >
-                  <span className="font-telugu">
-                    {language === 'te' ? 'SMS ఆలస్యమైతే? 12 అంకెల UTR తో అన్‌లాక్ చేయండి' : 'SMS Delayed? Enter 12-Digit UTR Manually'}
-                  </span>
-                  {showManualUtr ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                </button>
-
-                {showManualUtr && (
-                  <div className="p-3 bg-amber-50/50 space-y-2 border-t border-stone-200 animate-in fade-in duration-150">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-stone-800 font-telugu">
-                        {language === 'te' ? '12 అంకెల UPI Ref / UTR నంబర్:' : '12-Digit UPI UTR:'}
-                      </label>
-                      <span className={`text-[10px] font-mono font-bold ${utrInput.length === 12 ? 'text-emerald-700' : 'text-stone-500'}`}>
-                        {utrInput.length}/12 అంకెలు
-                      </span>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        type="text"
-                        maxLength={12}
-                        value={utrInput}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          setUtrInput(val);
-                          setErrorMsg(null);
-                        }}
-                        placeholder="ఉదా: 429810394821"
-                        className="w-full px-3 py-2 bg-white border-2 border-amber-300 focus:border-amber-600 rounded-xl font-mono text-base tracking-widest text-center text-stone-900 focus:outline-hidden shadow-inner font-bold placeholder:text-stone-400 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
-                      />
-                      {utrInput.length === 12 && (
-                        <span className="absolute right-3 top-2.5 text-emerald-600 font-bold">✓</span>
-                      )}
-                    </div>
-
-                    {errorMsg && (
-                      <div className="p-2 bg-rose-50 border border-rose-300 rounded-lg text-rose-800 text-xs font-bold flex items-center gap-1.5">
-                        <AlertCircle size={15} className="shrink-0 text-rose-600" />
-                        <span>{errorMsg}</span>
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={handleVerifyAndUnlock}
-                      disabled={isProcessing || utrInput.trim().length !== 12}
-                      className={`w-full py-2.5 text-white font-bold rounded-xl shadow-xs transition text-xs flex items-center justify-center gap-2 cursor-pointer ${
-                        utrInput.trim().length === 12
-                          ? 'bg-emerald-600 hover:bg-emerald-700'
-                          : 'bg-stone-300 cursor-not-allowed'
-                      }`}
-                    >
-                      {isProcessing ? 'ధృవీకరిస్తున్నాము...' : (language === 'te' ? 'UTR తో తక్షణమే అన్‌లాక్ చేయి' : 'Unlock with UTR')}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Optional Test & Clean Slate Helper */}
-              {onResetAllData && (
-                <div className="pt-2 border-t border-stone-200 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm(language === 'te' 
-                        ? 'ఖాతాలోని పాయింట్లు, లాక్‌లు మరియు లెడ్జర్‌ను మొదటి స్థితికి రీసెట్ చేయాలా?' 
-                        : 'Reset all locks, energy points and payment records to clean test state?')) {
-                        onResetAllData();
-                      }
-                    }}
-                    className="text-[11px] text-stone-600 hover:text-stone-900 underline transition cursor-pointer"
-                  >
-                    🧹 {language === 'te' ? 'పరీక్ష మోడ్: ఖాతా & లాక్‌లను రీసెట్ చేయండి' : 'Test Mode: Reset All Locks & Balance'}
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>

@@ -607,27 +607,7 @@ export function App() {
     );
   };
 
-  const handleResetAllData = async () => {
-    localStorage.removeItem('padam_kids_unlocked');
-    localStorage.removeItem('padam_active_session');
-    setIsKidsUnlocked(false);
-    setCoins(50);
-    setEnergyPoints(100);
-    localStorage.setItem('padam_coins', '50');
-    localStorage.setItem('padam_energy_points', '100');
-    setDifficulty('easy');
-    localStorage.setItem('padam_difficulty', 'easy');
-    loadPuzzle('easy');
-    try {
-      await fetch('https://padam.onrender.com/api/payment/admin-reset?secret=padam_sec_hdfc_9063', { method: 'POST' });
-    } catch {}
-    setStatusMessage(
-      language === 'te'
-        ? '🧹 అన్ని లాక్‌లు మరియు చెల్లింపు రికార్డులు విజయవంతంగా రీసెట్ చేయబడ్డాయి!'
-        : '🧹 All locks and payment records have been cleanly reset!'
-    );
-    setIsTopUpOpen(false);
-  };
+
 
   const targetTime = TARGET_TIMES[difficulty];
 
@@ -648,11 +628,13 @@ export function App() {
           score={score}
           bonusTimeAlert={bonusTimeAlert}
           language={language}
-          onToggleLanguage={() => setLanguage(l => (l === 'te' ? 'en' : 'te'))}
+          onToggleLanguage={() =>
+            setLanguage((l) => (l === "te" ? "en" : "te"))
+          }
           energyPoints={energyPoints}
           coins={coins}
           onOpenTopUp={(mode) => {
-            setTopUpInitialMode(mode || 'points');
+            setTopUpInitialMode(mode || "points");
             setIsTopUpOpen(true);
           }}
           isKidsUnlocked={isKidsUnlocked}
@@ -668,7 +650,7 @@ export function App() {
             language={language}
             onUseHint={handleUseHint}
             onOpenTopUp={() => {
-              setTopUpInitialMode('points');
+              setTopUpInitialMode("points");
               setIsTopUpOpen(true);
             }}
           />
@@ -679,8 +661,8 @@ export function App() {
           <div
             className={`text-center py-2 px-4 mb-3 rounded-lg font-bold text-xs md:text-sm transition-all print:hidden ${
               isSolved
-                ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                : 'bg-amber-100 text-amber-900 border border-amber-300'
+                ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                : "bg-amber-100 text-amber-900 border border-amber-300"
             }`}
           >
             {statusMessage}
@@ -689,10 +671,10 @@ export function App() {
 
         {/* Active Clue Bar with Voice Features (Hidden on Print) */}
         {activeClue && (
-          <div className="mb-3 p-2.5 bg-gradient-to-r from-amber-100/90 via-orange-50 to-amber-100/90 border border-amber-300 rounded-xl shadow-xs flex items-center justify-between gap-2 print:hidden">
+          <div className="mb-3 p-2.5 bg-linear-to-r from-amber-100/90 via-orange-50 to-amber-100/90 border border-amber-300 rounded-xl shadow-xs flex items-center justify-between gap-2 print:hidden">
             <div className="flex items-center gap-2 min-w-0">
               <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded font-sans shrink-0">
-                {direction === 'across' ? t.across : t.down} {activeClue.number}
+                {direction === "across" ? t.across : t.down} {activeClue.number}
               </span>
               <span className="font-telugu font-semibold text-xs md:text-sm text-stone-900 truncate">
                 {activeClue.clue}
@@ -708,7 +690,11 @@ export function App() {
                 type="button"
                 onClick={() => speakTeluguText(activeClue.clue)}
                 className="p-1.5 bg-white hover:bg-amber-200/90 text-amber-800 rounded-lg border border-amber-300 shadow-2xs transition active:scale-95"
-                title={language === 'te' ? 'క్లూను చదివి వినిపించు (Read Aloud)' : 'Read Clue Aloud'}
+                title={
+                  language === "te"
+                    ? "క్లూను చదివి వినిపించు (Read Aloud)"
+                    : "Read Clue Aloud"
+                }
               >
                 <Volume2 size={16} />
               </button>
@@ -717,10 +703,14 @@ export function App() {
                 onClick={handleStartVoiceInput}
                 className={`p-1.5 rounded-lg border shadow-2xs transition active:scale-95 ${
                   isListening
-                    ? 'bg-red-600 text-white animate-pulse border-red-500'
-                    : 'bg-white hover:bg-stone-50 text-red-600 border-stone-300'
+                    ? "bg-red-600 text-white animate-pulse border-red-500"
+                    : "bg-white hover:bg-stone-50 text-red-600 border-stone-300"
                 }`}
-                title={language === 'te' ? 'వాయిస్ ద్వారా సమాధానం చెప్పండి' : 'Speak Answer'}
+                title={
+                  language === "te"
+                    ? "వాయిస్ ద్వారా సమాధానం చెప్పండి"
+                    : "Speak Answer"
+                }
               >
                 <Mic size={16} />
               </button>
@@ -746,7 +736,9 @@ export function App() {
                     language={language}
                     onSelectCell={handleSelectCell}
                     onBackspace={handleBackspace}
-                    onToggleDirection={() => setDirection(d => (d === 'across' ? 'down' : 'across'))}
+                    onToggleDirection={() =>
+                      setDirection((d) => (d === "across" ? "down" : "across"))
+                    }
                   />
                 </div>
 
@@ -756,31 +748,39 @@ export function App() {
                   <div className="flex items-center justify-between bg-stone-100 p-1 rounded-xl border border-stone-200">
                     <button
                       type="button"
-                      onClick={() => setClueViewMode('narrator')}
+                      onClick={() => setClueViewMode("narrator")}
                       className={`flex-1 py-1 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
-                        clueViewMode === 'narrator'
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                        clueViewMode === "narrator"
+                          ? "bg-amber-600 text-white shadow-xs"
+                          : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/70"
                       }`}
                     >
                       <span>🎭</span>
-                      <span>{language === 'te' ? 'తెనాలి రామకృష్ణుడు (ఆస్థాన నిరూపణ)' : 'Tenali Narrator'}</span>
+                      <span>
+                        {language === "te"
+                          ? "తెనాలి రామకృష్ణుడు (ఆస్థాన నిరూపణ)"
+                          : "Tenali Narrator"}
+                      </span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setClueViewMode('list')}
+                      onClick={() => setClueViewMode("list")}
                       className={`flex-1 py-1 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
-                        clueViewMode === 'list'
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/70'
+                        clueViewMode === "list"
+                          ? "bg-amber-600 text-white shadow-xs"
+                          : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/70"
                       }`}
                     >
                       <span>📜</span>
-                      <span>{language === 'te' ? 'పూర్తి జాబితా (Full Clues)' : 'Full Clue Table'}</span>
+                      <span>
+                        {language === "te"
+                          ? "పూర్తి జాబితా (Full Clues)"
+                          : "Full Clue Table"}
+                      </span>
                     </button>
                   </div>
 
-                  {clueViewMode === 'narrator' ? (
+                  {clueViewMode === "narrator" ? (
                     <TenaliRamaStoryClue
                       activeClue={activeClue}
                       direction={direction}
@@ -789,10 +789,16 @@ export function App() {
                       allClues={puzzle.clues}
                       language={language}
                       mascotMoodOverride={mascotMoodOverride}
-                      onToggleDirection={() => setDirection(d => (d === 'across' ? 'down' : 'across'))}
-                      onSelectAlternateClue={(clue, dir) => handleSelectClue(clue, dir)}
+                      onToggleDirection={() =>
+                        setDirection((d) =>
+                          d === "across" ? "down" : "across",
+                        )
+                      }
+                      onSelectAlternateClue={(clue, dir) =>
+                        handleSelectClue(clue, dir)
+                      }
                       onOpenFullClues={() => setIsClueListDrawerOpen(true)}
-                      onUseHint={() => handleUseHint('reveal_syllable')}
+                      onUseHint={() => handleUseHint("reveal_syllable")}
                     />
                   ) : (
                     <ClueList
@@ -827,15 +833,34 @@ export function App() {
                     {t.appName} • {t.printCluesOnlyHeader}
                   </h1>
                   <p className="text-xs text-stone-800 font-semibold mt-0.5">
-                    {difficulty === 'kids' ? (language === 'te' ? 'బాలల విభాగం (Kids 5x5)' : 'Kids Mode (5x5)') :
-                     difficulty === 'easy' ? (language === 'te' ? 'సులభం (Easy 7x7)' : 'Easy Mode (7x7)') :
-                     difficulty === 'medium' ? (language === 'te' ? 'మధ్యమం (Medium 9x9)' : 'Medium Mode (9x9)') :
-                     (language === 'te' ? 'కఠినం (Hard 12x12)' : 'Hard Mode (12x12)')}
+                    {difficulty === "kids"
+                      ? language === "te"
+                        ? "బాలల విభాగం (Kids 5x5)"
+                        : "Kids Mode (5x5)"
+                      : difficulty === "easy"
+                        ? language === "te"
+                          ? "సులభం (Easy 7x7)"
+                          : "Easy Mode (7x7)"
+                        : difficulty === "medium"
+                          ? language === "te"
+                            ? "మధ్యమం (Medium 9x9)"
+                            : "Medium Mode (9x9)"
+                          : language === "te"
+                            ? "కఠినం (Hard 12x12)"
+                            : "Hard Mode (12x12)"}
                   </p>
                 </div>
                 <div className="text-right text-xs text-stone-800 space-y-0.5 font-sans">
-                  <div>{t.printDate}: {new Date().toLocaleDateString(language === 'te' ? 'te-IN' : 'en-US')}</div>
-                  <div className="font-bold">{t.printTotalClues}: {puzzle.clues.across.length + puzzle.clues.down.length}</div>
+                  <div>
+                    {t.printDate}:{" "}
+                    {new Date().toLocaleDateString(
+                      language === "te" ? "te-IN" : "en-US",
+                    )}
+                  </div>
+                  <div className="font-bold">
+                    {t.printTotalClues}:{" "}
+                    {puzzle.clues.across.length + puzzle.clues.down.length}
+                  </div>
                 </div>
               </div>
 
@@ -844,14 +869,22 @@ export function App() {
                 <div>
                   <div className="border-b-2 border-black pb-1 mb-2 font-bold text-sm text-black flex items-center justify-between">
                     <span>{t.across}</span>
-                    <span className="text-xs font-normal">({puzzle.clues.across.length})</span>
+                    <span className="text-xs font-normal">
+                      ({puzzle.clues.across.length})
+                    </span>
                   </div>
                   <div className="space-y-1.5">
                     {puzzle.clues.across.map((c) => (
                       <div key={c.id} className="flex items-start gap-1">
-                        <span className="font-bold min-w-[22px] font-sans text-black">{c.number}.</span>
-                        <span className="flex-1 text-black font-telugu">{c.clue}</span>
-                        <span className="font-bold ml-1 font-mono text-[11px] text-stone-800 shrink-0">({c.length})</span>
+                        <span className="font-bold min-w-5.5 font-sans text-black">
+                          {c.number}.
+                        </span>
+                        <span className="flex-1 text-black font-telugu">
+                          {c.clue}
+                        </span>
+                        <span className="font-bold ml-1 font-mono text-[11px] text-stone-800 shrink-0">
+                          ({c.length})
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -861,14 +894,22 @@ export function App() {
                 <div>
                   <div className="border-b-2 border-black pb-1 mb-2 font-bold text-sm text-black flex items-center justify-between">
                     <span>{t.down}</span>
-                    <span className="text-xs font-normal">({puzzle.clues.down.length})</span>
+                    <span className="text-xs font-normal">
+                      ({puzzle.clues.down.length})
+                    </span>
                   </div>
                   <div className="space-y-1.5">
                     {puzzle.clues.down.map((c) => (
                       <div key={c.id} className="flex items-start gap-1">
-                        <span className="font-bold min-w-[22px] font-sans text-black">{c.number}.</span>
-                        <span className="flex-1 text-black font-telugu">{c.clue}</span>
-                        <span className="font-bold ml-1 font-mono text-[11px] text-stone-800 shrink-0">({c.length})</span>
+                        <span className="font-bold min-w-5.5 font-sans text-black">
+                          {c.number}.
+                        </span>
+                        <span className="flex-1 text-black font-telugu">
+                          {c.clue}
+                        </span>
+                        <span className="font-bold ml-1 font-mono text-[11px] text-stone-800 shrink-0">
+                          ({c.length})
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -888,27 +929,26 @@ export function App() {
         isKidsUnlocked={isKidsUnlocked}
         language={language}
         onAddPoints={(energyAmt, coinsAmt) => {
-          setEnergyPoints(prev => {
+          setEnergyPoints((prev) => {
             const updated = prev + energyAmt;
-            localStorage.setItem('padam_energy_points', String(updated));
+            localStorage.setItem("padam_energy_points", String(updated));
             return updated;
           });
-          setCoins(prev => {
+          setCoins((prev) => {
             const updated = prev + coinsAmt;
-            localStorage.setItem('padam_coins', String(updated));
+            localStorage.setItem("padam_coins", String(updated));
             return updated;
           });
         }}
         onUnlockKids={handleUnlockKidsPermanent}
         initialMode={topUpInitialMode}
-        onResetAllData={handleResetAllData}
       />
 
       {/* Reveal All Drain Warning Modal */}
       {isRevealModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150 print:hidden">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border-2 border-rose-300 overflow-hidden relative font-telugu">
-            <div className="bg-gradient-to-r from-rose-700 via-red-600 to-rose-800 text-white p-4 flex items-center justify-between">
+            <div className="bg-linear-to-r from-rose-700 via-red-600 to-rose-800 text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-white/20 rounded-xl">
                   <Eye size={22} className="text-white" />
@@ -917,9 +957,7 @@ export function App() {
                   <h3 className="text-base md:text-lg font-bold">
                     {t.revealModalTitle}
                   </h3>
-                  <p className="text-xs text-rose-100">
-                    {t.revealModalDesc}
-                  </p>
+                  <p className="text-xs text-rose-100">{t.revealModalDesc}</p>
                 </div>
               </div>
               <button
@@ -936,7 +974,9 @@ export function App() {
               <div className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-stone-600">
-                    {language === 'te' ? 'మిగిలిన ఖాళీ/తప్పు గడులు:' : 'Remaining unsolved cells:'}
+                    {language === "te"
+                      ? "మిగిలిన ఖాళీ/తప్పు గడులు:"
+                      : "Remaining unsolved cells:"}
                   </span>
                   <span className="font-bold font-mono text-stone-900 bg-white px-2 py-0.5 rounded border border-rose-200">
                     {remainingCount} {t.cells}
@@ -945,7 +985,9 @@ export function App() {
 
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-stone-600">
-                    {language === 'te' ? 'అవసరమైన కనీస మొత్తం:' : 'Minimum required cost:'}
+                    {language === "te"
+                      ? "అవసరమైన కనీస మొత్తం:"
+                      : "Minimum required cost:"}
                   </span>
                   <span className="font-bold font-mono text-rose-700 bg-white px-2 py-0.5 rounded border border-rose-200">
                     {minDrainCost} 🪙
@@ -954,11 +996,17 @@ export function App() {
 
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-stone-600">
-                    {language === 'te' ? 'మీ ప్రస్తుత నాణేల బ్యాలెన్స్:' : 'Your current coin balance:'}
+                    {language === "te"
+                      ? "మీ ప్రస్తుత నాణేల బ్యాలెన్స్:"
+                      : "Your current coin balance:"}
                   </span>
-                  <span className={`font-bold font-mono px-2 py-0.5 rounded border ${
-                    canAffordReveal ? 'text-emerald-700 bg-emerald-50 border-emerald-300' : 'text-rose-700 bg-rose-100 border-rose-300'
-                  }`}>
+                  <span
+                    className={`font-bold font-mono px-2 py-0.5 rounded border ${
+                      canAffordReveal
+                        ? "text-emerald-700 bg-emerald-50 border-emerald-300"
+                        : "text-rose-700 bg-rose-100 border-rose-300"
+                    }`}
+                  >
                     {coins} 🪙
                   </span>
                 </div>
@@ -969,24 +1017,33 @@ export function App() {
                 <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-950 space-y-1">
                   <p className="font-bold text-amber-900 flex items-center gap-1">
                     <span>⚠️</span>
-                    <span>{language === 'te' ? 'పూర్తి బ్యాలెన్స్ ఖాళీ అవుతుంది!' : 'Complete Balance Will Be Emptied!'}</span>
+                    <span>
+                      {language === "te"
+                        ? "పూర్తి బ్యాలెన్స్ ఖాళీ అవుతుంది!"
+                        : "Complete Balance Will Be Emptied!"}
+                    </span>
                   </p>
                   <p className="leading-relaxed">
-                    {t.revealDrainNotice.replace('{coins}', String(coins))}
+                    {t.revealDrainNotice.replace("{coins}", String(coins))}
                   </p>
                   <p className="text-[11px] text-stone-500 pt-1">
-                    {t.revealCostExplain.replace('{remaining}', String(remainingCount)).replace('{cost}', String(minDrainCost))}
+                    {t.revealCostExplain
+                      .replace("{remaining}", String(remainingCount))
+                      .replace("{cost}", String(minDrainCost))}
                   </p>
                 </div>
               ) : (
                 <div className="p-3 bg-red-50 border border-red-300 rounded-xl text-xs text-red-950 space-y-1">
                   <p className="font-bold text-red-900">
-                    {t.revealNotEnoughCoins.replace('{cost}', String(minDrainCost))}
+                    {t.revealNotEnoughCoins.replace(
+                      "{cost}",
+                      String(minDrainCost),
+                    )}
                   </p>
                   <p className="text-[11px] text-stone-600">
-                    {language === 'te'
-                      ? 'మరిన్ని నాణాలు కొనుగోలు చేయడానికి లేదా పజిల్స్ పూర్తి చేయడానికి కింద బటన్ నొక్కండి.'
-                      : 'Purchase more coins or solve clues to earn coins.'}
+                    {language === "te"
+                      ? "మరిన్ని నాణాలు కొనుగోలు చేయడానికి లేదా పజిల్స్ పూర్తి చేయడానికి కింద బటన్ నొక్కండి."
+                      : "Purchase more coins or solve clues to earn coins."}
                   </p>
                 </div>
               )}
@@ -1015,12 +1072,16 @@ export function App() {
                     type="button"
                     onClick={() => {
                       setIsRevealModalOpen(false);
-                      setTopUpInitialMode('points');
+                      setTopUpInitialMode("points");
                       setIsTopUpOpen(true);
                     }}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    className="px-4 py-2 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 cursor-pointer flex items-center gap-1.5"
                   >
-                    <span>{language === 'te' ? 'నాణాలు కొనండి (Top-Up)' : 'Buy Coins (Top-Up)'}</span>
+                    <span>
+                      {language === "te"
+                        ? "నాణాలు కొనండి (Top-Up)"
+                        : "Buy Coins (Top-Up)"}
+                    </span>
                   </button>
                 )}
               </div>
@@ -1041,7 +1102,6 @@ export function App() {
           onSelectClue={handleSelectClue}
         />
       )}
-
     </div>
   );
 }
