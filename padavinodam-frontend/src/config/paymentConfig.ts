@@ -7,11 +7,15 @@
  * - 0% Commission: 100% of the funds go directly into your linked bank account.
  */
 
-export const DEFAULT_UPI_ID = 'padam@okaxis';
+export const DEFAULT_UPI_ID = '9063053602@hdfc';
 export const DEFAULT_PAYEE_NAME = 'Padavinodam Telugu Crossword';
 
 export function getSavedUpiId(): string {
-  return localStorage.getItem('padam_custom_upi_id') || DEFAULT_UPI_ID;
+  const saved = localStorage.getItem('padam_custom_upi_id');
+  if (!saved || saved === 'padam@okaxis') {
+    return DEFAULT_UPI_ID;
+  }
+  return saved;
 }
 
 export function saveUpiId(newUpiId: string): void {

@@ -105,8 +105,10 @@ export function App() {
     return saved !== null ? parseInt(saved, 10) : 100;
   });
 
-  // Kids Mode Lifetime Unlock (One-time ₹49) - Unlocked for testing
-  const [isKidsUnlocked, setIsKidsUnlocked] = useState<boolean>(true);
+  // Kids Mode Lifetime Unlock (One-time ₹49)
+  const [isKidsUnlocked, setIsKidsUnlocked] = useState<boolean>(() => {
+    return localStorage.getItem('padam_kids_unlocked') === 'true';
+  });
 
   // Top-Up Modal State
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
@@ -341,9 +343,43 @@ export function App() {
     }
   };
 
-  // New puzzle / Mode Switch: Points deductions and payment gates are paused for testing
+  // New puzzle / Mode Switch: Enforces Kids Mode payment lock & 15-point incomplete skip penalty
   const handleRequestNewPuzzle = (targetDiff?: GameDifficulty) => {
     const nextDiff = targetDiff || difficulty;
+
+    // 1. Kids Mode Payment Gate (₹49 one-time unlock)
+    if (nextDiff === 'kids' && !isKidsUnlocked) {
+      setTopUpInitialMode('kids');
+      setIsTopUpOpen(true);
+      setStatusMessage(
+        language === 'te'
+          ? '🔒 బాలల విభాగం (5x5) లాక్ చేయబడింది. అన్‌లాక్ చేయడానికి ₹49 చెల్లించండి.'
+          : '🔒 Kids Mode (5x5) is locked. Unlock lifetime access for ₹49.'
+      );
+      return;
+    }
+
+    // 2. Incomplete Puzzle Skip Energy Penalty (15 Points)
+    if (puzzle && userGrid.length > 0 && !isSolved) {
+      const hasAnyInput = userGrid.some(row => row.some(cell => cell && cell.trim() !== ''));
+      if (hasAnyInput) {
+        if (energyPoints < 15) {
+          setTopUpInitialMode('points');
+          setIsTopUpOpen(true);
+          setStatusMessage(
+            language === 'te'
+              ? '⚠️ అసంపూర్తి పజిల్ మార్చడానికి కనీసం 15 శక్తి పాయింట్లు అవసరం! దయచేసి టాప్-అప్ చేసుకోండి.'
+              : '⚠️ Skipping an incomplete puzzle costs 15 Energy Points! Please top up.'
+          );
+          return;
+        }
+        setEnergyPoints(prev => {
+          const updated = Math.max(0, prev - 15);
+          localStorage.setItem('padam_energy_points', String(updated));
+          return updated;
+        });
+      }
+    }
 
     if (nextDiff !== difficulty) {
       setDifficulty(nextDiff);
@@ -467,7 +503,13 @@ export function App() {
   const handleUseHint = (hintType: HintType) => {
     const hint = hintOptions.find(h => h.id === hintType);
     if (!hint || coins < hint.coinCost) {
-      setStatusMessage(t.notEnoughCoins);
+      setStatusMessage(
+        language === 'te'
+          ? `⚠️ అదనపు క్లూ కోసం నాణాలు సరిపోవు (${hint?.coinCost || 0} నాణాలు అవసరం). దయచేసి టాప్-అప్ చేసుకోండి.`
+          : `⚠️ Not enough coins for hint (${hint?.coinCost || 0} coins required). Please top up.`
+      );
+      setTopUpInitialMode('points');
+      setIsTopUpOpen(true);
       return;
     }
 
@@ -596,9 +638,9 @@ export function App() {
             coins={coins}
             language={language}
             onUseHint={handleUseHint}
-            onAddFreeCoins={() => {
-              setCoins(c => c + 50);
-              setStatusMessage(t.freeCoinsClaimed);
+            onOpenTopUp={() => {
+              setTopUpInitialMode('points');
+              setIsTopUpOpen(true);
             }}
           />
         </div>
@@ -808,17 +850,23 @@ export function App() {
         )}
       </div>
 
-      {/* Instant Top-Up Modal (Dummy GPay QR Code & Auto-Regen notice) */}
+      {/* Instant Top-Up Modal (Direct UPI & Auto-Regen notice) */}
       <TopUpModal
         isOpen={isTopUpOpen}
         onClose={() => setIsTopUpOpen(false)}
         currentPoints={energyPoints}
+        currentCoins={coins}
         isKidsUnlocked={isKidsUnlocked}
         language={language}
-        onAddPoints={(amt) => {
+        onAddPoints={(energyAmt, coinsAmt) => {
           setEnergyPoints(prev => {
-            const updated = Math.min(100, prev + amt);
+            const updated = Math.min(100, prev + energyAmt);
             localStorage.setItem('padam_energy_points', String(updated));
+            return updated;
+          });
+          setCoins(prev => {
+            const updated = prev + coinsAmt;
+            localStorage.setItem('padam_coins', String(updated));
             return updated;
           });
         }}
@@ -907,8 +955,8 @@ export function App() {
                   </p>
                   <p className="text-[11px] text-stone-600">
                     {language === 'te'
-                      ? 'సహాయాల బార్ నుండి +50 ఉచిత నాణేలను పొందండి లేదా మరిన్ని పజిల్స్ పూర్తి చేసి నాణేలు సంపాదించండి.'
-                      : 'Claim +50 free coins or solve more clues to earn coins.'}
+                      ? 'మరిన్ని నాణాలు కొనుగోలు చేయడానికి లేదా పజిల్స్ పూర్తి చేయడానికి కింద బటన్ నొక్కండి.'
+                      : 'Purchase more coins or solve clues to earn coins.'}
                   </p>
                 </div>
               )}
@@ -918,7 +966,7 @@ export function App() {
                 <button
                   type="button"
                   onClick={() => setIsRevealModalOpen(false)}
-                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-medium text-xs transition"
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-medium text-xs transition cursor-pointer"
                 >
                   {t.cancelBtn}
                 </button>
@@ -927,7 +975,7 @@ export function App() {
                   <button
                     type="button"
                     onClick={handleConfirmDrainReveal}
-                    className="px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1.5"
+                    className="px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
                   >
                     <Eye size={14} />
                     <span>{t.confirmDrainBtn}</span>
@@ -936,12 +984,13 @@ export function App() {
                   <button
                     type="button"
                     onClick={() => {
-                      setCoins(c => c + 50);
-                      setStatusMessage(t.freeCoinsClaimed);
+                      setIsRevealModalOpen(false);
+                      setTopUpInitialMode('points');
+                      setIsTopUpOpen(true);
                     }}
-                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95"
+                    className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 cursor-pointer flex items-center gap-1.5"
                   >
-                    {t.freeCoinsBtn}
+                    <span>{language === 'te' ? 'నాణాలు కొనండి (Top-Up)' : 'Buy Coins (Top-Up)'}</span>
                   </button>
                 )}
               </div>

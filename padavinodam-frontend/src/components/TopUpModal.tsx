@@ -7,9 +7,10 @@ interface TopUpModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentPoints: number;
+  currentCoins?: number;
   isKidsUnlocked: boolean;
   language: Language;
-  onAddPoints: (amount: number) => void;
+  onAddPoints: (points: number, coins: number) => void;
   onUnlockKids: () => void;
   initialMode?: 'points' | 'kids';
 }
@@ -18,6 +19,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
   isOpen,
   onClose,
   currentPoints,
+  currentCoins = 0,
   isKidsUnlocked,
   language,
   onAddPoints,
@@ -62,11 +64,11 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
     setTimeout(() => {
       setIsProcessing(false);
       if (selectedPack === 'p150') {
-        onAddPoints(150);
-        setSuccessMsg(language === 'te' ? '🎉 +150 పాయింట్లు విజయవంతంగా జోడించబడ్డాయి!' : '🎉 +150 Points added successfully!');
+        onAddPoints(150, 150);
+        setSuccessMsg(language === 'te' ? '🎉 +150 శక్తి & +150 క్లూ నాణాలు విజయవంతంగా జోడించబడ్డాయి!' : '🎉 +150 Points & +150 Clue Coins added successfully!');
       } else if (selectedPack === 'p500') {
-        onAddPoints(500);
-        setSuccessMsg(language === 'te' ? '🎉 +500 పాయింట్లు విజయవంతంగా జోడించబడ్డాయి!' : '🎉 +500 Points added successfully!');
+        onAddPoints(500, 500);
+        setSuccessMsg(language === 'te' ? '🎉 +500 శక్తి & +500 క్లూ నాణాలు విజయవంతంగా జోడించబడ్డాయి!' : '🎉 +500 Points & +500 Clue Coins added successfully!');
       } else if (selectedPack === 'kids') {
         onUnlockKids();
         setSuccessMsg(language === 'te' ? '👶 బాలల విభాగం శాశ్వతంగా అన్‌లాక్ అయింది!' : '👶 Kids Mode unlocked permanently!');
@@ -107,14 +109,25 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
 
         {/* Current Balance */}
         <div className="px-4 py-3 bg-amber-50/70 border-b border-amber-200/60 flex items-center justify-between">
-          <div>
-            <span className="text-[11px] text-stone-600 block">
-              {language === 'te' ? 'ప్రస్తుత శక్తి నిల్వ:' : 'Current Energy:'}
-            </span>
-            <div className="flex items-center gap-1.5 font-bold text-base text-amber-950 font-mono">
-              <Zap size={16} className="text-amber-500 fill-amber-500" />
-              <span>{currentPoints}</span>
-              <span className="text-stone-400 text-xs font-normal">/ 100 గరిష్టం</span>
+          <div className="flex items-center gap-4">
+            <div>
+              <span className="text-[10px] text-stone-600 block">
+                {language === 'te' ? 'శక్తి నిల్వ:' : 'Energy:'}
+              </span>
+              <div className="flex items-center gap-1 font-bold text-sm text-amber-950 font-mono">
+                <Zap size={14} className="text-amber-500 fill-amber-500" />
+                <span>{currentPoints}</span>
+                <span className="text-stone-400 text-[10px] font-normal">/ 100</span>
+              </div>
+            </div>
+            <div className="border-l border-amber-200/80 pl-3">
+              <span className="text-[10px] text-stone-600 block">
+                {language === 'te' ? 'క్లూ నాణాలు:' : 'Clue Coins:'}
+              </span>
+              <div className="flex items-center gap-1 font-bold text-sm text-amber-950 font-mono">
+                <span className="text-amber-600">🪙</span>
+                <span>{currentCoins}</span>
+              </div>
             </div>
           </div>
           <div className="text-right bg-white px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">
@@ -147,7 +160,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setSelectedPack('kids')}
-                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${
+                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       selectedPack === 'kids'
                         ? 'border-purple-500 bg-purple-50/80 ring-2 ring-purple-300 shadow-xs'
                         : 'border-stone-200 bg-white hover:border-purple-300'
@@ -167,7 +180,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                           </span>
                         </div>
                         <p className="text-[11px] text-stone-500">
-                          {language === 'te' ? 'పిల్లల కోసం ప్రత్యేక పజిల్స్' : 'Special 5x5 puzzles for kids'}
+                          {language === 'te' ? 'పిల్లల కోసం ప్రత్యేక 5x5 పజిల్స్ శాశ్వతంగా అన్‌లాక్' : 'Special 5x5 puzzles for kids permanently unlocked'}
                         </p>
                       </div>
                     </div>
@@ -175,11 +188,11 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                   </button>
                 )}
 
-                {/* 500 Points Pack */}
+                {/* 500 Points & Coins Pack */}
                 <button
                   type="button"
                   onClick={() => setSelectedPack('p500')}
-                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${
+                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                     selectedPack === 'p500'
                       ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                       : 'border-stone-200 bg-white hover:border-amber-300'
@@ -192,25 +205,25 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-sm text-stone-900 font-telugu">
-                          {language === 'te' ? '500 పాయింట్లు (సూపర్ ప్యాక్)' : '500 Points (Super Pack)'}
+                          {language === 'te' ? '500 నాణాలు + 500 శక్తి పాయింట్లు' : '500 Coins + 500 Energy'}
                         </span>
                         <span className="bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
-                          జనాదరణ
+                          సూపర్ ప్యాక్
                         </span>
                       </div>
                       <p className="text-[11px] text-stone-500">
-                        {language === 'te' ? '~33 సార్లు అసంపూర్తి పజిల్ మార్పిడులు' : '~33 puzzle skips'}
+                        {language === 'te' ? 'అదనపు క్లూలు, అక్షర వెల్లడి & పజిల్ మార్పిడులు' : 'Extra clues, reveals & puzzle skips'}
                       </p>
                     </div>
                   </div>
                   <span className="font-bold text-amber-700 text-base font-mono">₹49</span>
                 </button>
 
-                {/* 150 Points Pack */}
+                {/* 150 Points & Coins Pack */}
                 <button
                   type="button"
                   onClick={() => setSelectedPack('p150')}
-                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${
+                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                     selectedPack === 'p150'
                       ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                       : 'border-stone-200 bg-white hover:border-amber-300'
@@ -222,10 +235,10 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-sm text-stone-900 font-telugu">
-                        {language === 'te' ? '150 పాయింట్లు (స్టార్టర్)' : '150 Points (Starter)'}
+                        {language === 'te' ? '150 నాణాలు + 150 శక్తి పాయింట్లు' : '150 Coins + 150 Energy'}
                       </span>
                       <p className="text-[11px] text-stone-500">
-                        {language === 'te' ? '10 సార్లు అసంపూర్తి పజిల్ మార్పిడులు' : '10 puzzle skips'}
+                        {language === 'te' ? 'అదనపు క్లూలు & తక్షణ సూచనల స్టార్టర్ ప్యాక్' : 'Extra clues & instant hints starter pack'}
                       </p>
                     </div>
                   </div>

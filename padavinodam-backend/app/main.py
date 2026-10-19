@@ -138,6 +138,7 @@ def generate_puzzle(
             "difficulty": difficulty,
             "total_words": puzzle_data["meta"]["total_words"],
             "is_authentic_newspaper_grid": puzzle_data["meta"].get("is_authentic_newspaper_grid", True),
+            "is_procedural": puzzle_data["meta"].get("is_procedural", False),
             "generated_at": datetime.datetime.utcnow().timestamp()
         }
     )

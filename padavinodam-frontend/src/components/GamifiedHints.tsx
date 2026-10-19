@@ -8,7 +8,7 @@ interface GamifiedHintsProps {
   coins: number;
   language: Language;
   onUseHint: (hintType: HintType) => void;
-  onAddFreeCoins: () => void;
+  onOpenTopUp: () => void;
 }
 
 export const GamifiedHints: React.FC<GamifiedHintsProps> = ({
@@ -16,7 +16,7 @@ export const GamifiedHints: React.FC<GamifiedHintsProps> = ({
   coins,
   language,
   onUseHint,
-  onAddFreeCoins
+  onOpenTopUp
 }) => {
   const t = TRANSLATIONS[language];
   const maxUsed = Math.max(...hints.map(h => h.usedCount), 0);
@@ -75,11 +75,11 @@ export const GamifiedHints: React.FC<GamifiedHintsProps> = ({
           </span>
           <button
             type="button"
-            onClick={onAddFreeCoins}
-            title={t.freeCoinsBtn}
-            className="text-[10px] bg-amber-600 hover:bg-amber-700 text-white font-bold px-1.5 py-0.5 rounded-full ml-1 transition"
+            onClick={onOpenTopUp}
+            title={language === 'te' ? 'UPI ద్వారా నాణాలు కొనుగోలు చేయండి' : 'Buy Coins via UPI'}
+            className="text-[10px] bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold px-2 py-0.5 rounded-full ml-1 transition shadow-2xs flex items-center gap-1 active:scale-95 cursor-pointer"
           >
-            +50
+            <span>+ నాణాలు</span>
           </button>
         </div>
       </div>
@@ -95,17 +95,28 @@ export const GamifiedHints: React.FC<GamifiedHintsProps> = ({
             <button
               key={hint.id}
               type="button"
-              onClick={() => onUseHint(hint.id)}
-              disabled={!canAfford}
-              className={`relative flex flex-col items-start p-2.5 rounded-lg border text-left transition-all duration-150 active:scale-96 ${
+              onClick={() => {
+                if (canAfford) {
+                  onUseHint(hint.id);
+                } else {
+                  onOpenTopUp();
+                }
+              }}
+              className={`relative flex flex-col items-start p-2.5 rounded-lg border text-left transition-all duration-150 active:scale-96 cursor-pointer ${
                 isMostUsed
                   ? 'bg-amber-50/90 border-amber-400 ring-1 ring-amber-300 shadow-xs'
                   : 'bg-white hover:bg-stone-50 border-stone-200 shadow-2xs'
-              } ${!canAfford ? 'opacity-50 cursor-not-allowed' : 'hover:border-amber-400'}`}
+              } ${!canAfford ? 'border-amber-300/80 bg-amber-50/40' : 'hover:border-amber-400'}`}
             >
               {isMostUsed && (
                 <span className="absolute -top-2 right-1.5 bg-gradient-to-r from-red-600 to-amber-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full shadow-xs flex items-center gap-0.5 font-sans">
                   <Flame size={9} /> {t.mostUsed} ({hint.usedCount})
+                </span>
+              )}
+
+              {!canAfford && (
+                <span className="absolute -top-2 left-1.5 bg-purple-700 text-white text-[8px] font-bold px-1.5 py-0.2 rounded-full shadow-xs flex items-center gap-0.5 font-sans">
+                  🔒 {language === 'te' ? 'టాప్-అప్' : 'Top-Up'}
                 </span>
               )}
 
