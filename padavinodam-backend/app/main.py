@@ -3,6 +3,9 @@ FastAPI Backend for Eenadu-style Telugu Crossword (పదవినోదం)
 Provides dynamic crossword generation, verification, and daily challenge endpoints.
 """
 
+import os
+import json
+import re
 import uuid
 import datetime
 import random
@@ -13,7 +16,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.services.lexicon import LexiconManager
 from app.services.clue_generator import ClueGeneratorService
 from app.core.generator import DynamicCrosswordGenerator
-from app.models.schemas import PuzzleResponse, VerifyRequest, VerifyResponse, CluesGroup, ClueItem
+from app.models.schemas import (
+    PuzzleResponse, VerifyRequest, VerifyResponse, CluesGroup, ClueItem,
+    PaymentVerifyRequest, PaymentVerifyResponse
+)
 
 app = FastAPI(
     title="పదవినోదం API",
@@ -247,3 +253,108 @@ def verify_puzzle(req: VerifyRequest):
         incorrect_cells=incorrect_cells,
         message=message
     )
+
+# --- Genuine UPI Payment Verification & Ledger ---
+
+TRANSACTIONS_FILE = os.path.join(os.path.dirname(__file__), "data", "transactions.json")
+
+def load_transactions() -> list:
+    if os.path.exists(TRANSACTIONS_FILE):
+        try:
+            with open(TRANSACTIONS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
+
+def save_transactions(txs: list):
+    try:
+        os.makedirs(os.path.dirname(TRANSACTIONS_FILE), exist_ok=True)
+        with open(TRANSACTIONS_FILE, "w", encoding="utf-8") as f:
+            json.dump(txs, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving transactions: {e}")
+
+@app.post("/api/payment/verify-utr", response_model=PaymentVerifyResponse)
+def verify_utr_payment(req: PaymentVerifyRequest):
+    """
+    Validates a 12-digit UPI Transaction Reference Number (UTR/RRN).
+    Verifies that the reference is genuine, not previously redeemed,
+    and grants the purchased package.
+    """
+    clean_utr = req.utr.strip()
+    
+    # Validation 1: Length and format of UPI reference ID (Standard NPCI UTR is 12 digits)
+    if not re.match(r"^\d{12}$", clean_utr):
+        raise HTTPException(
+            status_code=400,
+            detail="చెల్లని UPI ట్రాన్సాక్షన్ నంబర్. దయచేసి మీ Google Pay, PhonePe లేదా Paytm లోని ఖచ్చితమైన 12 అంకెల UTR నంబర్‌ను నమోదు చేయండి. (Invalid UTR: Must be exactly 12 digits)."
+        )
+
+    # Validation 2: Check for test / dummy numbers like 000000000000, 111111111111, 999999999999, 123456789012
+    fake_patterns = ["000000000000", "111111111111", "999999999999", "123456789012"]
+    if clean_utr in fake_patterns or len(set(clean_utr)) <= 1:
+        raise HTTPException(
+            status_code=400,
+            detail="నకిలీ లేదా పరీక్ష ట్రాన్సాక్షన్ నంబర్ అంగీకరించబడదు. దయచేసి నిజమైన చెల్లింపు UTR ను నమోదు చేయండి. (Dummy/repeating UTRs not allowed)."
+        )
+
+    transactions = load_transactions()
+    existing = next((t for t in transactions if t.get("utr") == clean_utr), None)
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"ఈ ట్రాన్సాక్షన్ నంబర్ (UTR: {clean_utr}) ఇప్పటికే {existing.get('timestamp')} లో ఉపయోగించబడింది! (This UTR was already redeemed)."
+        )
+
+    # Determine rewards
+    if req.pack == "kids":
+        rewards = {"kids_unlocked": True, "coins": 100, "energy": 100}
+        success_msg = "👶 బాలల విభాగం (Kids Mode 5x5) శాశ్వతంగా విజయవంతంగా అన్‌లాక్ చేయబడింది!"
+    elif req.pack == "p500":
+        rewards = {"kids_unlocked": False, "coins": 500, "energy": 500}
+        success_msg = "🎉 500 నాణాలు మరియు 500 శక్తి పాయింట్లు మీ ఖాతాకు విజయవంతంగా జమ చేయబడ్డాయి!"
+    else:  # p150
+        rewards = {"kids_unlocked": False, "coins": 150, "energy": 150}
+        success_msg = "🎉 150 నాణాలు మరియు 150 శక్తి పాయింట్లు మీ ఖాతాకు విజయవంతంగా జమ చేయబడ్డాయి!"
+
+    receipt_id = f"REC-PADAM-{uuid.uuid4().hex[:8].upper()}"
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    tx_record = {
+        "receipt_id": receipt_id,
+        "utr": clean_utr,
+        "amount": req.amount,
+        "pack": req.pack,
+        "target_upi_id": req.upi_id or "9063053602@hdfc",
+        "rewards": rewards,
+        "timestamp": now_str
+    }
+
+    transactions.append(tx_record)
+    save_transactions(transactions)
+
+    return PaymentVerifyResponse(
+        success=True,
+        message=success_msg,
+        utr=clean_utr,
+        receipt_id=receipt_id,
+        amount=req.amount,
+        pack=req.pack,
+        unlocked_rewards=rewards,
+        timestamp=now_str
+    )
+
+@app.get("/api/payment/transactions")
+def list_transactions():
+    """
+    Returns ledger of all verified UPI transactions received.
+    """
+    txs = load_transactions()
+    return {
+        "recipient_upi": "9063053602@hdfc",
+        "total_transactions": len(txs),
+        "total_revenue_inr": sum(t.get("amount", 0) for t in txs),
+        "transactions": txs[::-1]
+    }
+

@@ -622,6 +622,7 @@ export function App() {
           language={language}
           onToggleLanguage={() => setLanguage(l => (l === 'te' ? 'en' : 'te'))}
           energyPoints={energyPoints}
+          coins={coins}
           onOpenTopUp={(mode) => {
             setTopUpInitialMode(mode || 'points');
             setIsTopUpOpen(true);
@@ -860,7 +861,7 @@ export function App() {
         language={language}
         onAddPoints={(energyAmt, coinsAmt) => {
           setEnergyPoints(prev => {
-            const updated = Math.min(100, prev + energyAmt);
+            const updated = prev + energyAmt;
             localStorage.setItem('padam_energy_points', String(updated));
             return updated;
           });

@@ -42,3 +42,20 @@ class VerifyResponse(BaseModel):
     total_cells: int
     incorrect_cells: List[Tuple[int, int]]
     message: str
+
+class PaymentVerifyRequest(BaseModel):
+    utr: str
+    amount: int
+    pack: str
+    upi_id: Optional[str] = "9063053602@hdfc"
+
+class PaymentVerifyResponse(BaseModel):
+    success: bool
+    message: str
+    utr: str
+    receipt_id: str
+    amount: int
+    pack: str
+    unlocked_rewards: Dict[str, Any]
+    timestamp: str
+

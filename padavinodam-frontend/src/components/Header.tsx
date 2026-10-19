@@ -19,6 +19,7 @@ interface HeaderProps {
   language: Language;
   onToggleLanguage: () => void;
   energyPoints: number;
+  coins: number;
   onOpenTopUp: (mode?: 'points' | 'kids') => void;
   isKidsUnlocked: boolean;
   targetTimeSeconds: number;
@@ -40,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   language,
   onToggleLanguage,
   energyPoints,
+  coins,
   onOpenTopUp,
   isKidsUnlocked,
   targetTimeSeconds,
@@ -120,6 +122,27 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden sm:inline font-sans">{!isMuted ? 'ధ్వని' : 'మ్యూట్'}</span>
           </button>
 
+          {/* Clue Coins Wallet Button */}
+          <button
+            type="button"
+            onClick={() => onOpenTopUp('points')}
+            className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100/90 border border-amber-300 px-2.5 py-1.5 rounded-lg shadow-2xs transition active:scale-95"
+            title={language === 'te' ? 'క్లూ నాణాలు టాప్-అప్ చేయండి' : 'Top-Up Clue Coins'}
+          >
+            <span className="text-base leading-none">🪙</span>
+            <div className="text-left">
+              <div className="text-[9px] text-amber-900/80 uppercase font-sans font-semibold leading-none">
+                {language === 'te' ? 'నాణాలు' : 'Coins'}
+              </div>
+              <div className="text-xs md:text-sm font-bold text-amber-950 font-mono leading-none mt-0.5">
+                {coins}
+              </div>
+            </div>
+            <span className="text-[10px] bg-amber-600 text-white font-bold px-1 py-0.2 rounded-full ml-0.5">
+              +
+            </span>
+          </button>
+
           {/* Energy Points Wallet Button */}
           <button
             type="button"
@@ -133,7 +156,12 @@ export const Header: React.FC<HeaderProps> = ({
                 {t.energy}
               </div>
               <div className="text-xs md:text-sm font-bold text-amber-950 font-mono leading-none mt-0.5">
-                {energyPoints}<span className="text-[9px] text-stone-400 font-normal">/100</span>
+                {energyPoints}
+                {energyPoints <= 100 ? (
+                  <span className="text-[9px] text-stone-400 font-normal">/100</span>
+                ) : (
+                  <span className="text-[8px] text-amber-800 font-bold ml-0.5 bg-amber-200/90 px-1 rounded-sm">⚡BOOST</span>
+                )}
               </div>
             </div>
             <span className="text-[10px] bg-amber-600 text-white font-bold px-1 py-0.2 rounded-full ml-0.5">
