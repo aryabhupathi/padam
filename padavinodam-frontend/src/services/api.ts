@@ -2,18 +2,29 @@ import type { PuzzleData, VerifyResult, GameDifficulty } from '../types/puzzle';
 import { getFallbackPuzzle, FALLBACK_PUZZLES } from '../data/fallbackPuzzles';
 
 const ENV_API_BASE = (import.meta as any).env?.VITE_API_BASE_URL?.trim();
-let ACTIVE_API_BASE = ENV_API_BASE || 'http://127.0.0.1:8000';
+const RENDER_PROD_URL = 'https://padam.onrender.com';
+let ACTIVE_API_BASE = ENV_API_BASE || RENDER_PROD_URL;
 
 async function getWorkingBaseUrl(): Promise<string> {
   if (ENV_API_BASE) {
     return ENV_API_BASE.replace(/\/+$/, '');
+  }
+  // Try live Render backend first so payment webhooks from mobile MacroDroid always match
+  try {
+    const testRes = await fetch(`${RENDER_PROD_URL}/`, { method: 'GET', signal: AbortSignal.timeout(3000) });
+    if (testRes.ok) {
+      ACTIVE_API_BASE = RENDER_PROD_URL;
+      return ACTIVE_API_BASE;
+    }
+  } catch {
+    // Fall back to local if Render is offline
   }
   const hosts = ['127.0.0.1', 'localhost'];
   const ports = [8000, 8001];
   for (const host of hosts) {
     for (const port of ports) {
       try {
-        const testRes = await fetch(`http://${host}:${port}/`, { method: 'GET', signal: AbortSignal.timeout(1500) });
+        const testRes = await fetch(`http://${host}:${port}/`, { method: 'GET', signal: AbortSignal.timeout(1000) });
         if (testRes.ok) {
           ACTIVE_API_BASE = `http://${host}:${port}`;
           return ACTIVE_API_BASE;

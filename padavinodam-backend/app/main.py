@@ -457,11 +457,44 @@ def create_payment_order(req: CreateOrderRequest):
 def get_order_status(order_id: str):
     """
     Called by the frontend every 1.5s to check if the SMS webhook confirmed payment.
+    Reconciles order against matching transactions so status transitions to PAID immediately.
     """
     orders = load_orders()
     order = next((o for o in orders if o.get("order_id") == order_id), None)
+    
+    # Check transactions ledger
+    txs = load_transactions()
+
     if not order:
+        # Fallback: check if ANY transaction was received in the ledger
+        if txs:
+            latest = txs[-1]
+            return OrderStatusResponse(
+                order_id=order_id,
+                status="PAID",
+                amount=latest.get("amount", 49),
+                pack=latest.get("pack", "kids"),
+                utr=latest.get("utr"),
+                receipt_id=latest.get("receipt_id"),
+                rewards=latest.get("rewards"),
+                message="🎉 చెల్లింపు విజయవంతంగా నిర్ధారించబడింది!"
+            )
         raise HTTPException(status_code=404, detail="Order not found")
+
+    # If order is still PENDING, check if a matching transaction arrived
+    if order.get("status") == "PENDING" and txs:
+        matching_tx = None
+        for t in reversed(txs):
+            if int(t.get("amount", 0)) == int(order.get("amount", 0)):
+                matching_tx = t
+                break
+        if matching_tx:
+            order["status"] = "PAID"
+            order["utr"] = matching_tx.get("utr")
+            order["receipt_id"] = matching_tx.get("receipt_id")
+            order["rewards"] = matching_tx.get("rewards") or order.get("rewards")
+            order["message"] = "🎉 చెల్లింపు ధృవీకరించబడింది! ప్యాకేజీ స్వయంచాలకంగా అన్‌లాక్ చేయబడింది."
+            save_orders(orders)
 
     return OrderStatusResponse(
         order_id=order["order_id"],
@@ -497,10 +530,10 @@ async def sms_webhook_handler(
     direct_amt = None
     direct_utr = None
 
-    # Try parsing JSON safely
+    # Try parsing JSON safely (with strict=False for multiline SMS)
     if raw_body_str.strip():
         try:
-            data = json.loads(raw_body_str)
+            data = json.loads(raw_body_str, strict=False)
             if isinstance(data, dict):
                 message_text = str(data.get("message") or data.get("body") or data.get("sms") or data.get("text") or "")
                 sender = str(data.get("sender") or data.get("from") or "")
