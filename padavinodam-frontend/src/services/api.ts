@@ -162,43 +162,16 @@ export async function verifyPaymentUtr(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ utr: cleanUtr, amount, pack, upi_id: upiId }),
-      signal: AbortSignal.timeout(6000)
+      signal: AbortSignal.timeout(8000)
     });
     
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.detail || 'చెల్లింపు ధృవీకరణ విఫలమైంది.');
+      throw new Error(data.detail || 'చెల్లింపు ధృవీకరణ విఫలమైంది. దయచేసి సరైన UTR ను నమోదు చేయండి.');
     }
     return data;
   } catch (err: any) {
-    const msg = err.message || '';
-    if (msg.includes('నమోదు చేయండి') || msg.includes('ఉపయోగించబడింది') || msg.includes('చెల్లని') || msg.includes('నకిలీ')) {
-      throw err;
-    }
-    // If backend is offline, store in local ledger to prevent reuse
-    const savedUtrs: string[] = JSON.parse(localStorage.getItem('padam_used_utrs') || '[]');
-    if (savedUtrs.includes(cleanUtr)) {
-      throw new Error(`ఈ ట్రాన్సాక్షన్ నంబర్ (UTR: ${cleanUtr}) ఇప్పటికే ఉపయోగించబడింది!`);
-    }
-    savedUtrs.push(cleanUtr);
-    localStorage.setItem('padam_used_utrs', JSON.stringify(savedUtrs));
-
-    return {
-      success: true,
-      message: pack === 'kids' 
-        ? '👶 బాలల విభాగం (Kids Mode 5x5) శాశ్వతంగా విజయవంతంగా అన్‌లాక్ చేయబడింది!'
-        : `🎉 +${pack === 'p500' ? 500 : 150} నాణాలు మరియు శక్తి విజయవంతంగా జోడించబడ్డాయి!`,
-      utr: cleanUtr,
-      receipt_id: `REC-LOC-${Date.now().toString(36).toUpperCase()}`,
-      amount,
-      pack,
-      unlocked_rewards: {
-        kids_unlocked: pack === 'kids',
-        coins: pack === 'p500' ? 500 : 150,
-        energy: pack === 'p500' ? 500 : 150
-      },
-      timestamp: new Date().toLocaleString()
-    };
+    throw new Error(err.message || 'సర్వర్ నుండి చెల్లింపు ధృవీకరించబడలేదు. దయచేసి ఇంటర్నెట్ కనెక్షన్ సరిచూసుకోండి.');
   }
 }
 
