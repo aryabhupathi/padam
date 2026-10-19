@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { X, Zap, ShieldCheck, CheckCircle2, Sparkles, Baby, Edit2, ExternalLink, Check, Copy, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Zap, CheckCircle2, Sparkles, Baby, Edit2, ExternalLink, Check, Copy, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import type { Language } from '../utils/translations';
 import { getSavedUpiId, saveUpiId, buildUpiPaymentUrl, buildUpiQrUrl } from '../config/paymentConfig';
-import { verifyPaymentUtr, type UtrVerifyResult } from '../services/api';
+import { verifyPaymentUtr, createPaymentOrder, checkOrderStatus, type UtrVerifyResult, type OrderSession } from '../services/api';
 import { templeAudio } from '../utils/templeAudio';
 
 interface TopUpModalProps {
@@ -42,12 +42,71 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
   const [tempUpiInput, setTempUpiInput] = useState(upiId);
   const [copied, setCopied] = useState(false);
 
-  if (!isOpen) return null;
+  // Automatic SMS Webhook listener state
+  const [activeOrder, setActiveOrder] = useState<OrderSession | null>(null);
+  const [showManualUtr, setShowManualUtr] = useState(false);
 
   const packAmount = selectedPack === 'p150' ? 19 : 49;
   const packTitle = selectedPack === 'kids' ? 'Kids Mode Lifetime' : (selectedPack === 'p500' ? '500 Points & Coins' : '150 Points & Coins');
   const upiUrl = buildUpiPaymentUrl(packAmount, packTitle, upiId);
   const qrUrl = buildUpiQrUrl(upiUrl);
+
+  // Auto-listen for incoming bank SMS webhook confirmation
+  useEffect(() => {
+    if (!isOpen) {
+      setActiveOrder(null);
+      return;
+    }
+    let isCancelled = false;
+    let pollInterval: any = null;
+
+    createPaymentOrder(selectedPack, packAmount, upiId).then(order => {
+      if (isCancelled) return;
+      setActiveOrder(order);
+
+      pollInterval = setInterval(async () => {
+        try {
+          const status = await checkOrderStatus(order.order_id);
+          if (status.status === 'PAID') {
+            clearInterval(pollInterval);
+            templeAudio.playSuccessFanfare();
+            setSuccessResult({
+              success: true,
+              message: status.message || (selectedPack === 'kids' ? '👶 బాలల విభాగం స్వయంచాలకంగా అన్‌లాక్ చేయబడింది!' : '🎉 పాయింట్లు స్వయంచాలకంగా జమ చేయబడ్డాయి!'),
+              utr: status.utr || 'BANK-SMS-VERIFIED',
+              receipt_id: status.receipt_id || `REC-${Date.now().toString(36).toUpperCase()}`,
+              amount: status.amount,
+              pack: status.pack,
+              unlocked_rewards: status.rewards || {},
+              timestamp: new Date().toLocaleTimeString()
+            });
+
+            if (selectedPack === 'kids') {
+              onUnlockKids();
+            } else if (selectedPack === 'p500') {
+              onAddPoints(500, 500);
+            } else if (selectedPack === 'p150') {
+              onAddPoints(150, 150);
+            }
+
+            setTimeout(() => {
+              setSuccessResult(null);
+              onClose();
+            }, 2500);
+          }
+        } catch {
+          // ignore network glitch
+        }
+      }, 1500);
+    });
+
+    return () => {
+      isCancelled = true;
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [isOpen, selectedPack, packAmount, upiId]);
+
+  if (!isOpen) return null;
 
   const handleSaveUpi = () => {
     if (tempUpiInput.trim()) {
@@ -88,7 +147,6 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
       setSuccessResult(res);
       templeAudio.playSuccessFanfare();
 
-      // Apply unlock rewards directly
       if (selectedPack === 'kids') {
         onUnlockKids();
       } else if (selectedPack === 'p500') {
@@ -122,7 +180,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 {language === 'te' ? 'పాయింట్లు & విభాగాల టాప్-అప్' : 'Points & Modes Top-Up'}
               </h3>
               <p className="text-xs text-white/90">
-                {language === 'te' ? 'UPI ద్వారా నేరుగా సురక్షిత చెల్లింపు' : 'Direct zero-fee UPI payment'}
+                {language === 'te' ? 'UPI ద్వారా నేరుగా బ్యాంక్ చెల్లింపు' : 'Direct zero-fee UPI payment'}
               </p>
             </div>
           </div>
@@ -288,7 +346,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
                     <span>📱</span>
-                    <span>దశ 1: Google Pay / PhonePe ద్వారా ₹{packAmount} చెల్లించండి</span>
+                    <span>Google Pay / PhonePe ద్వారా ₹{packAmount} చెల్లించండి</span>
                   </span>
                   <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-mono">
                     ₹{packAmount}
@@ -367,74 +425,95 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 </div>
               </div>
 
-              {/* Mandatory Step 2: 12-Digit UTR Verification Input */}
-              <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-300 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded-full bg-amber-600 text-white text-[11px] font-bold flex items-center justify-center">2</span>
-                    <span>{language === 'te' ? 'పేమెంట్ రసీదులోని 12 అంకెల UTR నంబర్:' : 'Enter 12-Digit UPI Ref / UTR Number:'}</span>
-                  </label>
-                  <span className={`text-[10px] font-mono font-bold ${utrInput.length === 12 ? 'text-emerald-700' : 'text-stone-500'}`}>
-                    {utrInput.length}/12 అంకెలు
+              {/* Automatic SMS Webhook Live Radar Listener */}
+              <div className="p-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-xl space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                   </span>
+                  <div className="flex-1">
+                    <div className="font-bold text-xs text-emerald-950 font-telugu flex items-center justify-between">
+                      <span>{language === 'te' ? '⚡ స్వయంచాలక తక్షణ అన్‌లాక్ (Live Detection)' : '⚡ Automatic Instant Unlock'}</span>
+                      {activeOrder && (
+                        <span className="text-[9px] font-mono text-emerald-700 bg-white px-1.5 py-0.5 rounded border border-emerald-200">
+                          {activeOrder.order_id}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-
-                <div className="relative">
-                  <input
-                    type="text"
-                    maxLength={12}
-                    value={utrInput}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '');
-                      setUtrInput(val);
-                      setErrorMsg(null);
-                    }}
-                    placeholder="ఉదా: 429810394821"
-                    className="w-full px-3 py-2 bg-white border-2 border-amber-300 focus:border-amber-600 rounded-xl font-mono text-base tracking-widest text-center text-stone-900 focus:outline-hidden shadow-inner font-bold placeholder:text-stone-400 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
-                  />
-                  {utrInput.length === 12 && (
-                    <span className="absolute right-3 top-2.5 text-emerald-600 font-bold">✓</span>
-                  )}
-                </div>
-
-                <p className="text-[10px] text-stone-500 leading-tight">
-                  {language === 'te' 
-                    ? 'చెల్లింపు పూర్తయిన తర్వాత Google Pay లేదా PhonePe రసీదులో "UPI Ref No" లేదా "UTR" అని ఉన్న 12 అంకెల నంబర్‌ను ఇక్కడ నమోదు చేయండి.'
-                    : 'After payment, find the 12-digit number labeled "UPI Ref No" or "UTR" in your GPay/PhonePe receipt and enter it above.'}
+                <p className="text-[11px] text-emerald-800 font-telugu leading-tight">
+                  {language === 'te'
+                    ? 'మీరు UPI లో చెల్లించగానే, మీ బ్యాంక్ SMS ఆధారంగా ఈ గేమ్ ఆటోమేటిక్‌గా అన్‌లాక్ అవుతుంది. మీరు ఎటువంటి నంబర్లు టైప్ చేయాల్సిన అవసరం లేదు!'
+                    : 'Once you pay via UPI, your bank SMS will automatically trigger the unlock. Zero typing required!'}
                 </p>
+              </div>
 
-                {errorMsg && (
-                  <div className="p-2 bg-rose-50 border border-rose-300 rounded-lg text-rose-800 text-xs font-bold flex items-center gap-1.5 animate-in shake">
-                    <AlertCircle size={15} className="shrink-0 text-rose-600" />
-                    <span>{errorMsg}</span>
+              {/* Expandable Manual UTR Fallback */}
+              <div className="border border-stone-200 rounded-xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowManualUtr(!showManualUtr)}
+                  className="w-full px-3 py-2 bg-stone-50 hover:bg-stone-100 text-left text-xs font-bold text-stone-700 flex items-center justify-between transition cursor-pointer"
+                >
+                  <span className="font-telugu">
+                    {language === 'te' ? 'SMS ఆలస్యమైతే? 12 అంకెల UTR తో అన్‌లాక్ చేయండి' : 'SMS Delayed? Enter 12-Digit UTR Manually'}
+                  </span>
+                  {showManualUtr ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                </button>
+
+                {showManualUtr && (
+                  <div className="p-3 bg-amber-50/50 space-y-2 border-t border-stone-200 animate-in fade-in duration-150">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-stone-800 font-telugu">
+                        {language === 'te' ? '12 అంకెల UPI Ref / UTR నంబర్:' : '12-Digit UPI UTR:'}
+                      </label>
+                      <span className={`text-[10px] font-mono font-bold ${utrInput.length === 12 ? 'text-emerald-700' : 'text-stone-500'}`}>
+                        {utrInput.length}/12 అంకెలు
+                      </span>
+                    </div>
+
+                    <div className="relative">
+                      <input
+                        type="text"
+                        maxLength={12}
+                        value={utrInput}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setUtrInput(val);
+                          setErrorMsg(null);
+                        }}
+                        placeholder="ఉదా: 429810394821"
+                        className="w-full px-3 py-2 bg-white border-2 border-amber-300 focus:border-amber-600 rounded-xl font-mono text-base tracking-widest text-center text-stone-900 focus:outline-hidden shadow-inner font-bold placeholder:text-stone-400 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
+                      />
+                      {utrInput.length === 12 && (
+                        <span className="absolute right-3 top-2.5 text-emerald-600 font-bold">✓</span>
+                      )}
+                    </div>
+
+                    {errorMsg && (
+                      <div className="p-2 bg-rose-50 border border-rose-300 rounded-lg text-rose-800 text-xs font-bold flex items-center gap-1.5">
+                        <AlertCircle size={15} className="shrink-0 text-rose-600" />
+                        <span>{errorMsg}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleVerifyAndUnlock}
+                      disabled={isProcessing || utrInput.trim().length !== 12}
+                      className={`w-full py-2.5 text-white font-bold rounded-xl shadow-xs transition text-xs flex items-center justify-center gap-2 cursor-pointer ${
+                        utrInput.trim().length === 12
+                          ? 'bg-emerald-600 hover:bg-emerald-700'
+                          : 'bg-stone-300 cursor-not-allowed'
+                      }`}
+                    >
+                      {isProcessing ? 'ధృవీకరిస్తున్నాము...' : (language === 'te' ? 'UTR తో తక్షణమే అన్‌లాక్ చేయి' : 'Unlock with UTR')}
+                    </button>
                   </div>
                 )}
               </div>
-
-              {/* Strict UTR Verification & Unlock Button */}
-              <button
-                type="button"
-                onClick={handleVerifyAndUnlock}
-                disabled={isProcessing}
-                className={`w-full py-3 text-white font-bold rounded-xl shadow-md transition-all active:scale-98 flex items-center justify-center gap-2 text-sm cursor-pointer ${
-                  utrInput.trim().length === 12
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700'
-                    : 'bg-stone-400 hover:bg-stone-500'
-                }`}
-              >
-                {isProcessing ? (
-                  <span className="animate-spin text-lg">⏳ ధృవీకరిస్తున్నాము...</span>
-                ) : (
-                  <>
-                    <ShieldCheck size={18} />
-                    <span>
-                      {language === 'te'
-                        ? `UTR ధృవీకరించి ₹${packAmount} ప్యాక్ అన్‌లాక్ చేయి`
-                        : `Verify UTR & Unlock (₹${packAmount})`}
-                    </span>
-                  </>
-                )}
-              </button>
             </>
           )}
         </div>

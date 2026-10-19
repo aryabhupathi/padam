@@ -191,3 +191,77 @@ export async function verifyPaymentUtr(
   }
 }
 
+export interface OrderSession {
+  order_id: string;
+  pack: string;
+  amount: number;
+  upi_id: string;
+  status: 'PENDING' | 'PAID' | 'EXPIRED';
+  created_at: string;
+  expires_at: string;
+}
+
+export interface OrderStatusResult {
+  order_id: string;
+  status: 'PENDING' | 'PAID' | 'EXPIRED';
+  amount: number;
+  pack: string;
+  utr?: string;
+  receipt_id?: string;
+  rewards?: {
+    kids_unlocked?: boolean;
+    coins?: number;
+    energy?: number;
+  };
+  message?: string;
+}
+
+export async function createPaymentOrder(
+  pack: string,
+  amount: number,
+  upiId: string = '9063053602@hdfc'
+): Promise<OrderSession> {
+  const baseUrl = await getWorkingBaseUrl();
+  try {
+    const res = await fetch(`${baseUrl}/api/payment/create-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pack, amount, upi_id: upiId }),
+      signal: AbortSignal.timeout(5000)
+    });
+    if (!res.ok) throw new Error('Order creation failed');
+    return await res.json();
+  } catch {
+    return {
+      order_id: `ORD-LOC-${Date.now().toString(36).toUpperCase()}`,
+      pack,
+      amount,
+      upi_id: upiId,
+      status: 'PENDING',
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 15 * 60000).toISOString()
+    };
+  }
+}
+
+export async function checkOrderStatus(orderId: string): Promise<OrderStatusResult> {
+  const baseUrl = await getWorkingBaseUrl();
+  try {
+    const res = await fetch(`${baseUrl}/api/payment/order-status/${orderId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) throw new Error('Order status check failed');
+    return await res.json();
+  } catch {
+    return {
+      order_id: orderId,
+      status: 'PENDING',
+      amount: 0,
+      pack: 'unknown'
+    };
+  }
+}
+
+

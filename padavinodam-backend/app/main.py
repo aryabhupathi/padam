@@ -9,8 +9,8 @@ import re
 import uuid
 import datetime
 import random
-from typing import Optional
-from fastapi import FastAPI, Query, HTTPException
+from typing import Optional, Dict, Any
+from fastapi import FastAPI, Query, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.services.lexicon import LexiconManager
@@ -18,7 +18,8 @@ from app.services.clue_generator import ClueGeneratorService
 from app.core.generator import DynamicCrosswordGenerator
 from app.models.schemas import (
     PuzzleResponse, VerifyRequest, VerifyResponse, CluesGroup, ClueItem,
-    PaymentVerifyRequest, PaymentVerifyResponse
+    PaymentVerifyRequest, PaymentVerifyResponse,
+    CreateOrderRequest, CreateOrderResponse, OrderStatusResponse, SmsWebhookPayload
 )
 
 app = FastAPI(
@@ -357,4 +358,207 @@ def list_transactions():
         "total_revenue_inr": sum(t.get("amount", 0) for t in txs),
         "transactions": txs[::-1]
     }
+
+# --- SMS Webhook Automation (Direct UPI to HDFC Bank) ---
+
+ACTIVE_ORDERS_FILE = os.path.join(os.path.dirname(__file__), "data", "active_orders.json")
+WEBHOOK_SECRET = os.environ.get("PAYMENT_WEBHOOK_SECRET", "padam_sec_hdfc_9063")
+
+def load_orders() -> list:
+    if os.path.exists(ACTIVE_ORDERS_FILE):
+        try:
+            with open(ACTIVE_ORDERS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
+
+def save_orders(orders: list):
+    try:
+        os.makedirs(os.path.dirname(ACTIVE_ORDERS_FILE), exist_ok=True)
+        with open(ACTIVE_ORDERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(orders, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving orders: {e}")
+
+def parse_bank_sms(text: str) -> tuple[Optional[float], Optional[str]]:
+    """
+    Extracts credited amount and 12-digit UPI UTR from HDFC / Indian Bank SMS alerts.
+    """
+    amt = None
+    amt_match = re.search(
+        r'(?:(?:Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)|credited\s*(?:for|with)?\s*(?:Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?))',
+        text,
+        re.IGNORECASE
+    )
+    if amt_match:
+        val = amt_match.group(1) or amt_match.group(2)
+        if val:
+            try:
+                amt = float(val.replace(',', ''))
+            except ValueError:
+                pass
+
+    utr = None
+    utr_match = re.search(r'(?:UPI[/: ]+|Ref\s*(?:no\.?)?[/: ]+|RRN[/: ]+)(\d{12})', text, re.IGNORECASE)
+    if utr_match:
+        utr = utr_match.group(1)
+    else:
+        m12 = re.search(r'\b(\d{12})\b', text)
+        if m12:
+            utr = m12.group(1)
+
+    return amt, utr
+
+@app.post("/api/payment/create-order", response_model=CreateOrderResponse)
+def create_payment_order(req: CreateOrderRequest):
+    """
+    Creates a pending payment order session. The frontend polls this order
+    until the SMS webhook detects the bank credit and auto-unlocks.
+    """
+    order_id = f"ORD-{uuid.uuid4().hex[:8].upper()}"
+    now = datetime.datetime.now()
+    expires_at = now + datetime.timedelta(minutes=15)
+
+    if req.pack == "kids":
+        rewards = {"kids_unlocked": True, "coins": 100, "energy": 100}
+    elif req.pack == "p500":
+        rewards = {"kids_unlocked": False, "coins": 500, "energy": 500}
+    else:
+        rewards = {"kids_unlocked": False, "coins": 150, "energy": 150}
+
+    order = {
+        "order_id": order_id,
+        "pack": req.pack,
+        "amount": req.amount,
+        "upi_id": req.upi_id or "9063053602@hdfc",
+        "status": "PENDING",
+        "rewards": rewards,
+        "created_at": now.strftime("%Y-%m-%d %H:%M:%S"),
+        "expires_at": expires_at.strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    orders = load_orders()
+    # Keep last 50 orders
+    orders = [o for o in orders if o.get("status") == "PENDING"] + [order]
+    save_orders(orders[-50:])
+
+    return CreateOrderResponse(
+        order_id=order_id,
+        pack=req.pack,
+        amount=req.amount,
+        upi_id=order["upi_id"],
+        status="PENDING",
+        created_at=order["created_at"],
+        expires_at=order["expires_at"]
+    )
+
+@app.get("/api/payment/order-status/{order_id}", response_model=OrderStatusResponse)
+def get_order_status(order_id: str):
+    """
+    Called by the frontend every 1.5s to check if the SMS webhook confirmed payment.
+    """
+    orders = load_orders()
+    order = next((o for o in orders if o.get("order_id") == order_id), None)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    return OrderStatusResponse(
+        order_id=order["order_id"],
+        status=order["status"],
+        amount=order["amount"],
+        pack=order["pack"],
+        utr=order.get("utr"),
+        receipt_id=order.get("receipt_id"),
+        rewards=order.get("rewards"),
+        message=order.get("message")
+    )
+
+@app.post("/api/payment/sms-webhook")
+def sms_webhook_handler(
+    payload: SmsWebhookPayload,
+    x_webhook_secret: Optional[str] = Header(None, alias="X-Webhook-Secret")
+):
+    """
+    Webhook called automatically by the Android phone (MacroDroid / Tasker / SMS Forwarder)
+    whenever HDFC Bank sends an SMS credit alert.
+    Parses Amount & UTR, validates the secret, and auto-fulfills the pending order!
+    """
+    if x_webhook_secret != WEBHOOK_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized webhook: Invalid X-Webhook-Secret")
+
+    parsed_amt, parsed_utr = parse_bank_sms(payload.message)
+    final_amt = payload.amount or parsed_amt
+    final_utr = payload.utr or parsed_utr
+
+    if not final_amt:
+        return {
+            "status": "ignored",
+            "reason": "Could not extract credited amount from SMS",
+            "raw_message": payload.message[:60]
+        }
+
+    # Match latest PENDING order with matching amount
+    orders = load_orders()
+    target_order = None
+    for o in reversed(orders):
+        if o.get("status") == "PENDING" and int(o.get("amount", 0)) == int(final_amt):
+            target_order = o
+            break
+
+    receipt_id = f"REC-SMS-{uuid.uuid4().hex[:8].upper()}"
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if target_order:
+        target_order["status"] = "PAID"
+        target_order["utr"] = final_utr or f"SMS-{int(datetime.datetime.now().timestamp())}"
+        target_order["receipt_id"] = receipt_id
+        target_order["message"] = "🎉 చెల్లింపు ధృవీకరించబడింది! ప్యాకేజీ స్వయంచాలకంగా అన్‌లాక్ చేయబడింది."
+        save_orders(orders)
+
+        # Record in transactions ledger
+        txs = load_transactions()
+        txs.append({
+            "receipt_id": receipt_id,
+            "order_id": target_order["order_id"],
+            "utr": target_order["utr"],
+            "amount": target_order["amount"],
+            "pack": target_order["pack"],
+            "target_upi_id": "9063053602@hdfc",
+            "rewards": target_order.get("rewards"),
+            "timestamp": now_str,
+            "source": "sms_webhook"
+        })
+        save_transactions(txs)
+
+        return {
+            "status": "success",
+            "matched_order_id": target_order["order_id"],
+            "amount": final_amt,
+            "utr": final_utr,
+            "receipt_id": receipt_id,
+            "pack": target_order["pack"]
+        }
+    else:
+        # Bank received money, but no active pending order matched right at that second.
+        # Still record the payment into ledger!
+        txs = load_transactions()
+        txs.append({
+            "receipt_id": receipt_id,
+            "utr": final_utr or f"SMS-{int(datetime.datetime.now().timestamp())}",
+            "amount": final_amt,
+            "pack": "unmatched_credit",
+            "target_upi_id": "9063053602@hdfc",
+            "timestamp": now_str,
+            "source": "sms_webhook_unmatched"
+        })
+        save_transactions(txs)
+
+        return {
+            "status": "credited_unmatched",
+            "amount": final_amt,
+            "utr": final_utr,
+            "message": "Payment recorded in ledger, but no active pending order window was open."
+        }
+
 

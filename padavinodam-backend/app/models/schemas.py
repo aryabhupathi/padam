@@ -59,3 +59,34 @@ class PaymentVerifyResponse(BaseModel):
     unlocked_rewards: Dict[str, Any]
     timestamp: str
 
+class CreateOrderRequest(BaseModel):
+    pack: str
+    amount: int
+    upi_id: Optional[str] = "9063053602@hdfc"
+
+class CreateOrderResponse(BaseModel):
+    order_id: str
+    pack: str
+    amount: int
+    upi_id: str
+    status: str
+    created_at: str
+    expires_at: str
+
+class OrderStatusResponse(BaseModel):
+    order_id: str
+    status: str
+    amount: int
+    pack: str
+    utr: Optional[str] = None
+    receipt_id: Optional[str] = None
+    rewards: Optional[Dict[str, Any]] = None
+    message: Optional[str] = None
+
+class SmsWebhookPayload(BaseModel):
+    sender: Optional[str] = None
+    message: str
+    amount: Optional[float] = None
+    utr: Optional[str] = None
+
+
