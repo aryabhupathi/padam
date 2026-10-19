@@ -246,6 +246,8 @@ export function App() {
     setTimerSeconds(0);
 
     const data = await fetchDailyPuzzle();
+    setDifficulty('hard');
+    localStorage.setItem('padam_difficulty', 'hard');
     initializePuzzleState(data);
     setLoading(false);
     setStatusMessage(t.dailyStarted);

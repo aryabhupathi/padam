@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Zap, QrCode, ShieldCheck, CheckCircle2, Sparkles, Baby } from 'lucide-react';
+import { X, Zap, ShieldCheck, CheckCircle2, Sparkles, Baby, Edit2, ExternalLink, Check, Copy } from 'lucide-react';
 import type { Language } from '../utils/translations';
+import { getSavedUpiId, saveUpiId, buildUpiPaymentUrl, buildUpiQrUrl } from '../config/paymentConfig';
 
 interface TopUpModalProps {
   isOpen: boolean;
@@ -29,9 +30,34 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Dynamic UPI configuration
+  const [upiId, setUpiId] = useState<string>(() => getSavedUpiId());
+  const [isEditingUpi, setIsEditingUpi] = useState(false);
+  const [tempUpiInput, setTempUpiInput] = useState(upiId);
+  const [copied, setCopied] = useState(false);
+
   if (!isOpen) return null;
 
-  const handleSimulatePayment = () => {
+  const packAmount = selectedPack === 'p150' ? 19 : 49;
+  const packTitle = selectedPack === 'kids' ? 'Kids Mode' : (selectedPack === 'p500' ? '500 Points' : '150 Points');
+  const upiUrl = buildUpiPaymentUrl(packAmount, packTitle, upiId);
+  const qrUrl = buildUpiQrUrl(upiUrl);
+
+  const handleSaveUpi = () => {
+    if (tempUpiInput.trim()) {
+      saveUpiId(tempUpiInput.trim());
+      setUpiId(tempUpiInput.trim());
+      setIsEditingUpi(false);
+    }
+  };
+
+  const handleCopyUpi = () => {
+    navigator.clipboard.writeText(upiId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleConfirmPayment = () => {
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
@@ -49,12 +75,12 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
         setSuccessMsg(null);
         onClose();
       }, 1800);
-    }, 1000);
+    }, 600);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200 print:hidden">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-stone-200 overflow-hidden relative">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 print:hidden overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-stone-200 overflow-hidden relative my-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white p-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -66,7 +92,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 {language === 'te' ? 'పాయింట్లు & విభాగాల టాప్-అప్' : 'Points & Modes Top-Up'}
               </h3>
               <p className="text-xs text-white/90">
-                {language === 'te' ? 'అసంపూర్తి పజిల్‌ను వదిలేందుకు 15 పాయింట్లు అవసరం' : 'Costs 15 points to skip an incomplete puzzle'}
+                {language === 'te' ? 'UPI ద్వారా నేరుగా మీ బ్యాంక్ ఖాతాకు చెల్లింపు' : 'Direct zero-fee UPI payment'}
               </p>
             </div>
           </div>
@@ -79,19 +105,19 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
           </button>
         </div>
 
-        {/* Current Balance & Auto-Restore Banner */}
-        <div className="p-4 bg-amber-50/70 border-b border-amber-200/60 flex items-center justify-between">
+        {/* Current Balance */}
+        <div className="px-4 py-3 bg-amber-50/70 border-b border-amber-200/60 flex items-center justify-between">
           <div>
-            <span className="text-xs text-stone-600 block">
+            <span className="text-[11px] text-stone-600 block">
               {language === 'te' ? 'ప్రస్తుత శక్తి నిల్వ:' : 'Current Energy:'}
             </span>
-            <div className="flex items-center gap-1.5 font-bold text-lg text-amber-950 font-mono">
-              <Zap size={18} className="text-amber-500 fill-amber-500" />
+            <div className="flex items-center gap-1.5 font-bold text-base text-amber-950 font-mono">
+              <Zap size={16} className="text-amber-500 fill-amber-500" />
               <span>{currentPoints}</span>
               <span className="text-stone-400 text-xs font-normal">/ 100 గరిష్టం</span>
             </div>
           </div>
-          <div className="text-right bg-white px-2.5 py-1.5 rounded-lg border border-amber-200 shadow-2xs">
+          <div className="text-right bg-white px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">
             <span className="text-[11px] text-amber-800 font-medium block">
               ⏰ {language === 'te' ? 'ఉచిత రీఛార్జ్' : 'Free Auto-Regen'}
             </span>
@@ -104,9 +130,9 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
         {/* Content Body */}
         <div className="p-4 space-y-3.5">
           {successMsg ? (
-            <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-center text-emerald-800 font-bold flex flex-col items-center gap-2 animate-in zoom-in-95">
-              <CheckCircle2 size={36} className="text-emerald-600" />
-              <span>{successMsg}</span>
+            <div className="p-6 bg-emerald-50 border border-emerald-300 rounded-xl text-center text-emerald-800 font-bold flex flex-col items-center gap-2 animate-in zoom-in-95">
+              <CheckCircle2 size={40} className="text-emerald-600 animate-bounce" />
+              <span className="text-base">{successMsg}</span>
             </div>
           ) : (
             <>
@@ -116,12 +142,12 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                   {language === 'te' ? 'ప్యాకేజీని ఎంచుకోండి:' : 'Select Package:'}
                 </label>
 
-                {/* Kids Mode Unlock Option */}
+                {/* Kids Mode Option */}
                 {!isKidsUnlocked && (
                   <button
                     type="button"
                     onClick={() => setSelectedPack('kids')}
-                    className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+                    className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${
                       selectedPack === 'kids'
                         ? 'border-purple-500 bg-purple-50/80 ring-2 ring-purple-300 shadow-xs'
                         : 'border-stone-200 bg-white hover:border-purple-300'
@@ -137,13 +163,11 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                             {language === 'te' ? 'బాలల విభాగం (5x5)' : 'Kids Mode (5x5)'}
                           </span>
                           <span className="bg-purple-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
-                            ఒక్కసారి మాత్రమే
+                            లైఫ్‌టైమ్
                           </span>
                         </div>
                         <p className="text-[11px] text-stone-500">
-                          {language === 'te'
-                            ? 'పిల్లల కోసం జంతువులు, ప్రకృతి, నీతి కథలు (జీవితాంతం ఉచితం)'
-                            : 'Animals, nature & moral literature for kids (Free forever)'}
+                          {language === 'te' ? 'పిల్లల కోసం ప్రత్యేక పజిల్స్' : 'Special 5x5 puzzles for kids'}
                         </p>
                       </div>
                     </div>
@@ -151,11 +175,11 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                   </button>
                 )}
 
-                {/* 500 Points Pack (Value) */}
+                {/* 500 Points Pack */}
                 <button
                   type="button"
                   onClick={() => setSelectedPack('p500')}
-                  className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${
                     selectedPack === 'p500'
                       ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                       : 'border-stone-200 bg-white hover:border-amber-300'
@@ -175,7 +199,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                         </span>
                       </div>
                       <p className="text-[11px] text-stone-500">
-                        {language === 'te' ? '~33 సార్లు అసంపూర్తి పజిల్ మార్పిడులు' : '~33 incomplete puzzle skips'}
+                        {language === 'te' ? '~33 సార్లు అసంపూర్తి పజిల్ మార్పిడులు' : '~33 puzzle skips'}
                       </p>
                     </div>
                   </div>
@@ -186,7 +210,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedPack('p150')}
-                  className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+                  className={`w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${
                     selectedPack === 'p150'
                       ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                       : 'border-stone-200 bg-white hover:border-amber-300'
@@ -201,7 +225,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                         {language === 'te' ? '150 పాయింట్లు (స్టార్టర్)' : '150 Points (Starter)'}
                       </span>
                       <p className="text-[11px] text-stone-500">
-                        {language === 'te' ? '10 సార్లు అసంపూర్తి పజిల్ మార్పిడులు' : '10 incomplete puzzle skips'}
+                        {language === 'te' ? '10 సార్లు అసంపూర్తి పజిల్ మార్పిడులు' : '10 puzzle skips'}
                       </p>
                     </div>
                   </div>
@@ -209,33 +233,96 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                 </button>
               </div>
 
-              {/* GPay QR Section */}
-              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center gap-3">
-                <div className="w-16 h-16 bg-white p-1 rounded-lg border border-stone-300 shadow-2xs flex flex-col items-center justify-center shrink-0">
-                  <QrCode size={36} className="text-stone-800" />
-                  <span className="text-[8px] font-bold text-blue-600 font-mono">GPay / UPI</span>
+              {/* Dynamic Live UPI Payment Box */}
+              <div className="p-3 bg-gradient-to-br from-stone-50 to-amber-50/40 rounded-xl border border-stone-300 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>📱</span>
+                    <span>{language === 'te' ? 'UPI చెల్లింపు విధానం (Google Pay / PhonePe)' : 'Direct UPI Payment'}</span>
+                  </span>
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-mono">
+                    ₹{packAmount}
+                  </span>
                 </div>
-                <div className="flex-1 text-left">
-                  <span className="text-[10px] text-stone-500 uppercase font-bold tracking-wider block">
-                    Google Pay / PhonePe QR
-                  </span>
-                  <span className="text-xs font-mono font-bold text-stone-800 block">
-                    padam@okaxis
-                  </span>
-                  <p className="text-[10px] text-stone-500 mt-0.5">
-                    {language === 'te'
-                      ? 'డెమో కోసం క్రింది బటన్ నొక్కి వెంటనే యాక్టివేట్ చేసుకోండి'
-                      : 'Simulate instant UPI payment with one click below'}
-                  </p>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-2.5 rounded-lg border border-stone-200">
+                  {/* Real Live Dynamic QR Code */}
+                  <div className="shrink-0 flex flex-col items-center">
+                    <img
+                      src={qrUrl}
+                      alt="UPI QR Code"
+                      className="w-24 h-24 rounded border border-stone-200 shadow-2xs"
+                    />
+                    <span className="text-[9px] font-bold text-stone-500 mt-1">స్కాన్ చేసి చెల్లించండి</span>
+                  </div>
+
+                  {/* UPI Details & Custom UPI Config */}
+                  <div className="flex-1 min-w-0 text-left space-y-1.5 w-full">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[11px] text-stone-500">స్వీకర్త UPI ID:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTempUpiInput(upiId);
+                          setIsEditingUpi(!isEditingUpi);
+                        }}
+                        className="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"
+                        title="మీ UPI IDని మార్చుకోండి"
+                      >
+                        <Edit2 size={12} />
+                        <span>{isEditingUpi ? 'రద్దు' : 'UPI మార్చు'}</span>
+                      </button>
+                    </div>
+
+                    {isEditingUpi ? (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <input
+                          type="text"
+                          value={tempUpiInput}
+                          onChange={(e) => setTempUpiInput(e.target.value)}
+                          placeholder="ఉదా: yourname@okaxis"
+                          className="flex-1 px-2 py-1 text-xs border rounded font-mono border-blue-400 focus:outline-hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSaveUpi}
+                          className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700"
+                        >
+                          సేవ్
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-stone-50 px-2 py-1 rounded border border-stone-200 font-mono text-xs font-bold text-stone-800">
+                        <span className="truncate">{upiId}</span>
+                        <button
+                          type="button"
+                          onClick={handleCopyUpi}
+                          className="text-stone-500 hover:text-stone-800 ml-1 shrink-0"
+                          title="Copy UPI ID"
+                        >
+                          {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Direct UPI Mobile Intent Link */}
+                    <a
+                      href={upiUrl}
+                      className="block w-full text-center py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <ExternalLink size={13} />
+                      <span>{language === 'te' ? 'ఫోన్‌లో GPay / PhonePe తో చెల్లించు' : 'Pay via Mobile UPI App'}</span>
+                    </a>
+                  </div>
                 </div>
               </div>
 
-              {/* Instant Simulated Payment Button */}
+              {/* Instant Activation Button */}
               <button
                 type="button"
-                onClick={handleSimulatePayment}
+                onClick={handleConfirmPayment}
                 disabled={isProcessing}
-                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-98 flex items-center justify-center gap-2 text-sm"
+                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-98 flex items-center justify-center gap-2 text-sm cursor-pointer"
               >
                 {isProcessing ? (
                   <span className="animate-spin text-lg">⏳</span>
@@ -243,9 +330,9 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                   <>
                     <ShieldCheck size={18} />
                     <span>
-                      {selectedPack === 'kids'
-                        ? (language === 'te' ? 'GPay ద్వారా ₹49 చెల్లించి అన్‌లాక్ చేయి' : 'Pay ₹49 with GPay to Unlock')
-                        : (language === 'te' ? `GPay ద్వారా ₹${selectedPack === 'p150' ? 19 : 49} చెల్లించి రీఛార్జ్ చేయి` : `Pay ₹${selectedPack === 'p150' ? 19 : 49} with GPay`)}
+                      {language === 'te'
+                        ? `చెల్లింపు పూర్తయింది - ₹${packAmount} ప్యాక్ అన్‌లాక్ చేయి`
+                        : `Confirm Payment & Unlock (₹${packAmount})`}
                     </span>
                   </>
                 )}

@@ -387,10 +387,13 @@ class DynamicCrosswordGenerator:
 
         return True, "Valid"
 
-    def get_verified_fallback(self, size: int, difficulty: str = "easy") -> Optional[Dict]:
+    def get_verified_fallback(self, size: int, difficulty: Optional[str] = None) -> Optional[Dict]:
         """Loads pre-verified, 100% collision-free fallback puzzle from rotating bank."""
         bank_path = os.path.join(self.fallback_dir, "puzzle_bank.json")
-        diff_key = difficulty if difficulty in ["kids", "easy", "medium", "hard"] else ("kids" if size <= 5 else ("easy" if size <= 7 else ("medium" if size <= 9 else "hard")))
+        if difficulty in ["kids", "easy", "medium", "hard"]:
+            diff_key = difficulty
+        else:
+            diff_key = "kids" if size <= 5 else ("easy" if size <= 7 else ("medium" if size <= 9 else "hard"))
 
         if os.path.exists(bank_path):
             try:

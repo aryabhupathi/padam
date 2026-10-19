@@ -148,7 +148,8 @@ def get_daily_puzzle(reveal: bool = False):
     Returns the official deterministic daily puzzle for today's date (12x12 Newspaper Replica).
     """
     today_str = datetime.date.today().isoformat()
-    puzzle_data = generator.get_verified_fallback(12) or generator.generate(size=12, difficulty="hard")
+    puzzle_data = generator.get_verified_fallback(12, "hard") or generator.generate(size=12, difficulty="hard")
+    actual_size = puzzle_data["size"]
     puzzle_id = f"daily_{today_str}"
     mask = puzzle_data["mask"]
 
@@ -190,7 +191,7 @@ def get_daily_puzzle(reveal: bool = False):
 
     return PuzzleResponse(
         puzzle_id=puzzle_id,
-        size=12,
+        size=actual_size,
         mask=mask,
         numbers=puzzle_data["numbers"],
         clues=CluesGroup(across=across_clues, down=down_clues),
