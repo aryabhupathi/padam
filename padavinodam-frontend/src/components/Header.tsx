@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { GameDifficulty } from '../types/puzzle';
 import { TRANSLATIONS, type Language } from '../utils/translations';
-import { RefreshCw, Calendar, Printer, CheckCircle, Eye, Trophy, Zap, Languages, Lock, Clock, Bell, BellOff } from 'lucide-react';
+import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Zap, Languages, Lock, Clock, Bell, BellOff } from 'lucide-react';
 import { templeAudio } from '../utils/templeAudio';
 
 interface HeaderProps {
@@ -9,7 +9,6 @@ interface HeaderProps {
   onDailyPuzzle: () => void;
   onVerify: () => void;
   onReveal: () => void;
-  onPrint: () => void;
   loading: boolean;
   difficulty: GameDifficulty;
   onDifficultyChange: (diff: GameDifficulty) => void;
@@ -31,7 +30,6 @@ export const Header: React.FC<HeaderProps> = ({
   onDailyPuzzle,
   onVerify,
   onReveal,
-  onPrint,
   loading,
   difficulty,
   onDifficultyChange,
@@ -293,15 +291,6 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={onPrint}
-            className="inline-flex items-center gap-1 p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-200 transition"
-            title={t.print}
-          >
-            <Printer size={16} />
-          </button>
         </div>
       </div>
     </header>

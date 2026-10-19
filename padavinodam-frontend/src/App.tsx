@@ -620,7 +620,6 @@ export function App() {
           onDailyPuzzle={loadDailyPuzzle}
           onVerify={handleVerify}
           onReveal={handleRevealAll}
-          onPrint={() => window.print()}
           loading={loading}
           difficulty={difficulty}
           onDifficultyChange={(d) => handleRequestNewPuzzle(d)}
@@ -825,97 +824,6 @@ export function App() {
               </div>
             </div>
 
-            {/* Dedicated Printable Clues Sheet - Rendered ONLY on print (all clues across & down) */}
-            <div className="hidden print:block w-full text-black font-telugu bg-white p-4">
-              <div className="border-b-2 border-black pb-2 mb-4 flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-black font-telugu">
-                    {t.appName} • {t.printCluesOnlyHeader}
-                  </h1>
-                  <p className="text-xs text-stone-800 font-semibold mt-0.5">
-                    {difficulty === "kids"
-                      ? language === "te"
-                        ? "బాలల విభాగం (Kids 5x5)"
-                        : "Kids Mode (5x5)"
-                      : difficulty === "easy"
-                        ? language === "te"
-                          ? "సులభం (Easy 7x7)"
-                          : "Easy Mode (7x7)"
-                        : difficulty === "medium"
-                          ? language === "te"
-                            ? "మధ్యమం (Medium 9x9)"
-                            : "Medium Mode (9x9)"
-                          : language === "te"
-                            ? "కఠినం (Hard 12x12)"
-                            : "Hard Mode (12x12)"}
-                  </p>
-                </div>
-                <div className="text-right text-xs text-stone-800 space-y-0.5 font-sans">
-                  <div>
-                    {t.printDate}:{" "}
-                    {new Date().toLocaleDateString(
-                      language === "te" ? "te-IN" : "en-US",
-                    )}
-                  </div>
-                  <div className="font-bold">
-                    {t.printTotalClues}:{" "}
-                    {puzzle.clues.across.length + puzzle.clues.down.length}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-8 text-xs leading-normal">
-                {/* Across Clues Column */}
-                <div>
-                  <div className="border-b-2 border-black pb-1 mb-2 font-bold text-sm text-black flex items-center justify-between">
-                    <span>{t.across}</span>
-                    <span className="text-xs font-normal">
-                      ({puzzle.clues.across.length})
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {puzzle.clues.across.map((c) => (
-                      <div key={c.id} className="flex items-start gap-1">
-                        <span className="font-bold min-w-5.5 font-sans text-black">
-                          {c.number}.
-                        </span>
-                        <span className="flex-1 text-black font-telugu">
-                          {c.clue}
-                        </span>
-                        <span className="font-bold ml-1 font-mono text-[11px] text-stone-800 shrink-0">
-                          ({c.length})
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Down Clues Column */}
-                <div>
-                  <div className="border-b-2 border-black pb-1 mb-2 font-bold text-sm text-black flex items-center justify-between">
-                    <span>{t.down}</span>
-                    <span className="text-xs font-normal">
-                      ({puzzle.clues.down.length})
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {puzzle.clues.down.map((c) => (
-                      <div key={c.id} className="flex items-start gap-1">
-                        <span className="font-bold min-w-5.5 font-sans text-black">
-                          {c.number}.
-                        </span>
-                        <span className="flex-1 text-black font-telugu">
-                          {c.clue}
-                        </span>
-                        <span className="font-bold ml-1 font-mono text-[11px] text-stone-800 shrink-0">
-                          ({c.length})
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
           </>
         )}
       </div>
