@@ -10,7 +10,7 @@ import uuid
 import datetime
 import random
 from typing import Optional, Dict, Any
-from fastapi import FastAPI, Query, HTTPException, Header
+from fastapi import FastAPI, Query, HTTPException, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.services.lexicon import LexiconManager
@@ -474,28 +474,84 @@ def get_order_status(order_id: str):
         message=order.get("message")
     )
 
-@app.post("/api/payment/sms-webhook")
-def sms_webhook_handler(
-    payload: SmsWebhookPayload,
-    x_webhook_secret: Optional[str] = Header(None, alias="X-Webhook-Secret")
+@app.api_route("/api/payment/sms-webhook", methods=["GET", "POST"])
+async def sms_webhook_handler(
+    request: Request,
+    x_webhook_secret: Optional[str] = Header(None, alias="X-Webhook-Secret"),
+    secret: Optional[str] = Query(None)
 ):
     """
-    Webhook called automatically by the Android phone (MacroDroid / Tasker / SMS Forwarder)
-    whenever HDFC Bank sends an SMS credit alert.
-    Parses Amount & UTR, validates the secret, and auto-fulfills the pending order!
+    Ultra-resilient Webhook called automatically by MacroDroid / Tasker / SMS Forwarders.
+    Accepts JSON, Form Data, URL-encoded data, Query Params, or Raw Plaintext.
+    Accepts Secret via Header, Query Param, or Body.
+    Never throws 422!
     """
-    if x_webhook_secret != WEBHOOK_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized webhook: Invalid X-Webhook-Secret")
+    # 1. Secret verification (Header OR Query Param ?secret= OR Body)
+    received_secret = x_webhook_secret or secret
 
-    parsed_amt, parsed_utr = parse_bank_sms(payload.message)
-    final_amt = payload.amount or parsed_amt
-    final_utr = payload.utr or parsed_utr
+    raw_body_bytes = await request.body()
+    raw_body_str = raw_body_bytes.decode('utf-8', errors='ignore') if raw_body_bytes else ""
+
+    message_text = ""
+    sender = ""
+    direct_amt = None
+    direct_utr = None
+
+    # Try parsing JSON safely
+    if raw_body_str.strip():
+        try:
+            data = json.loads(raw_body_str)
+            if isinstance(data, dict):
+                message_text = str(data.get("message") or data.get("body") or data.get("sms") or data.get("text") or "")
+                sender = str(data.get("sender") or data.get("from") or "")
+                if not received_secret:
+                    received_secret = data.get("secret") or data.get("key")
+                if data.get("amount"):
+                    try:
+                        direct_amt = float(data.get("amount"))
+                    except ValueError:
+                        pass
+                if data.get("utr"):
+                    direct_utr = str(data.get("utr"))
+        except Exception:
+            pass
+
+    # If message is still empty, check query params or form data or raw body
+    if not message_text:
+        qp = request.query_params
+        if qp.get("message") or qp.get("body") or qp.get("text"):
+            message_text = qp.get("message") or qp.get("body") or qp.get("text") or ""
+            sender = qp.get("sender") or ""
+        elif raw_body_str:
+            from urllib.parse import parse_qs
+            parsed_form = parse_qs(raw_body_str)
+            if parsed_form.get("message") or parsed_form.get("body") or parsed_form.get("sms"):
+                message_text = (parsed_form.get("message") or parsed_form.get("body") or parsed_form.get("sms"))[0]
+                sender = (parsed_form.get("sender") or [""])[0]
+                if not received_secret and parsed_form.get("secret"):
+                    received_secret = parsed_form.get("secret")[0]
+            else:
+                message_text = raw_body_str
+
+    # Validate secret (case-insensitive)
+    if not received_secret or received_secret.strip().lower() != WEBHOOK_SECRET.strip().lower():
+        raise HTTPException(
+            status_code=401,
+            detail=f"Unauthorized webhook: Invalid or missing secret. Provide header 'X-Webhook-Secret: {WEBHOOK_SECRET}' or query '?secret={WEBHOOK_SECRET}'"
+        )
+
+    # Parse message text for bank credit & UTR
+    parsed_amt, parsed_utr = parse_bank_sms(message_text)
+    final_amt = direct_amt or parsed_amt
+    final_utr = direct_utr or parsed_utr
 
     if not final_amt:
         return {
             "status": "ignored",
-            "reason": "Could not extract credited amount from SMS",
-            "raw_message": payload.message[:60]
+            "code": 200,
+            "reason": "Could not extract credited amount from message",
+            "received_message": message_text[:100],
+            "note": "Secret was valid! When a real bank SMS arrives with an amount, it will unlock automatically."
         }
 
     # Match latest PENDING order with matching amount
@@ -516,7 +572,6 @@ def sms_webhook_handler(
         target_order["message"] = "🎉 చెల్లింపు ధృవీకరించబడింది! ప్యాకేజీ స్వయంచాలకంగా అన్‌లాక్ చేయబడింది."
         save_orders(orders)
 
-        # Record in transactions ledger
         txs = load_transactions()
         txs.append({
             "receipt_id": receipt_id,
@@ -540,8 +595,6 @@ def sms_webhook_handler(
             "pack": target_order["pack"]
         }
     else:
-        # Bank received money, but no active pending order matched right at that second.
-        # Still record the payment into ledger!
         txs = load_transactions()
         txs.append({
             "receipt_id": receipt_id,
@@ -560,5 +613,6 @@ def sms_webhook_handler(
             "utr": final_utr,
             "message": "Payment recorded in ledger, but no active pending order window was open."
         }
+
 
 
