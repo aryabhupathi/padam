@@ -1012,9 +1012,6 @@ export function App() {
         />
       )}
 
-      <footer className="mt-5 text-center text-xs text-stone-500 font-sans print:hidden">
-        {t.footer}
-      </footer>
     </div>
   );
 }

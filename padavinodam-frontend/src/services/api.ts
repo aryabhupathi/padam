@@ -1,9 +1,13 @@
 import type { PuzzleData, VerifyResult, GameDifficulty } from '../types/puzzle';
 import { getFallbackPuzzle, FALLBACK_PUZZLES } from '../data/fallbackPuzzles';
 
-let ACTIVE_API_BASE = 'http://127.0.0.1:8000';
+const ENV_API_BASE = (import.meta as any).env?.VITE_API_BASE_URL?.trim();
+let ACTIVE_API_BASE = ENV_API_BASE || 'http://127.0.0.1:8000';
 
 async function getWorkingBaseUrl(): Promise<string> {
+  if (ENV_API_BASE) {
+    return ENV_API_BASE.replace(/\/+$/, '');
+  }
   const hosts = ['127.0.0.1', 'localhost'];
   const ports = [8000, 8001];
   for (const host of hosts) {
