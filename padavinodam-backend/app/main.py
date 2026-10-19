@@ -280,8 +280,8 @@ def save_transactions(txs: list):
 def verify_utr_payment(req: PaymentVerifyRequest):
     """
     Validates a 12-digit UPI Transaction Reference Number (UTR/RRN).
-    Verifies that the reference is genuine, not previously redeemed,
-    and grants the purchased package.
+    Requires a matching bank credit SMS to have been received by the webhook.
+    Prevents any manual bypass without actual bank payment.
     """
     clean_utr = req.utr.strip()
     
@@ -292,7 +292,7 @@ def verify_utr_payment(req: PaymentVerifyRequest):
             detail="చెల్లని UPI ట్రాన్సాక్షన్ నంబర్. దయచేసి మీ Google Pay, PhonePe లేదా Paytm లోని ఖచ్చితమైన 12 అంకెల UTR నంబర్‌ను నమోదు చేయండి. (Invalid UTR: Must be exactly 12 digits)."
         )
 
-    # Validation 2: Check for test / dummy numbers like 000000000000, 111111111111, 999999999999, 123456789012
+    # Validation 2: Check for test / dummy numbers
     fake_patterns = ["000000000000", "111111111111", "999999999999", "123456789012"]
     if clean_utr in fake_patterns or len(set(clean_utr)) <= 1:
         raise HTTPException(
@@ -302,11 +302,29 @@ def verify_utr_payment(req: PaymentVerifyRequest):
 
     transactions = load_transactions()
     existing = next((t for t in transactions if t.get("utr") == clean_utr), None)
-    if existing:
+
+    if not existing:
+        raise HTTPException(
+            status_code=400,
+            detail="ఈ UTR నంబర్‌తో బ్యాంక్ క్రెడిట్ రికార్డు కాలేదు. దయచేసి మీ UPI యాప్‌లో చెల్లింపు విజయవంతమైందో లేదో సరిచూసుకోండి, లేదా బ్యాంక్ SMS వచ్చే వరకు 10-15 సెకన్లు వేచి చూడండి. (No verified bank payment found for this UTR yet)."
+        )
+
+    if existing.get("redeemed", False) and existing.get("order_id"):
         raise HTTPException(
             status_code=400,
             detail=f"ఈ ట్రాన్సాక్షన్ నంబర్ (UTR: {clean_utr}) ఇప్పటికే {existing.get('timestamp')} లో ఉపయోగించబడింది! (This UTR was already redeemed)."
         )
+
+    # Verify amount matches
+    if int(existing.get("amount", 0)) != int(req.amount):
+        raise HTTPException(
+            status_code=400,
+            detail=f"చెల్లింపు మొత్తం సరిపోలలేదు. అవసరమైన మొత్తం ₹{req.amount}, కానీ UTR లో ₹{existing.get('amount')} ఉంది. (Amount mismatch)."
+        )
+
+    # Mark transaction as redeemed
+    existing["redeemed"] = True
+    existing["pack"] = req.pack
 
     # Determine rewards
     if req.pack == "kids":
@@ -319,31 +337,29 @@ def verify_utr_payment(req: PaymentVerifyRequest):
         rewards = {"kids_unlocked": False, "coins": 150, "energy": 150}
         success_msg = "🎉 150 నాణాలు మరియు 150 శక్తి పాయింట్లు మీ ఖాతాకు విజయవంతంగా జమ చేయబడ్డాయి!"
 
-    receipt_id = f"REC-PADAM-{uuid.uuid4().hex[:8].upper()}"
-    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    tx_record = {
-        "receipt_id": receipt_id,
-        "utr": clean_utr,
-        "amount": req.amount,
-        "pack": req.pack,
-        "target_upi_id": req.upi_id or "9063053602@hdfc",
-        "rewards": rewards,
-        "timestamp": now_str
-    }
-
-    transactions.append(tx_record)
+    existing["rewards"] = rewards
     save_transactions(transactions)
+
+    # Also mark any open pending order for this amount as PAID
+    orders = load_orders()
+    for o in reversed(orders):
+        if o.get("status") == "PENDING" and int(o.get("amount", 0)) == int(req.amount):
+            o["status"] = "PAID"
+            o["utr"] = clean_utr
+            o["receipt_id"] = existing.get("receipt_id")
+            o["rewards"] = rewards
+            save_orders(orders)
+            break
 
     return PaymentVerifyResponse(
         success=True,
         message=success_msg,
         utr=clean_utr,
-        receipt_id=receipt_id,
+        receipt_id=existing.get("receipt_id", f"REC-PADAM-{uuid.uuid4().hex[:8].upper()}"),
         amount=req.amount,
         pack=req.pack,
         unlocked_rewards=rewards,
-        timestamp=now_str
+        timestamp=existing.get("timestamp") or datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
 
 @app.get("/api/payment/transactions")
@@ -566,6 +582,28 @@ async def sms_webhook_handler(
             "note": "Secret was valid! When a real bank SMS arrives with an amount, it will unlock automatically."
         }
 
+    txs = load_transactions()
+
+    # Reject dummy / repeating UTRs
+    fake_patterns = ["000000000000", "111111111111", "999999999999", "123456789012"]
+    if final_utr and (final_utr in fake_patterns or len(set(final_utr)) <= 1):
+        return {
+            "status": "ignored",
+            "code": 200,
+            "reason": f"Dummy or repeating UTR {final_utr} rejected."
+        }
+
+    # Replay protection: Check if this genuine UTR was ALREADY consumed or recorded
+    if final_utr:
+        for t in txs:
+            if t.get("utr") == final_utr:
+                return {
+                    "status": "ignored",
+                    "code": 200,
+                    "reason": f"UTR {final_utr} was already processed and recorded in ledger.",
+                    "utr": final_utr
+                }
+
     # Match latest PENDING order with matching amount
     orders = load_orders()
     target_order = None
@@ -584,7 +622,6 @@ async def sms_webhook_handler(
         target_order["message"] = "🎉 చెల్లింపు ధృవీకరించబడింది! ప్యాకేజీ స్వయంచాలకంగా అన్‌లాక్ చేయబడింది."
         save_orders(orders)
 
-        txs = load_transactions()
         txs.append({
             "receipt_id": receipt_id,
             "order_id": target_order["order_id"],
@@ -593,6 +630,7 @@ async def sms_webhook_handler(
             "pack": target_order["pack"],
             "target_upi_id": "9063053602@hdfc",
             "rewards": target_order.get("rewards"),
+            "redeemed": True,
             "timestamp": now_str,
             "source": "sms_webhook"
         })
@@ -607,13 +645,14 @@ async def sms_webhook_handler(
             "pack": target_order["pack"]
         }
     else:
-        txs = load_transactions()
         txs.append({
             "receipt_id": receipt_id,
+            "order_id": None,
             "utr": final_utr or f"SMS-{int(datetime.datetime.now().timestamp())}",
             "amount": final_amt,
             "pack": "unmatched_credit",
             "target_upi_id": "9063053602@hdfc",
+            "redeemed": False,
             "timestamp": now_str,
             "source": "sms_webhook_unmatched"
         })

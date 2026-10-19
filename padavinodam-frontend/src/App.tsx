@@ -598,7 +598,35 @@ export function App() {
     setIsKidsUnlocked(true);
     localStorage.setItem('padam_kids_unlocked', 'true');
     setDifficulty('kids');
+    localStorage.setItem('padam_difficulty', 'kids');
     loadPuzzle('kids');
+    setStatusMessage(
+      language === 'te'
+        ? '👶 అభినందనలు! బాలల విభాగం (5x5) శాశ్వతంగా విజయవంతంగా అన్‌లాక్ చేయబడింది!'
+        : '👶 Congratulations! Kids Mode (5x5) permanently unlocked!'
+    );
+  };
+
+  const handleResetAllData = async () => {
+    localStorage.removeItem('padam_kids_unlocked');
+    localStorage.removeItem('padam_active_session');
+    setIsKidsUnlocked(false);
+    setCoins(50);
+    setEnergyPoints(100);
+    localStorage.setItem('padam_coins', '50');
+    localStorage.setItem('padam_energy_points', '100');
+    setDifficulty('easy');
+    localStorage.setItem('padam_difficulty', 'easy');
+    loadPuzzle('easy');
+    try {
+      await fetch('https://padam.onrender.com/api/payment/admin-reset?secret=padam_sec_hdfc_9063', { method: 'POST' });
+    } catch {}
+    setStatusMessage(
+      language === 'te'
+        ? '🧹 అన్ని లాక్‌లు మరియు చెల్లింపు రికార్డులు విజయవంతంగా రీసెట్ చేయబడ్డాయి!'
+        : '🧹 All locks and payment records have been cleanly reset!'
+    );
+    setIsTopUpOpen(false);
   };
 
   const targetTime = TARGET_TIMES[difficulty];
@@ -873,6 +901,7 @@ export function App() {
         }}
         onUnlockKids={handleUnlockKidsPermanent}
         initialMode={topUpInitialMode}
+        onResetAllData={handleResetAllData}
       />
 
       {/* Reveal All Drain Warning Modal */}

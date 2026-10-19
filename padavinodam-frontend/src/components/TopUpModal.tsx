@@ -15,6 +15,7 @@ interface TopUpModalProps {
   onAddPoints: (points: number, coins: number) => void;
   onUnlockKids: () => void;
   initialMode?: 'points' | 'kids';
+  onResetAllData?: () => void;
 }
 
 export const TopUpModal: React.FC<TopUpModalProps> = ({
@@ -26,7 +27,8 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
   language,
   onAddPoints,
   onUnlockKids,
-  initialMode = 'points'
+  initialMode = 'points',
+  onResetAllData
 }) => {
   const [selectedPack, setSelectedPack] = useState<'p150' | 'p500' | 'kids'>(
     initialMode === 'kids' && !isKidsUnlocked ? 'kids' : 'p500'
@@ -35,6 +37,20 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successResult, setSuccessResult] = useState<UtrVerifyResult | null>(null);
+
+  // Synchronize selected pack whenever modal opens or initialMode changes
+  useEffect(() => {
+    if (isOpen) {
+      if (initialMode === 'kids' && !isKidsUnlocked) {
+        setSelectedPack('kids');
+      } else if (initialMode === 'points') {
+        setSelectedPack('p500');
+      }
+      setErrorMsg(null);
+      setSuccessResult(null);
+      setUtrInput('');
+    }
+  }, [isOpen, initialMode, isKidsUnlocked]);
 
   // Dynamic UPI configuration
   const [upiId, setUpiId] = useState<string>(() => getSavedUpiId());
@@ -70,22 +86,26 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
           if (status.status === 'PAID') {
             clearInterval(pollInterval);
             templeAudio.playSuccessFanfare();
+            const effectivePack = status.pack || selectedPack;
             setSuccessResult({
               success: true,
-              message: status.message || (selectedPack === 'kids' ? '👶 బాలల విభాగం స్వయంచాలకంగా అన్‌లాక్ చేయబడింది!' : '🎉 పాయింట్లు స్వయంచాలకంగా జమ చేయబడ్డాయి!'),
+              message: status.message || (effectivePack === 'kids' ? '👶 బాలల విభాగం స్వయంచాలకంగా అన్‌లాక్ చేయబడింది!' : '🎉 పాయింట్లు స్వయంచాలకంగా జమ చేయబడ్డాయి!'),
               utr: status.utr || 'BANK-SMS-VERIFIED',
               receipt_id: status.receipt_id || `REC-${Date.now().toString(36).toUpperCase()}`,
               amount: status.amount,
-              pack: status.pack,
+              pack: effectivePack,
               unlocked_rewards: status.rewards || {},
               timestamp: new Date().toLocaleTimeString()
             });
 
-            if (selectedPack === 'kids') {
+            if (effectivePack === 'kids' || status.rewards?.kids_unlocked) {
               onUnlockKids();
-            } else if (selectedPack === 'p500') {
+              if (status.rewards?.coins || status.rewards?.energy) {
+                onAddPoints(status.rewards?.energy || 100, status.rewards?.coins || 100);
+              }
+            } else if (effectivePack === 'p500') {
               onAddPoints(500, 500);
-            } else if (selectedPack === 'p150') {
+            } else if (effectivePack === 'p150') {
               onAddPoints(150, 150);
             }
 
@@ -147,11 +167,15 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
       setSuccessResult(res);
       templeAudio.playSuccessFanfare();
 
-      if (selectedPack === 'kids') {
+      const effectivePack = res.pack || selectedPack;
+      if (effectivePack === 'kids' || res.unlocked_rewards?.kids_unlocked) {
         onUnlockKids();
-      } else if (selectedPack === 'p500') {
+        if (res.unlocked_rewards?.coins || res.unlocked_rewards?.energy) {
+          onAddPoints(res.unlocked_rewards?.energy || 100, res.unlocked_rewards?.coins || 100);
+        }
+      } else if (effectivePack === 'p500') {
         onAddPoints(500, 500);
-      } else if (selectedPack === 'p150') {
+      } else if (effectivePack === 'p150') {
         onAddPoints(150, 150);
       }
 
@@ -514,6 +538,25 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
                   </div>
                 )}
               </div>
+
+              {/* Optional Test & Clean Slate Helper */}
+              {onResetAllData && (
+                <div className="pt-2 border-t border-stone-200 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(language === 'te' 
+                        ? 'ఖాతాలోని పాయింట్లు, లాక్‌లు మరియు లెడ్జర్‌ను మొదటి స్థితికి రీసెట్ చేయాలా?' 
+                        : 'Reset all locks, energy points and payment records to clean test state?')) {
+                        onResetAllData();
+                      }
+                    }}
+                    className="text-[11px] text-stone-600 hover:text-stone-900 underline transition cursor-pointer"
+                  >
+                    🧹 {language === 'te' ? 'పరీక్ష మోడ్: ఖాతా & లాక్‌లను రీసెట్ చేయండి' : 'Test Mode: Reset All Locks & Balance'}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
