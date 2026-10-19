@@ -101,24 +101,30 @@ class DynamicCrosswordGenerator:
 
             # Collect candidate masks
             masks = [p["mask"] for p in puzzles]
-            chosen_mask = random.choice(masks)
+            if size == 9 and len(masks) >= 10:
+                masks = [masks[i] for i in [0, 1, 2, 6, 8, 9] if i < len(masks)]
 
-            # Solve via CSP with fast timeout
-            timeout = 0.5 if size <= 5 else (0.8 if size <= 7 else 1.2)
-            csp = CrosswordCSP(size, chosen_mask, self._words_by_len)
-            sol = csp.solve(max_seconds=timeout)
+            # Rapid Restarts Loop: Avoids getting stuck in dead-end search trees
+            max_budget = 0.6 if size <= 5 else (1.0 if size <= 7 else (1.8 if size <= 9 else 2.5))
+            per_restart = 0.08 if size <= 7 else 0.12
+            t_start = time.time()
 
-            if sol:
-                ok, errs = self.verify_integrity(sol)
-                if ok:
-                    sol["meta"] = {
-                        "difficulty": difficulty,
-                        "total_words": len(sol["clues"]["across"]) + len(sol["clues"]["down"]),
-                        "is_authentic_newspaper_grid": True,
-                        "is_procedural": True,
-                        "generated_at": time.time()
-                    }
-                    return sol
+            while time.time() - t_start < max_budget:
+                chosen_mask = random.choice(masks)
+                csp = CrosswordCSP(size, chosen_mask, self._words_by_len)
+                sol = csp.solve(max_seconds=per_restart)
+
+                if sol:
+                    ok, errs = self.verify_integrity(sol)
+                    if ok:
+                        sol["meta"] = {
+                            "difficulty": difficulty,
+                            "total_words": len(sol["clues"]["across"]) + len(sol["clues"]["down"]),
+                            "is_authentic_newspaper_grid": True,
+                            "is_procedural": True,
+                            "generated_at": time.time()
+                        }
+                        return sol
         except Exception:
             pass
 
@@ -142,11 +148,10 @@ class DynamicCrosswordGenerator:
             else:
                 size = 7
 
-        # 1. Procedural dynamic synthesis via CSP solver (Instant for Kids 5x5, Easy 7x7, Medium 9x9)
-        if size <= 9:
-            procedural = self._synthesize_procedural_csp(size, difficulty)
-            if procedural:
-                return procedural
+        # 1. Procedural dynamic synthesis via CSP solver with Rapid Restarts (Instant for Kids 5x5, Easy 7x7, Medium 9x9, Hard 12x12)
+        procedural = self._synthesize_procedural_csp(size, difficulty)
+        if procedural:
+            return procedural
 
         # 2. Seamless fallback to rotating verified bank
         return self.get_verified_fallback(size, difficulty)
@@ -458,7 +463,16 @@ class DynamicCrosswordGenerator:
                     bank = json.load(f)
                     puzzles = bank.get(diff_key, [])
                     if puzzles:
-                        return copy.deepcopy(random.choice(puzzles))
+                        if not hasattr(self, '_last_fallback_indices'):
+                            self._last_fallback_indices = {}
+                        last_idx = self._last_fallback_indices.get(diff_key, -1)
+                        next_idx = (last_idx + 1) % len(puzzles)
+                        self._last_fallback_indices[diff_key] = next_idx
+                        chosen = copy.deepcopy(puzzles[next_idx])
+                        chosen["meta"] = chosen.get("meta", {})
+                        chosen["meta"]["is_procedural"] = False
+                        chosen["meta"]["bank_index"] = next_idx
+                        return chosen
             except Exception:
                 pass
 
