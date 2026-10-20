@@ -46,19 +46,19 @@ jobs:
         working-directory: padavinodam-frontend/android
         run: chmod +x gradlew
 
-      - name: Build Debug APK (For Immediate Device Testing)
+      - name: Build Signed Release APK (For Indus Appstore & Direct Distribution)
         working-directory: padavinodam-frontend/android
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Build Release Bundle (For Google Play Store)
         working-directory: padavinodam-frontend/android
         run: ./gradlew bundleRelease --stacktrace
 
-      - name: Upload Debug APK
+      - name: Upload Signed Release APK (Indus Appstore)
         uses: actions/upload-artifact@v4
         with:
-          name: padavinodam-debug-apk
-          path: padavinodam-frontend/android/app/build/outputs/apk/debug/*.apk
+          name: padavinodam-release-apk
+          path: padavinodam-frontend/android/app/build/outputs/apk/release/*.apk
 
       - name: Upload Release AAB (Play Store)
         uses: actions/upload-artifact@v4
