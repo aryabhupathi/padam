@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { GameDifficulty } from '../types/puzzle';
 import { TRANSLATIONS, type Language } from '../utils/translations';
-import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Languages, Lock, Clock, Bell, BellOff, ShieldCheck, Lightbulb } from 'lucide-react';
+import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Zap, Lock, Clock, Bell, BellOff, ShieldCheck } from 'lucide-react';
 import { templeAudio } from '../utils/templeAudio';
 
 interface HeaderProps {
@@ -40,14 +40,13 @@ export const Header: React.FC<HeaderProps> = ({
   bonusTimeAlert: _bonusTimeAlert,
   language,
   onToggleLanguage,
-  energyPoints: _energyPoints,
+  energyPoints,
   coins,
   onOpenTopUp,
   isKidsUnlocked,
   targetTimeSeconds,
   isSolved,
-  onOpenPrivacy,
-  onOpenHints
+  onOpenPrivacy
 }) => {
   const t = TRANSLATIONS[language];
   const [isMuted, setIsMuted] = useState(templeAudio.isMuted());
@@ -66,62 +65,40 @@ export const Header: React.FC<HeaderProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const getDifficultyBadge = (d: GameDifficulty) => {
-    switch (d) {
-      case 'kids':
-        return { label: t.kidsMode, mult: '0.8x', color: 'bg-purple-100 text-purple-800 border-purple-300' };
-      case 'easy':
-        return { label: t.easyMode, mult: '1.0x', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' };
-      case 'medium':
-        return { label: t.mediumMode, mult: '1.5x', color: 'bg-amber-100 text-amber-800 border-amber-300' };
-      case 'hard':
-        return { label: t.hardMode, mult: '2.0x', color: 'bg-rose-100 text-rose-800 border-rose-300' };
-    }
-  };
-
-  const badge = getDifficultyBadge(difficulty);
   const isSpeedBonusEligible = timerSeconds <= targetTimeSeconds;
   const isTimeUp = timerSeconds >= targetTimeSeconds;
 
   return (
-    <header className="border-b-2 border-stone-200 pb-4 mb-3 select-none print:hidden">
-      {/* Masthead */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-        <div>
-          <div className="text-[11px] uppercase tracking-widest text-amber-800 font-serif font-bold">
-            {t.platformBadge}
-          </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight font-telugu">
-            {t.appName}
-          </h1>
-        </div>
+    <header className="pb-2 mb-2 select-none print:hidden">
+      {/* 1. Top Header Row: Just Padavinodam on left & Language (EN/TEL) + Controls on right */}
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-stone-200">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-telugu">
+          {language === 'te' ? 'పదవినోదం' : 'Padavinodam'}
+        </h1>
 
-        {/* Live Game Stats & Language Switch */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Language Switch Button */}
+        <div className="flex items-center gap-1.5">
+          {/* Language Switch Button with just EN / TEL */}
           <button
             type="button"
             onClick={onToggleLanguage}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-stone-50 border border-stone-300 text-stone-800 rounded-lg text-xs font-bold shadow-2xs transition active:scale-95"
-            title="భాష మార్చండి / Switch Language"
+            className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 rounded-lg text-xs font-bold font-sans shadow-2xs transition active:scale-95 cursor-pointer"
+            title="Switch Language (భాష మార్చు)"
           >
-            <Languages size={14} className="text-amber-700" />
-            <span className="font-sans">{language === 'te' ? 'English' : 'తెలుగు'}</span>
+            {language === 'te' ? 'EN' : 'TEL'}
           </button>
 
-          {/* Temple Sound Toggle Button */}
+          {/* Temple Sound Toggle */}
           <button
             type="button"
             onClick={handleToggleSound}
-            className={`inline-flex items-center gap-1 px-2.5 py-1.5 border rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 ${
+            className={`p-1.5 border rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer ${
               !isMuted
                 ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300'
                 : 'bg-stone-100 hover:bg-stone-200 text-stone-500 border-stone-300'
             }`}
-            title={!isMuted ? 'ధ్వని ఆన్ (Temple Chimes On)' : 'ధ్వని మ్యూట్ (Muted)'}
+            title={!isMuted ? 'ధ్వని ఆన్ (Sound On)' : 'ధ్వని మ్యూట్ (Muted)'}
           >
-            {!isMuted ? <Bell size={14} className="text-amber-600" /> : <BellOff size={14} className="text-stone-400" />}
-            <span className="hidden sm:inline font-sans">{!isMuted ? 'ధ్వని' : 'మ్యూట్'}</span>
+            {!isMuted ? <Bell size={15} className="text-amber-600" /> : <BellOff size={15} className="text-stone-400" />}
           </button>
 
           {/* Privacy Policy Quick Access Button */}
@@ -129,149 +106,141 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenPrivacy}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-amber-50/70 border border-stone-300 hover:border-amber-400 text-stone-700 hover:text-amber-950 rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
-              title={language === 'te' ? 'గోప్యతా విధానం (Privacy Policy)' : 'Privacy Policy'}
+              className="p-1.5 bg-white hover:bg-amber-50 border border-stone-300 text-stone-700 rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+              title="Privacy Policy (గోప్యతా విధానం)"
             >
-              <ShieldCheck size={14} className="text-emerald-700" />
-              <span className="hidden sm:inline font-sans">{language === 'te' ? 'గోప్యత' : 'Privacy'}</span>
-            </button>
-          )}
-
-          {/* Clue Coins Wallet Button */}
-          <button
-            type="button"
-            onClick={() => onOpenTopUp('points')}
-            className="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-950 shadow-2xs transition active:scale-95 cursor-pointer font-mono"
-            title={language === 'te' ? 'నాణాలు (Coins) - క్లిక్ చేయండి' : 'Clue Coins - Click to Top-Up'}
-          >
-            <span>🪙</span>
-            <span>{coins}</span>
-            <span className="text-[10px] bg-amber-600 text-white font-bold px-1 rounded-full">+</span>
-          </button>
-
-          {/* Clean Timer Display */}
-          <div 
-            className="inline-flex items-center gap-1 bg-stone-100 border border-stone-300 px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono text-stone-700 shadow-2xs"
-            title={language === 'te' ? 'సమయం' : 'Timer'}
-          >
-            <Clock size={14} className={isSpeedBonusEligible ? 'text-emerald-700' : 'text-stone-500'} />
-            <span>{formatTime(timerSeconds)}</span>
-          </div>
-
-          {/* Clean Score Display */}
-          <div 
-            className="inline-flex items-center gap-1 bg-amber-50/80 border border-amber-200 px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono text-amber-900 shadow-2xs"
-            title={language === 'te' ? 'స్కోరు' : 'Score'}
-          >
-            <Trophy size={14} className="text-amber-600" />
-            <span>{score}</span>
-            <span className="text-[10px] text-amber-700 font-sans font-normal">({badge.mult})</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Mode Selector & Action Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mt-3 bg-stone-100 p-2 rounded-xl border border-stone-200">
-        {/* Game Modes: Kids (5x5), Easy (7x7), Medium (9x9), Hard (11x11/12x12) */}
-        <div className="flex items-center gap-1 bg-stone-200/80 p-1 rounded-lg flex-wrap">
-          {(['kids', 'easy', 'medium', 'hard'] as GameDifficulty[]).map((d) => {
-            const active = difficulty === d;
-            const isKidsLocked = d === 'kids' && !isKidsUnlocked;
-            const labels: Record<GameDifficulty, string> = {
-              kids: t.kidsMode,
-              easy: t.easyMode,
-              medium: t.mediumMode,
-              hard: t.hardMode
-            };
-            return (
-              <button
-                key={d}
-                type="button"
-                onClick={() => {
-                  if (isKidsLocked) {
-                    onOpenTopUp('kids');
-                  } else {
-                    onDifficultyChange(d);
-                  }
-                }}
-                className={`px-2.5 py-1 rounded-md text-xs md:text-sm font-bold transition-all flex items-center gap-1 ${
-                  active
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-300/40'
-                } ${isKidsLocked ? 'opacity-85 text-purple-900' : ''}`}
-              >
-                {isKidsLocked && <Lock size={12} className="text-purple-600" />}
-                <span>{labels[d]}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            type="button"
-            onClick={onNewPuzzle}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-lg font-medium text-xs md:text-sm shadow-xs transition active:scale-95 disabled:opacity-50"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            {t.newPuzzle}
-          </button>
-
-          <button
-            type="button"
-            onClick={onDailyPuzzle}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-medium text-xs md:text-sm shadow-xs transition active:scale-95 disabled:opacity-50"
-          >
-            <Calendar size={14} />
-            {t.dailyChallenge}
-          </button>
-
-          <button
-            type="button"
-            onClick={onVerify}
-            className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs md:text-sm font-bold shadow-xs transition active:scale-95"
-          >
-            <CheckCircle size={14} />
-            {t.verify}
-          </button>
-
-          {/* On-Demand Hints Button */}
-          {onOpenHints && (
-            <button
-              type="button"
-              onClick={onOpenHints}
-              className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 rounded-lg text-xs md:text-sm font-bold shadow-xs transition active:scale-95 cursor-pointer"
-              title={language === 'te' ? 'సూచనలు (Hints)' : 'Hints'}
-            >
-              <Lightbulb size={14} className="text-amber-700" />
-              <span>{t.hints}</span>
-            </button>
-          )}
-
-          {/* Reveal All: ONLY appears when time is up for that mode */}
-          {isTimeUp && !isSolved && (
-            <button
-              type="button"
-              onClick={onReveal}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg text-xs md:text-sm font-bold shadow-xs transition active:scale-95 animate-pulse"
-              title={
-                language === 'te'
-                  ? 'సమయం ముగిసింది! అన్ని నాణేలను ఖాళీ చేసి సమాధానాలు చూడండి'
-                  : 'Time is up! Reveal all answers (Empties your wallet)'
-              }
-            >
-              <Eye size={14} className="text-white" />
-              <span>{t.reveal}</span>
-              <span className="text-[10px] bg-black/30 text-rose-100 px-1.5 py-0.2 rounded-full font-sans">
-                {language === 'te' ? 'సమయం ముగిసింది' : 'Time Up'}
-              </span>
+              <ShieldCheck size={15} className="text-emerald-700" />
             </button>
           )}
         </div>
       </div>
+
+      {/* 2. Next Part: Coins | Score | Time | Energy */}
+      <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mt-2">
+        {/* Coins */}
+        <button
+          type="button"
+          onClick={() => onOpenTopUp('points')}
+          className="flex items-center justify-center gap-1 bg-amber-50 hover:bg-amber-100/90 border border-amber-300 px-1.5 py-1.5 rounded-xl text-xs font-bold text-amber-950 font-mono shadow-2xs transition active:scale-95 cursor-pointer"
+          title={language === 'te' ? 'నాణాలు (Coins)' : 'Coins'}
+        >
+          <span>🪙</span>
+          <span className="truncate">{coins}</span>
+        </button>
+
+        {/* Score */}
+        <div 
+          className="flex items-center justify-center gap-1 bg-amber-50/80 border border-amber-200 px-1.5 py-1.5 rounded-xl text-xs font-bold font-mono text-amber-900 shadow-2xs"
+          title={language === 'te' ? 'స్కోరు (Score)' : 'Score'}
+        >
+          <Trophy size={13} className="text-amber-600 shrink-0" />
+          <span className="truncate">{score}</span>
+        </div>
+
+        {/* Time */}
+        <div 
+          className="flex items-center justify-center gap-1 bg-stone-100 border border-stone-300 px-1.5 py-1.5 rounded-xl text-xs font-bold font-mono text-stone-700 shadow-2xs"
+          title={language === 'te' ? 'సమయం (Time)' : 'Time'}
+        >
+          <Clock size={13} className={isSpeedBonusEligible ? 'text-emerald-700 shrink-0' : 'text-stone-500 shrink-0'} />
+          <span className="truncate">{formatTime(timerSeconds)}</span>
+        </div>
+
+        {/* Energy */}
+        <button
+          type="button"
+          onClick={() => onOpenTopUp('points')}
+          className="flex items-center justify-center gap-1 bg-amber-50 hover:bg-amber-100/90 border border-amber-300 px-1.5 py-1.5 rounded-xl text-xs font-bold text-amber-950 font-mono shadow-2xs transition active:scale-95 cursor-pointer"
+          title={language === 'te' ? 'శక్తి (Energy)' : 'Energy'}
+        >
+          <Zap size={13} className="text-amber-500 fill-amber-500 shrink-0" />
+          <span className="truncate">{energyPoints}</span>
+        </button>
+      </div>
+
+      {/* 3. Modes: Easy, Medium, Hard, Kids (No counts) */}
+      <div className="grid grid-cols-4 gap-1 mt-2 bg-stone-200/70 p-1 rounded-xl">
+        {(['easy', 'medium', 'hard', 'kids'] as GameDifficulty[]).map((d) => {
+          const active = difficulty === d;
+          const isKidsLocked = d === 'kids' && !isKidsUnlocked;
+          const labels: Record<GameDifficulty, string> = {
+            easy: t.easyMode,
+            medium: t.mediumMode,
+            hard: t.hardMode,
+            kids: t.kidsMode
+          };
+          return (
+            <button
+              key={d}
+              type="button"
+              onClick={() => {
+                if (isKidsLocked) {
+                  onOpenTopUp('kids');
+                } else {
+                  onDifficultyChange(d);
+                }
+              }}
+              className={`py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer text-center truncate ${
+                active
+                  ? 'bg-white text-stone-900 shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-300/40'
+              } ${isKidsLocked ? 'text-purple-900' : ''}`}
+            >
+              {isKidsLocked && <Lock size={11} className="text-purple-600 shrink-0" />}
+              <span className="truncate">{labels[d]}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 4. Action Toolbar: New Puzzle | Daily Challenge | Check Answers */}
+      <div className="grid grid-cols-3 gap-1.5 mt-2">
+        <button
+          type="button"
+          onClick={onNewPuzzle}
+          disabled={loading}
+          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-medium text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+        >
+          <RefreshCw size={13} className={loading ? 'animate-spin shrink-0' : 'shrink-0'} />
+          <span className="truncate">{t.newPuzzle}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onDailyPuzzle}
+          disabled={loading}
+          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-medium text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+        >
+          <Calendar size={13} className="shrink-0" />
+          <span className="truncate">{t.dailyChallenge}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onVerify}
+          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
+        >
+          <CheckCircle size={13} className="shrink-0" />
+          <span className="truncate">{t.verify}</span>
+        </button>
+      </div>
+
+      {/* Reveal All: ONLY appears when time is up for that mode */}
+      {isTimeUp && !isSolved && (
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={onReveal}
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer animate-pulse"
+          >
+            <Eye size={14} className="text-white shrink-0" />
+            <span>{t.reveal}</span>
+            <span className="text-[10px] bg-black/30 text-rose-100 px-1.5 py-0.2 rounded-full font-sans">
+              {language === 'te' ? 'సమయం ముగిసింది' : 'Time Up'}
+            </span>
+          </button>
+        </div>
+      )}
     </header>
   );
 };
