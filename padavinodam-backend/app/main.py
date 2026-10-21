@@ -11,6 +11,7 @@ import datetime
 import random
 from typing import Optional, Dict, Any
 from fastapi import FastAPI, Query, HTTPException, Header, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.services.lexicon import LexiconManager
@@ -21,6 +22,7 @@ from app.models.schemas import (
     PaymentVerifyRequest, PaymentVerifyResponse,
     CreateOrderRequest, CreateOrderResponse, OrderStatusResponse, SmsWebhookPayload
 )
+from app.privacy_html import PRIVACY_POLICY_HTML
 
 app = FastAPI(
     title="పదవినోదం API",
@@ -56,9 +58,18 @@ def read_root():
         "endpoints": {
             "generate": "/api/puzzle/generate?difficulty=easy|medium|hard",
             "daily": "/api/puzzle/daily",
-            "verify": "POST /api/puzzle/verify"
+            "verify": "POST /api/puzzle/verify",
+            "privacy": "/privacy"
         }
     }
+
+@app.get("/privacy", response_class=HTMLResponse)
+@app.get("/privacy.html", response_class=HTMLResponse)
+def get_privacy_policy():
+    """
+    Renders the official bilingual Privacy Policy for Google Play & PhonePe Indus Appstore compliance.
+    """
+    return HTMLResponse(content=PRIVACY_POLICY_HTML, status_code=200)
 
 @app.get("/api/puzzle/generate", response_model=PuzzleResponse)
 def generate_puzzle(

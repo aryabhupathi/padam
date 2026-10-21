@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { GameDifficulty } from '../types/puzzle';
 import { TRANSLATIONS, type Language } from '../utils/translations';
-import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Zap, Languages, Lock, Clock, Bell, BellOff } from 'lucide-react';
+import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Zap, Languages, Lock, Clock, Bell, BellOff, ShieldCheck } from 'lucide-react';
 import { templeAudio } from '../utils/templeAudio';
 
 interface HeaderProps {
@@ -23,6 +23,7 @@ interface HeaderProps {
   isKidsUnlocked: boolean;
   targetTimeSeconds: number;
   isSolved?: boolean;
+  onOpenPrivacy?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -43,7 +44,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenTopUp,
   isKidsUnlocked,
   targetTimeSeconds,
-  isSolved
+  isSolved,
+  onOpenPrivacy
 }) => {
   const t = TRANSLATIONS[language];
   const [isMuted, setIsMuted] = useState(templeAudio.isMuted());
@@ -119,6 +121,19 @@ export const Header: React.FC<HeaderProps> = ({
             {!isMuted ? <Bell size={14} className="text-amber-600" /> : <BellOff size={14} className="text-stone-400" />}
             <span className="hidden sm:inline font-sans">{!isMuted ? 'ధ్వని' : 'మ్యూట్'}</span>
           </button>
+
+          {/* Privacy Policy Quick Access Button */}
+          {onOpenPrivacy && (
+            <button
+              type="button"
+              onClick={onOpenPrivacy}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-amber-50/70 border border-stone-300 hover:border-amber-400 text-stone-700 hover:text-amber-950 rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+              title={language === 'te' ? 'గోప్యతా విధానం (Privacy Policy)' : 'Privacy Policy'}
+            >
+              <ShieldCheck size={14} className="text-emerald-700" />
+              <span className="hidden sm:inline font-sans">{language === 'te' ? 'గోప్యత' : 'Privacy'}</span>
+            </button>
+          )}
 
           {/* Clue Coins Wallet Button */}
           <button

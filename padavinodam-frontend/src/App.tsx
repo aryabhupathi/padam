@@ -14,7 +14,8 @@ import { TopUpModal } from './components/TopUpModal';
 import { TRANSLATIONS, type Language } from './utils/translations';
 import { speakTeluguText, startTeluguListening } from './utils/speech';
 import { templeAudio } from './utils/templeAudio';
-import { Volume2, Mic, Eye, X } from 'lucide-react';
+import { Volume2, Mic, Eye, X, ShieldCheck } from 'lucide-react';
+import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 
 const INITIAL_HINTS: HintOption[] = [
   {
@@ -116,6 +117,9 @@ export function App() {
 
   // Reveal All Drain Modal State
   const [isRevealModalOpen, setIsRevealModalOpen] = useState(false);
+
+  // In-App Privacy Policy Modal State
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
   // Vocal Feature: Voice Input Listening State
   const [isListening, setIsListening] = useState(false);
@@ -639,6 +643,7 @@ export function App() {
           isKidsUnlocked={isKidsUnlocked}
           targetTimeSeconds={targetTime}
           isSolved={isSolved}
+          onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
         />
 
         {/* Gamified Hints & Power-ups Section (Hidden on Print) */}
@@ -826,6 +831,36 @@ export function App() {
 
           </>
         )}
+
+        {/* App Footer: In-App Privacy Policy & Developer Links */}
+        <footer className="mt-8 pt-4 border-t border-stone-200 text-stone-500 font-telugu select-none print:hidden flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-1.5 text-stone-600">
+            <span>© {new Date().getFullYear()}</span>
+            <span className="font-bold text-stone-800">పదవినోదం (Padavinodam)</span>
+            <span>•</span>
+            <span className="text-stone-500">Arya Bhupathi</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsPrivacyModalOpen(true)}
+              className="text-amber-800 hover:text-amber-950 font-bold underline underline-offset-4 cursor-pointer transition flex items-center gap-1.5 py-1 px-2.5 rounded-lg hover:bg-amber-50 border border-transparent hover:border-amber-300"
+            >
+              <ShieldCheck size={14} className="text-emerald-700" />
+              <span>{language === 'te' ? 'గోప్యతా విధానం (Privacy Policy)' : 'Privacy Policy'}</span>
+            </button>
+
+            <a
+              href="https://padam.onrender.com/privacy.html"
+              target="_blank"
+              rel="noreferrer"
+              className="text-stone-500 hover:text-amber-900 text-[11px] underline underline-offset-2 transition"
+            >
+              Web Link
+            </a>
+          </div>
+        </footer>
       </div>
 
       {/* Instant Top-Up Modal (Direct UPI & Auto-Regen notice) */}
@@ -1010,6 +1045,13 @@ export function App() {
           onSelectClue={handleSelectClue}
         />
       )}
+
+      {/* In-App Privacy Policy Modal (PhonePe Indus & Google Play Compliant) */}
+      <PrivacyPolicyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+        language={language}
+      />
     </div>
   );
 }
