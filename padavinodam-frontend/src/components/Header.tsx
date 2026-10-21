@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { GameDifficulty } from '../types/puzzle';
 import { TRANSLATIONS, type Language } from '../utils/translations';
-import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Zap, Languages, Lock, Clock, Bell, BellOff, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Languages, Lock, Clock, Bell, BellOff, ShieldCheck, Lightbulb } from 'lucide-react';
 import { templeAudio } from '../utils/templeAudio';
 
 interface HeaderProps {
@@ -24,6 +24,7 @@ interface HeaderProps {
   targetTimeSeconds: number;
   isSolved?: boolean;
   onOpenPrivacy?: () => void;
+  onOpenHints?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -36,16 +37,17 @@ export const Header: React.FC<HeaderProps> = ({
   onDifficultyChange,
   timerSeconds,
   score,
-  bonusTimeAlert,
+  bonusTimeAlert: _bonusTimeAlert,
   language,
   onToggleLanguage,
-  energyPoints,
+  energyPoints: _energyPoints,
   coins,
   onOpenTopUp,
   isKidsUnlocked,
   targetTimeSeconds,
   isSolved,
-  onOpenPrivacy
+  onOpenPrivacy,
+  onOpenHints
 }) => {
   const t = TRANSLATIONS[language];
   const [isMuted, setIsMuted] = useState(templeAudio.isMuted());
@@ -139,82 +141,31 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => onOpenTopUp('points')}
-            className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100/90 border border-amber-300 px-2.5 py-1.5 rounded-lg shadow-2xs transition active:scale-95"
-            title={language === 'te' ? 'క్లూ నాణాలు టాప్-అప్ చేయండి' : 'Top-Up Clue Coins'}
+            className="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-950 shadow-2xs transition active:scale-95 cursor-pointer font-mono"
+            title={language === 'te' ? 'నాణాలు (Coins) - క్లిక్ చేయండి' : 'Clue Coins - Click to Top-Up'}
           >
-            <span className="text-base leading-none">🪙</span>
-            <div className="text-left">
-              <div className="text-[9px] text-amber-900/80 uppercase font-sans font-semibold leading-none">
-                {language === 'te' ? 'నాణాలు' : 'Coins'}
-              </div>
-              <div className="text-xs md:text-sm font-bold text-amber-950 font-mono leading-none mt-0.5">
-                {coins}
-              </div>
-            </div>
-            <span className="text-[10px] bg-amber-600 text-white font-bold px-1 py-0.2 rounded-full ml-0.5">
-              +
-            </span>
+            <span>🪙</span>
+            <span>{coins}</span>
+            <span className="text-[10px] bg-amber-600 text-white font-bold px-1 rounded-full">+</span>
           </button>
 
-          {/* Energy Points Wallet Button */}
-          <button
-            type="button"
-            onClick={() => onOpenTopUp('points')}
-            className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100/90 border border-amber-300 px-2.5 py-1.5 rounded-lg shadow-2xs transition active:scale-95"
-            title={language === 'te' ? 'శక్తి పాయింట్లు టాప్-అప్ చేయండి' : 'Top-Up Energy Points'}
+          {/* Clean Timer Display */}
+          <div 
+            className="inline-flex items-center gap-1 bg-stone-100 border border-stone-300 px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono text-stone-700 shadow-2xs"
+            title={language === 'te' ? 'సమయం' : 'Timer'}
           >
-            <Zap size={16} className="text-amber-500 fill-amber-500" />
-            <div className="text-left">
-              <div className="text-[9px] text-amber-900/80 uppercase font-sans font-semibold leading-none">
-                {t.energy}
-              </div>
-              <div className="text-xs md:text-sm font-bold text-amber-950 font-mono leading-none mt-0.5">
-                {energyPoints}
-                {energyPoints <= 100 ? (
-                  <span className="text-[9px] text-stone-400 font-normal">/100</span>
-                ) : (
-                  <span className="text-[8px] text-amber-800 font-bold ml-0.5 bg-amber-200/90 px-1 rounded-sm">⚡BOOST</span>
-                )}
-              </div>
-            </div>
-            <span className="text-[10px] bg-amber-600 text-white font-bold px-1 py-0.2 rounded-full ml-0.5">
-              +
-            </span>
-          </button>
-
-          {/* Score Card */}
-          <div className="flex items-center gap-1.5 bg-gradient-to-br from-amber-50 to-amber-100/70 border border-amber-200 px-2.5 py-1.5 rounded-lg shadow-2xs">
-            <Trophy size={16} className="text-amber-600" />
-            <div>
-              <div className="text-[9px] text-amber-900/70 uppercase font-sans font-semibold leading-none">{t.score}</div>
-              <div className="text-xs md:text-sm font-bold text-amber-950 font-mono leading-none mt-0.5">
-                {score} <span className="text-[9px] text-amber-700 font-sans font-normal">({badge.mult})</span>
-              </div>
-            </div>
+            <Clock size={14} className={isSpeedBonusEligible ? 'text-emerald-700' : 'text-stone-500'} />
+            <span>{formatTime(timerSeconds)}</span>
           </div>
 
-          {/* Timer Card with Speed Bonus Tracker */}
-          <div className="relative flex items-center gap-1.5 bg-stone-100 border border-stone-300 px-2.5 py-1.5 rounded-lg shadow-2xs">
-            <Clock size={16} className={isSpeedBonusEligible ? 'text-emerald-700' : 'text-stone-500'} />
-            <div>
-              <div className="text-[9px] text-stone-500 uppercase font-sans font-semibold flex items-center gap-1 leading-none">
-                <span>{t.time}</span>
-                {isSpeedBonusEligible && (
-                  <span className="text-[8px] text-amber-800 bg-amber-100/90 border border-amber-300 px-1 rounded font-bold font-mono">
-                    +5🪙 బోనస్
-                  </span>
-                )}
-              </div>
-              <div className="text-xs md:text-sm font-bold text-stone-800 font-mono leading-none mt-0.5">
-                {formatTime(timerSeconds)}
-                <span className="text-[9px] text-stone-400 font-normal ml-0.5">/{formatTime(targetTimeSeconds)}</span>
-              </div>
-            </div>
-            {bonusTimeAlert && (
-              <span className="absolute -top-3 right-0 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow animate-bounce">
-                {bonusTimeAlert}
-              </span>
-            )}
+          {/* Clean Score Display */}
+          <div 
+            className="inline-flex items-center gap-1 bg-amber-50/80 border border-amber-200 px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono text-amber-900 shadow-2xs"
+            title={language === 'te' ? 'స్కోరు' : 'Score'}
+          >
+            <Trophy size={14} className="text-amber-600" />
+            <span>{score}</span>
+            <span className="text-[10px] text-amber-700 font-sans font-normal">({badge.mult})</span>
           </div>
         </div>
       </div>
@@ -286,6 +237,19 @@ export const Header: React.FC<HeaderProps> = ({
             <CheckCircle size={14} />
             {t.verify}
           </button>
+
+          {/* On-Demand Hints Button */}
+          {onOpenHints && (
+            <button
+              type="button"
+              onClick={onOpenHints}
+              className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 rounded-lg text-xs md:text-sm font-bold shadow-xs transition active:scale-95 cursor-pointer"
+              title={language === 'te' ? 'సూచనలు (Hints)' : 'Hints'}
+            >
+              <Lightbulb size={14} className="text-amber-700" />
+              <span>{t.hints}</span>
+            </button>
+          )}
 
           {/* Reveal All: ONLY appears when time is up for that mode */}
           {isTimeUp && !isSolved && (

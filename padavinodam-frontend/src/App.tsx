@@ -12,9 +12,9 @@ import { TeluguKeypad } from './components/TeluguKeypad';
 import { GamifiedHints } from './components/GamifiedHints';
 import { TopUpModal } from './components/TopUpModal';
 import { TRANSLATIONS, type Language } from './utils/translations';
-import { speakTeluguText, startTeluguListening } from './utils/speech';
+import { speakTeluguText, startTeluguListening, splitIntoTeluguSyllables } from './utils/speech';
 import { templeAudio } from './utils/templeAudio';
-import { Volume2, Mic, Eye, X, ShieldCheck } from 'lucide-react';
+import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter } from 'lucide-react';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 
 const INITIAL_HINTS: HintOption[] = [
@@ -121,11 +121,16 @@ export function App() {
   // In-App Privacy Policy Modal State
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
+  // On-Demand Hints Modal State (Declutters main screen)
+  const [isHintsModalOpen, setIsHintsModalOpen] = useState(false);
+
   // Vocal Feature: Voice Input Listening State
   const [isListening, setIsListening] = useState(false);
 
-  // Clue Presentation Modes: 'narrator' (Tenali Rama Mascot Clue Speaker) vs 'list' (Full Classical Table)
-  const [clueViewMode, setClueViewMode] = useState<'narrator' | 'list'>('narrator');
+  // Clue Presentation Modes: 'list' (Classical Newspaper Table) vs 'narrator' (Tenali Rama Story Mode)
+  const [clueViewMode, setClueViewMode] = useState<'narrator' | 'list'>(() => {
+    return (localStorage.getItem('padam_clue_view_mode') as 'narrator' | 'list') || 'list';
+  });
   const [isClueListDrawerOpen, setIsClueListDrawerOpen] = useState(false);
 
   // Persist Coins & Score
@@ -570,23 +575,72 @@ export function App() {
     }
   };
 
-  // Vocal Feature: Start listening to Telugu voice dictation
+  // Vocal Feature: Start listening to Telugu voice dictation with multi-syllable auto-fill
   const handleStartVoiceInput = () => {
     if (isListening) return;
     setIsListening(true);
-    setStatusMessage(language === 'te' ? '🎙️ వింటున్నాము... మాట్లాడండి (Listening... speak now)' : '🎙️ Listening... speak in Telugu');
+    setStatusMessage(
+      language === 'te' 
+        ? '🎙️ వింటున్నాము... పదాన్ని స్పష్టంగా పలకండి (Listening... speak clearly)' 
+        : '🎙️ Listening... speak clearly in Telugu'
+    );
 
     startTeluguListening(
       (transcript) => {
         setIsListening(false);
         if (!transcript) return;
         const clean = transcript.trim();
-        handleInsertSyllable(clean);
-        setStatusMessage(
-          language === 'te'
-            ? `🎙️ వాయిస్ ఇన్‌పుట్: '${clean}' గుర్తించబడింది`
-            : `🎙️ Voice Input: '${clean}' recognized`
-        );
+        const syls = splitIntoTeluguSyllables(clean);
+
+        if (syls.length === 0) {
+          setStatusMessage(language === 'te' ? `⚠️ మాట స్పష్టంగా లేదు: '${clean}'` : `⚠️ Unclear speech: '${clean}'`);
+          return;
+        }
+
+        if (syls.length === 1) {
+          // Single syllable: insert into selected cell and auto-advance cursor
+          handleInsertSyllable(syls[0]);
+          setStatusMessage(
+            language === 'te'
+              ? `🎙️ వాయిస్ అక్షరం: '${syls[0]}' నమోదు చేయబడింది`
+              : `🎙️ Syllable '${syls[0]}' inserted`
+          );
+        } else {
+          // Multi-syllable word (e.g. 'భారతం' -> ['భా', 'ర', 'తం']):
+          // Auto-fill sequentially into the active clue's consecutive cells!
+          if (!puzzle) return;
+          templeAudio.playTileTap();
+          const nextGrid = userGrid.map(row => [...row]);
+
+          // Start from active clue's origin if cursor is at origin or empty
+          let startR = selectedCell.r;
+          let startC = selectedCell.c;
+          if (activeClue && (startR === activeClue.row && startC === activeClue.col)) {
+            startR = activeClue.row;
+            startC = activeClue.col;
+          }
+
+          let lastR = startR;
+          let lastC = startC;
+          for (let i = 0; i < syls.length; i++) {
+            const currR = direction === 'across' ? startR : startR + i;
+            const currC = direction === 'across' ? startC + i : startC;
+
+            if (currR < puzzle.size && currC < puzzle.size && puzzle.mask[currR][currC]) {
+              nextGrid[currR][currC] = syls[i];
+              lastR = currR;
+              lastC = currC;
+            }
+          }
+
+          setUserGrid(nextGrid);
+          setSelectedCell({ r: lastR, c: lastC });
+          setStatusMessage(
+            language === 'te'
+              ? `🎙️ వాయిస్ పదం: '${clean}' (${syls.join('-')}) నమోదు చేయబడింది!`
+              : `🎙️ Word '${clean}' (${syls.join('-')}) filled across cells!`
+          );
+        }
       },
       (errMsg) => {
         setIsListening(false);
@@ -644,21 +698,8 @@ export function App() {
           targetTimeSeconds={targetTime}
           isSolved={isSolved}
           onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
+          onOpenHints={() => setIsHintsModalOpen(true)}
         />
-
-        {/* Gamified Hints & Power-ups Section (Hidden on Print) */}
-        <div className="print:hidden">
-          <GamifiedHints
-            hints={hintOptions}
-            coins={coins}
-            language={language}
-            onUseHint={handleUseHint}
-            onOpenTopUp={() => {
-              setTopUpInitialMode("points");
-              setIsTopUpOpen(true);
-            }}
-          />
-        </div>
 
         {/* Live Status Banner (Hidden on Print) */}
         {statusMessage && (
@@ -673,50 +714,72 @@ export function App() {
           </div>
         )}
 
-        {/* Active Clue Bar with Voice Features (Hidden on Print) */}
+        {/* Clean, High-Contrast Active Clue Bar (Hero Component directly above grid) */}
         {activeClue && (
-          <div className="mb-3 p-2.5 bg-linear-to-r from-amber-100/90 via-orange-50 to-amber-100/90 border border-amber-300 rounded-xl shadow-xs flex items-center justify-between gap-2 print:hidden">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded font-sans shrink-0">
-                {direction === "across" ? t.across : t.down} {activeClue.number}
-              </span>
-              <span className="font-telugu font-semibold text-xs md:text-sm text-stone-900 truncate">
+          <div className="mb-3 p-2.5 sm:p-3 bg-gradient-to-r from-amber-50 via-white to-amber-50 border-2 border-amber-300 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 print:hidden">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <button
+                type="button"
+                onClick={() => setDirection((d) => (d === "across" ? "down" : "across"))}
+                className={`text-white text-xs font-bold px-2.5 py-1 rounded-md font-sans shrink-0 flex items-center gap-1 shadow-2xs transition active:scale-95 cursor-pointer ${
+                  direction === "across" ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                title={language === "te" ? "దిశ మార్చండి (అడ్డంగా / నిలువుగా)" : "Toggle Direction (Across / Down)"}
+              >
+                <span>{direction === "across" ? t.across : t.down} {activeClue.number}</span>
+                <span className="text-[10px] opacity-80">⇄</span>
+              </button>
+
+              <span className="font-telugu font-bold text-sm sm:text-base text-stone-900 leading-tight">
                 {activeClue.clue}
               </span>
-              <span className="text-[11px] text-stone-500 font-mono font-bold shrink-0">
-                ({activeClue.length} {t.cells})
+
+              <span className="text-xs text-amber-900 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded font-mono font-bold shrink-0">
+                {activeClue.length} {t.cells}
               </span>
             </div>
 
-            {/* Vocal Action Buttons: Speaker (TTS) & Mic (STT) */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            {/* Vocal & Quick Actions */}
+            <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
               <button
                 type="button"
-                onClick={() => speakTeluguText(activeClue.clue)}
-                className="p-1.5 bg-white hover:bg-amber-200/90 text-amber-800 rounded-lg border border-amber-300 shadow-2xs transition active:scale-95"
-                title={
-                  language === "te"
-                    ? "క్లూను చదివి వినిపించు (Read Aloud)"
-                    : "Read Clue Aloud"
-                }
+                onClick={() => speakTeluguText(activeClue.clue, (msg) => setStatusMessage(msg))}
+                className="p-1.5 bg-white hover:bg-amber-100 text-amber-800 rounded-lg border border-amber-300 shadow-2xs transition active:scale-95 cursor-pointer"
+                title={language === "te" ? "క్లూను చదివి వినిపించు (Read Aloud)" : "Read Clue Aloud"}
               >
                 <Volume2 size={16} />
               </button>
+
               <button
                 type="button"
                 onClick={handleStartVoiceInput}
-                className={`p-1.5 rounded-lg border shadow-2xs transition active:scale-95 ${
+                className={`p-1.5 rounded-lg border shadow-2xs transition active:scale-95 cursor-pointer ${
                   isListening
                     ? "bg-red-600 text-white animate-pulse border-red-500"
                     : "bg-white hover:bg-stone-50 text-red-600 border-stone-300"
                 }`}
-                title={
-                  language === "te"
-                    ? "వాయిస్ ద్వారా సమాధానం చెప్పండి"
-                    : "Speak Answer"
-                }
+                title={language === "te" ? "వాయిస్ ద్వారా సమాధానం చెప్పండి" : "Speak Answer"}
               >
                 <Mic size={16} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsHintsModalOpen(true)}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+                title={language === "te" ? "సూచన తీసుకోండి (Hints)" : "Use Hint"}
+              >
+                <Lightbulb size={14} />
+                <span>{t.hints}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsClueListDrawerOpen(true)}
+                className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg border border-stone-300 shadow-2xs transition active:scale-95 cursor-pointer md:hidden"
+                title={language === "te" ? "అన్ని క్లూలు చూడండి" : "View All Clues"}
+              >
+                <ListFilter size={16} />
               </button>
             </div>
           </div>
@@ -748,38 +811,44 @@ export function App() {
 
                 {/* Clues & Tenali Story Narrator Column */}
                 <div className="flex-1 w-full min-w-0 flex flex-col gap-2.5">
-                  {/* View Mode Toggle: Tenali Rama Story Narrator vs Full Clues List */}
+                  {/* View Mode Toggle: Classical Newspaper Clues List vs Tenali Rama Story Mode */}
                   <div className="flex items-center justify-between bg-stone-100 p-1 rounded-xl border border-stone-200">
                     <button
                       type="button"
-                      onClick={() => setClueViewMode("narrator")}
-                      className={`flex-1 py-1 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
-                        clueViewMode === "narrator"
-                          ? "bg-amber-600 text-white shadow-xs"
-                          : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/70"
-                      }`}
-                    >
-                      <span>🎭</span>
-                      <span>
-                        {language === "te"
-                          ? "తెనాలి రామకృష్ణుడు (ఆస్థాన నిరూపణ)"
-                          : "Tenali Narrator"}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setClueViewMode("list")}
-                      className={`flex-1 py-1 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+                      onClick={() => {
+                        setClueViewMode("list");
+                        localStorage.setItem("padam_clue_view_mode", "list");
+                      }}
+                      className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                         clueViewMode === "list"
-                          ? "bg-amber-600 text-white shadow-xs"
+                          ? "bg-amber-700 text-white shadow-xs"
                           : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/70"
                       }`}
                     >
                       <span>📜</span>
                       <span>
                         {language === "te"
-                          ? "పూర్తి జాబితా (Full Clues)"
-                          : "Full Clue Table"}
+                          ? "పత్రికా శైలి క్లూలు (Newspaper Clues)"
+                          : "Newspaper Clues"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setClueViewMode("narrator");
+                        localStorage.setItem("padam_clue_view_mode", "narrator");
+                      }}
+                      className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        clueViewMode === "narrator"
+                          ? "bg-amber-700 text-white shadow-xs"
+                          : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/70"
+                      }`}
+                    >
+                      <span>🎭</span>
+                      <span>
+                        {language === "te"
+                          ? "తెనాలి రామ (Story Mode)"
+                          : "Tenali Story Mode"}
                       </span>
                     </button>
                   </div>
@@ -1052,6 +1121,53 @@ export function App() {
         onClose={() => setIsPrivacyModalOpen(false)}
         language={language}
       />
+
+      {/* On-Demand Hints Modal (Declutters main gameplay screen) */}
+      {isHintsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 print:hidden">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border-2 border-amber-300 overflow-hidden font-telugu">
+            <div className="bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-amber-500/20 border border-amber-400/30 rounded-xl">
+                  <Lightbulb size={20} className="text-amber-300" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold">
+                    {language === 'te' ? 'పజిల్ సహాయ సూచనలు (Hints)' : 'Puzzle Hints & Power-ups'}
+                  </h3>
+                  <p className="text-xs text-amber-200">
+                    {language === 'te' ? 'చిక్కు పదాలను సులభంగా పరిష్కరించడానికి ఎంచుకోండి' : 'Choose a hint to help solve difficult clues'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsHintsModalOpen(false)}
+                className="p-1.5 hover:bg-white/20 rounded-full text-white cursor-pointer transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-5">
+              <GamifiedHints
+                hints={hintOptions}
+                coins={coins}
+                language={language}
+                onUseHint={(hintType) => {
+                  handleUseHint(hintType);
+                  setIsHintsModalOpen(false);
+                }}
+                onOpenTopUp={() => {
+                  setIsHintsModalOpen(false);
+                  setTopUpInitialMode('points');
+                  setIsTopUpOpen(true);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
