@@ -665,8 +665,8 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#faf6ee] text-stone-900 font-telugu p-2 sm:p-4 md:p-6 flex flex-col items-center print:bg-white print:p-0 print:m-0 print:min-h-0">
-      {/* Expanded Main Card Container */}
-      <div className="max-w-6xl w-full bg-[#fffdf9] border-2 border-stone-300 rounded-2xl shadow-lg p-3 sm:p-5 md:p-6 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white print:max-w-full">
+      {/* Expanded Main Card Container - Generous Desktop Width */}
+      <div className="max-w-7xl w-full bg-[#fffdf9] border-2 border-stone-300 rounded-2xl shadow-lg p-3 sm:p-5 md:p-6 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white print:max-w-full">
         <Header
           onNewPuzzle={() => handleRequestNewPuzzle()}
           onDailyPuzzle={loadDailyPuzzle}
@@ -808,8 +808,8 @@ export function App() {
           <>
             {/* Screen Interactive Game Play Area (Hidden when printing) */}
             <div className="flex flex-col gap-4 w-full print:hidden">
-              {/* Play Area: Centered Grid (No repetition below puzzle on mobile) */}
-              <div className="flex flex-col lg:flex-row gap-5 items-center lg:items-start justify-center w-full">
+              {/* Play Area: Centered Grid & Flexible Desktop Clues Table */}
+              <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 items-center lg:items-start justify-center w-full">
                 {/* Crossword Grid */}
                 <div className="flex flex-col items-center shrink-0 w-full lg:w-auto">
                   <CrosswordGrid
@@ -828,8 +828,8 @@ export function App() {
                   />
                 </div>
 
-                {/* Desktop-only Side Clues Table (Completely omitted on mobile to prevent repetition) */}
-                <div className="hidden lg:flex flex-col w-[340px] shrink-0">
+                {/* Desktop-only Side Clues Table (Takes all available space so clues are never trimmed) */}
+                <div className="hidden lg:flex flex-col flex-1 min-w-0 w-full self-stretch">
                   <ClueList
                     clues={puzzle.clues}
                     activeClue={activeClue}
