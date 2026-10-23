@@ -13,7 +13,7 @@ import { TopUpModal } from './components/TopUpModal';
 import { TRANSLATIONS, type Language } from './utils/translations';
 import { speakTeluguText, startTeluguListening, splitIntoTeluguSyllables } from './utils/speech';
 import { templeAudio } from './utils/templeAudio';
-import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter } from 'lucide-react';
+import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter, Play } from 'lucide-react';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 
 const INITIAL_HINTS: HintOption[] = [
@@ -79,6 +79,7 @@ export function App() {
   const [incorrectCells, setIncorrectCells] = useState<[number, number][]>([]);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+  const [hasPaused, setHasPaused] = useState<boolean>(false);
   const [isSolved, setIsSolved] = useState<boolean>(false);
 
   // Language switch: 'te' (Telugu) | 'en' (English UI)
@@ -194,6 +195,19 @@ export function App() {
     return () => clearInterval(interval);
   }, [isTimerRunning, isSolved, loading]);
 
+  // Anti-cheat: Auto-pause when user leaves tab / minimizes app to search answers
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && isTimerRunning && !isSolved && !loading) {
+        setIsTimerRunning(false);
+        setHasPaused(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isTimerRunning, isSolved, loading]);
+
   const ensureTimerRunning = () => {
     if (!isTimerRunning && !isSolved && !loading) {
       setIsTimerRunning(true);
@@ -242,6 +256,7 @@ export function App() {
     setIncorrectCells([]);
     setIsSolved(false);
     setIsTimerRunning(false);
+    setHasPaused(false);
     setTimerSeconds(0);
 
     const data = await fetchGeneratedPuzzle(diff);
@@ -257,6 +272,7 @@ export function App() {
     setIncorrectCells([]);
     setIsSolved(false);
     setIsTimerRunning(false);
+    setHasPaused(false);
     setTimerSeconds(0);
 
     const data = await fetchDailyPuzzle();
@@ -272,6 +288,7 @@ export function App() {
     const newGrid = data.mask.map(row => row.map(isPlayable => (isPlayable ? '' : null)));
     setUserGrid(newGrid);
     setIsTimerRunning(false);
+    setHasPaused(false);
     setTimerSeconds(0);
 
     for (let r = 0; r < data.size; r++) {
@@ -422,7 +439,7 @@ export function App() {
       setMascotMoodOverride('celebrating');
       templeAudio.playSuccessFanfare();
       const targetTime = TARGET_TIMES[difficulty];
-      const isUnderTime = timerSeconds <= targetTime;
+      const isUnderTime = !hasPaused && timerSeconds <= targetTime;
       const speedBonusCoins = isUnderTime ? 5 : 0;
 
       const mult = difficulty === 'kids' ? 0.8 : (difficulty === 'easy' ? 1 : (difficulty === 'medium' ? 1.5 : 2));
@@ -439,11 +456,17 @@ export function App() {
         origin: { y: 0.6 }
       });
 
-      const message = isUnderTime
+      let message = isUnderTime
         ? (language === 'te'
             ? `🎉 అభినందనలు! నిర్ణీత సమయంలో పూర్తి చేశారు! +${earnedCoins} నాణేలు (+5 వేగ బోనస్ 🪙) గెలుచుకున్నారు!`
             : `🎉 Solved within time! +${earnedCoins} Coins (+5 Speed Bonus 🪙) awarded!`)
         : t.solvedMsg;
+
+      if (!isUnderTime && hasPaused) {
+        message += language === 'te'
+          ? ' (ఆటలో విరామం తీసుకున్నందున స్పీడ్ బోనస్ రద్దు అయింది)'
+          : ' (Speed bonus forfeited due to pause)';
+      }
 
       setStatusMessage(message);
     } else {
@@ -694,9 +717,15 @@ export function App() {
           onDifficultyChange={(d) => handleRequestNewPuzzle(d)}
           timerSeconds={timerSeconds}
           isTimerRunning={isTimerRunning}
+          hasPaused={hasPaused}
           onToggleTimer={() => {
             if (!isSolved && !loading) {
-              setIsTimerRunning(r => !r);
+              if (isTimerRunning) {
+                setIsTimerRunning(false);
+                setHasPaused(true);
+              } else {
+                setIsTimerRunning(true);
+              }
             }
           }}
           score={score}
@@ -731,8 +760,84 @@ export function App() {
           </div>
         )}
 
-        {/* 4. Clue Section (Line 1: Across/Down on top, Line 2: Complete Clue, Line 3: Symmetric Action Buttons) */}
-        {activeClue && (
+        {/* Play & Clues Interactive Zone wrapped in relative container for blind-pause protection */}
+        <div className="relative w-full">
+          {/* Frosted Blind-Pause Curtain Overlay (NYT Crossword Anti-Cheat Standard) */}
+          {puzzle && !isSolved && !loading && !isTimerRunning && (
+            <div className="absolute inset-0 z-30 backdrop-blur-md bg-stone-900/60 rounded-2xl flex flex-col items-center justify-center p-4 sm:p-6 text-center select-none shadow-2xl animate-in fade-in duration-200">
+              <div className="bg-[#fffdf9] border-2 border-amber-300 rounded-2xl p-5 sm:p-7 max-w-md w-full shadow-2xl flex flex-col items-center gap-3">
+                {/* Icon Badge */}
+                <div
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${
+                    timerSeconds === 0
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}
+                >
+                  {timerSeconds === 0 ? '🎮' : '⏸️'}
+                </div>
+
+                {/* Title */}
+                <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 font-telugu">
+                  {timerSeconds === 0
+                    ? (language === 'te' ? 'పదవినోదం సిద్ధంగా ఉంది' : 'Ready to Play')
+                    : (language === 'te' ? 'ఆట విరామంలో ఉంది' : 'Game Paused')}
+                </h3>
+
+                {/* Description */}
+                <p className="text-xs sm:text-sm text-stone-600 font-telugu leading-relaxed">
+                  {timerSeconds === 0
+                    ? (language === 'te'
+                        ? 'ఆధారాలు మరియు గడులను చూసి పరిష్కరించడానికి ఆటను ప్రారంభించండి.'
+                        : 'Start the game to reveal the clues and crossword grid.')
+                    : (language === 'te'
+                        ? 'సమయం ఆపినప్పుడు ఆధారాలు మరియు గడులు దాచబడతాయి. కొనసాగించడానికి క్రింది బటన్ నొక్కండి.'
+                        : 'Clues and grid are hidden while the timer is paused. Tap resume to continue.')}
+                </p>
+
+                {/* Anti-Cheat Speed Bonus Alert */}
+                {timerSeconds > 0 && hasPaused && (
+                  <div className="bg-amber-50 border border-amber-300 text-amber-900 text-[11px] sm:text-xs py-1.5 px-3 rounded-lg font-medium">
+                    {language === 'te'
+                      ? '⚠️ విరామం తీసుకున్నందున స్పీడ్ బోనస్ నాణాలు (+5 🪙) రద్దు చేయబడ్డాయి'
+                      : '⚠️ Speed bonus (+5 🪙) is forfeited for this paused run'}
+                  </div>
+                )}
+
+                {/* Target time info on initial start */}
+                {timerSeconds === 0 && (
+                  <div className="bg-stone-100 border border-stone-200 text-stone-700 text-[11px] sm:text-xs py-1 px-3 rounded-lg font-mono">
+                    {language === 'te'
+                      ? `లక్ష్య సమయం: ${Math.floor(targetTime / 60)} నిమిషాలు • స్పీడ్ బోనస్: +5 🪙`
+                      : `Target: ${Math.floor(targetTime / 60)} mins • Speed Bonus: +5 🪙`}
+                  </div>
+                )}
+
+                {/* Resume / Start Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsTimerRunning(true);
+                  }}
+                  className={`w-full py-2.5 sm:py-3 px-6 rounded-xl font-bold text-sm sm:text-base text-white shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2 ${
+                    timerSeconds === 0
+                      ? 'bg-emerald-700 hover:bg-emerald-800'
+                      : 'bg-amber-700 hover:bg-amber-800'
+                  }`}
+                >
+                  <Play size={18} className="fill-white" />
+                  <span>
+                    {timerSeconds === 0
+                      ? (language === 'te' ? 'ఆటను ప్రారంభించండి' : 'Start Puzzle')
+                      : (language === 'te' ? 'కొనసాగించండి' : 'Resume Puzzle')}
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 4. Clue Section (Line 1: Across/Down on top, Line 2: Complete Clue, Line 3: Symmetric Action Buttons) */}
+          {activeClue && (
           <div className="mb-2.5 sm:mb-3 p-2.5 sm:p-3 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/90 border-2 border-amber-300 rounded-2xl shadow-xs flex flex-col gap-1.5 sm:gap-2 print:hidden">
             {/* Line 1: Across & Down on Top + Syllable Count */}
             <div className="flex items-center justify-between border-b border-amber-200/70 pb-1.5 sm:pb-2">
@@ -890,6 +995,7 @@ export function App() {
 
           </>
         )}
+        </div>
 
         {/* App Footer: In-App Privacy Policy & Developer Links */}
         <footer className="mt-8 pt-4 border-t border-stone-200 text-stone-500 font-telugu select-none print:hidden flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">

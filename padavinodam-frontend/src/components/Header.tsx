@@ -14,6 +14,7 @@ interface HeaderProps {
   onDifficultyChange: (diff: GameDifficulty) => void;
   timerSeconds: number;
   isTimerRunning?: boolean;
+  hasPaused?: boolean;
   onToggleTimer?: () => void;
   score: number;
   bonusTimeAlert?: string | null;
@@ -39,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
   onDifficultyChange,
   timerSeconds,
   isTimerRunning = false,
+  hasPaused = false,
   onToggleTimer,
   score,
   bonusTimeAlert: _bonusTimeAlert,
@@ -69,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const isSpeedBonusEligible = timerSeconds <= targetTimeSeconds;
+  const isSpeedBonusEligible = !hasPaused && timerSeconds <= targetTimeSeconds;
   const isTimeUp = timerSeconds >= targetTimeSeconds;
 
   return (
