@@ -146,29 +146,31 @@ export const CrosswordGrid: React.FC<CrosswordGridProps> = ({
     <div className="flex flex-col items-center">
       {/* 
         Authentic Newspaper Crossword Box:
-        - Outer border: 2px coral-red (#ea3a3a)
-        - Inner lines: 1px coral-red grid gap (#f87171)
-        - Pure white cell backgrounds
-        - Dark blue flower rosettes for blocked cells
-        - Small red numbers in top-left
+        - Outer border: Crisp 2px crimson red (#dc2626)
+        - Inner lines: Solid 1px crimson red borders (#dc2626) on each cell
+        - Zero gap to eliminate subpixel rounding gaps and misalignment
+        - Pure white cell backgrounds with dark blue flower rosettes
       */}
       <div
         ref={containerRef}
-        className="inline-grid bg-[#f87171] p-[2px] rounded-xs border-2 border-[#ea3a3a] shadow-lg select-none max-w-full overflow-hidden"
+        className="inline-grid bg-white border-2 border-[#dc2626] shadow-md select-none max-w-full"
         style={{
-          gridTemplateColumns: `repeat(${puzzle.size}, auto)`,
-          gridTemplateRows: `repeat(${puzzle.size}, auto)`,
-          gap: '1px'
+          gridTemplateColumns: `repeat(${puzzle.size}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${puzzle.size}, minmax(0, 1fr))`
         }}
       >
         {puzzle.mask.map((row, r) =>
           row.map((isPlayable, c) => {
+            const isLastCol = c === puzzle.size - 1;
+            const isLastRow = r === puzzle.size - 1;
+            const borderClasses = `${!isLastCol ? 'border-r border-[#dc2626]' : ''} ${!isLastRow ? 'border-b border-[#dc2626]' : ''}`;
+
             // Blocked / Rosette cell (White box with blue flower)
             if (!isPlayable) {
               return (
                 <div
                   key={`${r}-${c}`}
-                  className={`${dims.cellClass} bg-white aspect-square flex items-center justify-center p-0.5 select-none pointer-events-none`}
+                  className={`${dims.cellClass} ${borderClasses} bg-white aspect-square flex items-center justify-center p-0.5 select-none pointer-events-none`}
                   title="పూల గుర్తు"
                 >
                   <TeluguFlowerRosette className={dims.flowerSize} />
@@ -189,7 +191,7 @@ export const CrosswordGrid: React.FC<CrosswordGridProps> = ({
                   templeAudio.playTileTap();
                   onSelectCell(r, c);
                 }}
-                className={`${dims.cellClass} relative aspect-square flex items-center justify-center cursor-pointer select-none transition-colors ${
+                className={`${dims.cellClass} ${borderClasses} relative aspect-square flex items-center justify-center cursor-pointer select-none transition-colors ${
                   isSelected
                     ? 'bg-amber-100 ring-2 ring-amber-500 ring-inset z-10'
                     : inWord
@@ -201,7 +203,7 @@ export const CrosswordGrid: React.FC<CrosswordGridProps> = ({
               >
                 {/* Red Clue Number in Top-Left (Exact replica of newspaper photo) */}
                 {num && (
-                  <span className={`absolute top-0.5 left-0.5 ${dims.numSize} font-bold text-red-600 font-sans leading-none pointer-events-none`}>
+                  <span className={`absolute top-0.5 left-0.5 ${dims.numSize} font-bold text-red-600 font-sans leading-none pointer-events-none select-none z-10`}>
                     {num}
                   </span>
                 )}
