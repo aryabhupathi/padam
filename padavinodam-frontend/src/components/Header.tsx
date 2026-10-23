@@ -13,6 +13,8 @@ interface HeaderProps {
   difficulty: GameDifficulty;
   onDifficultyChange: (diff: GameDifficulty) => void;
   timerSeconds: number;
+  isTimerRunning?: boolean;
+  onToggleTimer?: () => void;
   score: number;
   bonusTimeAlert?: string | null;
   language: Language;
@@ -36,6 +38,8 @@ export const Header: React.FC<HeaderProps> = ({
   difficulty,
   onDifficultyChange,
   timerSeconds,
+  isTimerRunning = false,
+  onToggleTimer,
   score,
   bonusTimeAlert: _bonusTimeAlert,
   language,
@@ -137,14 +141,43 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="truncate">{score}</span>
         </div>
 
-        {/* Time */}
-        <div 
-          className="flex items-center justify-center gap-1 bg-stone-100 border border-stone-300 px-1.5 py-1.5 rounded-xl text-xs font-bold font-mono text-stone-700 shadow-2xs"
-          title={language === 'te' ? 'సమయం (Time)' : 'Time'}
+        {/* Time with Play / Pause / Start Toggle */}
+        <button
+          type="button"
+          onClick={onToggleTimer}
+          className={`flex items-center justify-center gap-1 border px-1.5 py-1.5 rounded-xl text-xs font-bold font-mono shadow-2xs transition active:scale-95 cursor-pointer ${
+            !isTimerRunning && timerSeconds === 0
+              ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
+              : !isTimerRunning && timerSeconds > 0
+              ? 'bg-amber-100 hover:bg-amber-200 border-amber-400 text-amber-900 animate-pulse'
+              : 'bg-stone-100 hover:bg-stone-200 border-stone-300 text-stone-700'
+          }`}
+          title={
+            !isTimerRunning && timerSeconds === 0
+              ? (language === 'te' ? 'సమయం ప్రారంభించండి (Start Timer)' : 'Start Timer')
+              : !isTimerRunning
+              ? (language === 'te' ? 'కొనసాగించండి (Resume Timer)' : 'Resume Timer')
+              : (language === 'te' ? 'విరామం (Pause Timer)' : 'Pause Timer')
+          }
         >
-          <Clock size={13} className={isSpeedBonusEligible ? 'text-emerald-700 shrink-0' : 'text-stone-500 shrink-0'} />
-          <span className="truncate">{formatTime(timerSeconds)}</span>
-        </div>
+          <Clock
+            size={13}
+            className={
+              !isTimerRunning && timerSeconds === 0
+                ? 'text-emerald-600 shrink-0'
+                : isSpeedBonusEligible
+                ? 'text-emerald-700 shrink-0'
+                : 'text-stone-500 shrink-0'
+            }
+          />
+          <span className="truncate">
+            {!isTimerRunning && timerSeconds === 0
+              ? `▶ 00:00`
+              : !isTimerRunning
+              ? `⏸ ${formatTime(timerSeconds)}`
+              : formatTime(timerSeconds)}
+          </span>
+        </button>
 
         {/* Energy */}
         <button
@@ -158,71 +191,74 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
       </div>
 
-      {/* 3. Modes: Easy, Medium, Hard, Kids (No counts) */}
-      <div className="grid grid-cols-4 gap-1 mt-2 bg-stone-200/70 p-1 rounded-xl">
-        {(['easy', 'medium', 'hard', 'kids'] as GameDifficulty[]).map((d) => {
-          const active = difficulty === d;
-          const isKidsLocked = d === 'kids' && !isKidsUnlocked;
-          const labels: Record<GameDifficulty, string> = {
-            easy: t.easyMode,
-            medium: t.mediumMode,
-            hard: t.hardMode,
-            kids: t.kidsMode
-          };
-          return (
-            <button
-              key={d}
-              type="button"
-              onClick={() => {
-                if (isKidsLocked) {
-                  onOpenTopUp('kids');
-                } else {
-                  onDifficultyChange(d);
-                }
-              }}
-              className={`py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer text-center truncate ${
-                active
-                  ? 'bg-white text-stone-900 shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-300/40'
-              } ${isKidsLocked ? 'text-purple-900' : ''}`}
-            >
-              {isKidsLocked && <Lock size={11} className="text-purple-600 shrink-0" />}
-              <span className="truncate">{labels[d]}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* 3 & 4. Modes & Actions: Responsive Layout (Stacked on mobile, side-by-side on tablets & desktops) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mt-2">
+        {/* Modes: Easy, Medium, Hard, Kids (No counts) */}
+        <div className="grid grid-cols-4 gap-1 bg-stone-200/70 p-1 rounded-xl flex-1 md:max-w-md">
+          {(['easy', 'medium', 'hard', 'kids'] as GameDifficulty[]).map((d) => {
+            const active = difficulty === d;
+            const isKidsLocked = d === 'kids' && !isKidsUnlocked;
+            const labels: Record<GameDifficulty, string> = {
+              easy: t.easyMode,
+              medium: t.mediumMode,
+              hard: t.hardMode,
+              kids: t.kidsMode
+            };
+            return (
+              <button
+                key={d}
+                type="button"
+                onClick={() => {
+                  if (isKidsLocked) {
+                    onOpenTopUp('kids');
+                  } else {
+                    onDifficultyChange(d);
+                  }
+                }}
+                className={`py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer text-center truncate ${
+                  active
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-300/40'
+                } ${isKidsLocked ? 'text-purple-900' : ''}`}
+              >
+                {isKidsLocked && <Lock size={11} className="text-purple-600 shrink-0" />}
+                <span className="truncate">{labels[d]}</span>
+              </button>
+            );
+          })}
+        </div>
 
-      {/* 4. Action Toolbar: New Puzzle | Daily Challenge | Check Answers */}
-      <div className="grid grid-cols-3 gap-1.5 mt-2">
-        <button
-          type="button"
-          onClick={onNewPuzzle}
-          disabled={loading}
-          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-medium text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
-        >
-          <RefreshCw size={13} className={loading ? 'animate-spin shrink-0' : 'shrink-0'} />
-          <span className="truncate">{t.newPuzzle}</span>
-        </button>
+        {/* Action Toolbar: New Puzzle | Daily Challenge | Check Answers */}
+        <div className="grid grid-cols-3 gap-1.5 flex-1 md:max-w-sm">
+          <button
+            type="button"
+            onClick={onNewPuzzle}
+            disabled={loading}
+            className="flex items-center justify-center gap-1 py-1.5 px-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-medium text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin shrink-0' : 'shrink-0'} />
+            <span className="truncate">{t.newPuzzle}</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={onDailyPuzzle}
-          disabled={loading}
-          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-medium text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
-        >
-          <Calendar size={13} className="shrink-0" />
-          <span className="truncate">{t.dailyChallenge}</span>
-        </button>
+          <button
+            type="button"
+            onClick={onDailyPuzzle}
+            disabled={loading}
+            className="flex items-center justify-center gap-1 py-1.5 px-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-medium text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            <Calendar size={13} className="shrink-0" />
+            <span className="truncate">{t.dailyChallenge}</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={onVerify}
-          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
-        >
-          <CheckCircle size={13} className="shrink-0" />
-          <span className="truncate">{t.verify}</span>
-        </button>
+          <button
+            type="button"
+            onClick={onVerify}
+            className="flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
+          >
+            <CheckCircle size={13} className="shrink-0" />
+            <span className="truncate">{t.verify}</span>
+          </button>
+        </div>
       </div>
 
       {/* Reveal All: ONLY appears when time is up for that mode */}

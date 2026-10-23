@@ -91,11 +91,11 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
   };
 
   return (
-    <div className="bg-stone-100/90 border-2 border-stone-300 rounded-xl p-3 md:p-4 shadow-sm w-full select-none">
+    <div className="bg-stone-100/90 border-2 border-stone-300 rounded-xl p-2.5 sm:p-3 md:p-3.5 shadow-sm w-full select-none">
       {/* Top Bar: Full-width Phonetic Input & Action Buttons */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2 mb-2 sm:mb-2.5">
         {/* Phonetic Input Box */}
-        <div className="flex-1 flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-stone-300 shadow-2xs focus-within:ring-2 focus-within:ring-amber-500">
+        <div className="flex-1 flex items-center gap-2 bg-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-stone-300 shadow-2xs focus-within:ring-2 focus-within:ring-amber-500">
           <Keyboard size={18} className="text-amber-800 shrink-0" />
           <input
             type="text"
@@ -113,7 +113,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
               <button
                 type="button"
                 onClick={() => setPhoneticInput('')}
-                className="text-stone-400 hover:text-stone-700"
+                className="text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X size={15} />
               </button>
@@ -127,7 +127,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
             <button
               type="button"
               onClick={onVoiceInput}
-              className={`px-3 py-2 rounded-lg font-bold text-xs md:text-sm shadow-2xs transition active:scale-95 flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs md:text-sm shadow-2xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer ${
                 isListening
                   ? 'bg-red-600 text-white animate-pulse ring-2 ring-red-400'
                   : 'bg-white hover:bg-stone-50 border border-stone-300 text-stone-700'
@@ -142,7 +142,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
           <button
             type="button"
             onClick={() => onInsertSyllable('')}
-            className="flex-1 sm:flex-none px-2.5 py-2 bg-white hover:bg-stone-50 border border-stone-300 rounded-lg text-xs md:text-sm font-medium text-stone-700 shadow-2xs transition active:scale-95"
+            className="flex-1 sm:flex-none px-2 sm:px-2.5 py-1.5 sm:py-2 bg-white hover:bg-stone-50 border border-stone-300 rounded-lg text-xs md:text-sm font-medium text-stone-700 shadow-2xs transition active:scale-95 cursor-pointer"
             title="ఖాళీ (Empty Space)"
           >
             స్పేస్ (Space)
@@ -150,7 +150,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
           <button
             type="button"
             onClick={onBackspace}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-3 py-2 bg-red-700 hover:bg-red-800 text-white rounded-lg text-xs md:text-sm font-bold shadow-2xs transition active:scale-95"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-red-700 hover:bg-red-800 text-white rounded-lg text-xs md:text-sm font-bold shadow-2xs transition active:scale-95 cursor-pointer"
           >
             <Delete size={15} />
             <span>{t.backspace}</span>
@@ -159,19 +159,19 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
       </div>
 
       {/* Category Tabs across the whole card */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-2.5 border-b border-stone-200 text-xs font-semibold scrollbar-none">
+      <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto pb-1 mb-2 border-b border-stone-200 text-xs font-semibold scrollbar-none">
         {puzzleSyllables.length > 0 && (
           <button
             type="button"
             onClick={() => setActiveCategory('puzzle')}
-            className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center gap-1 ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center gap-1 cursor-pointer ${
               activeCategory === 'puzzle'
                 ? 'bg-amber-600 text-white shadow-xs font-bold'
                 : 'bg-white text-stone-600 hover:bg-stone-200'
             }`}
           >
             <Sparkles size={13} />
-            <span>{language === 'te' ? 'ఈ పజిల్ అక్షరాలు (Quick Access)' : 'Puzzle Letters (Quick Access)'}</span>
+            <span>{language === 'te' ? 'ఈ పజిల్ అక్షరాలు' : 'Puzzle Letters'}</span>
             <span className="ml-1 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
               {puzzleSyllables.length}
             </span>
@@ -181,7 +181,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
         <button
           type="button"
           onClick={() => setActiveCategory('common')}
-          className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
             activeCategory === 'common'
               ? 'bg-amber-600 text-white shadow-xs font-bold'
               : 'bg-white text-stone-600 hover:bg-stone-200'
@@ -193,7 +193,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
         <button
           type="button"
           onClick={() => setActiveCategory('hallulu')}
-          className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
             activeCategory === 'hallulu'
               ? 'bg-amber-600 text-white shadow-xs font-bold'
               : 'bg-white text-stone-600 hover:bg-stone-200'
@@ -205,7 +205,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
         <button
           type="button"
           onClick={() => setActiveCategory('achchulu')}
-          className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
             activeCategory === 'achchulu'
               ? 'bg-amber-600 text-white shadow-xs font-bold'
               : 'bg-white text-stone-600 hover:bg-stone-200'
@@ -217,7 +217,7 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
         <button
           type="button"
           onClick={() => setActiveCategory('guninthalu')}
-          className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+          className={`px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
             activeCategory === 'guninthalu'
               ? 'bg-amber-600 text-white shadow-xs font-bold'
               : 'bg-white text-stone-600 hover:bg-stone-200'
@@ -227,17 +227,17 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
         </button>
       </div>
 
-      {/* Spacious Full-Card Keyboard Grid */}
-      <div className="bg-white border border-stone-200 rounded-lg p-2.5 min-h-[120px] max-h-[190px] overflow-y-auto shadow-inner">
+      {/* Compact Full-Card Keyboard Grid (Calibrated for Tablets & Phones) */}
+      <div className="bg-white border border-stone-200 rounded-lg p-2 sm:p-2.5 min-h-[90px] max-h-[150px] sm:max-h-[170px] md:max-h-[180px] overflow-y-auto shadow-inner">
         {/* Active: Puzzle Syllables (Immediate 1-click solving) */}
         {activeCategory === 'puzzle' && (
-          <div className="flex flex-wrap gap-1.5 md:gap-2">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5">
             {puzzleSyllables.map((syl) => (
               <button
                 key={syl}
                 type="button"
                 onClick={() => onInsertSyllable(syl)}
-                className="min-w-[42px] h-[40px] md:min-w-[48px] md:h-[44px] bg-amber-50 hover:bg-amber-200 border border-amber-300 text-amber-950 font-bold rounded-lg flex items-center justify-center text-base md:text-lg font-telugu transition active:scale-95 shadow-2xs hover:shadow-xs"
+                className="min-w-[36px] h-[34px] sm:min-w-[40px] sm:h-[38px] md:min-w-[44px] md:h-[40px] bg-amber-50 hover:bg-amber-200 border border-amber-300 text-amber-950 font-bold rounded-lg flex items-center justify-center text-sm sm:text-base font-telugu transition active:scale-95 shadow-2xs hover:shadow-xs cursor-pointer"
               >
                 {syl}
               </button>
@@ -247,13 +247,13 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
 
         {/* Active: Common Syllables */}
         {activeCategory === 'common' && (
-          <div className="flex flex-wrap gap-1.5 md:gap-2">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5">
             {COMMON_SYLLABLES.map((syl) => (
               <button
                 key={syl}
                 type="button"
                 onClick={() => onInsertSyllable(syl)}
-                className="min-w-[40px] h-[38px] md:min-w-[46px] md:h-[42px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-sm md:text-base font-telugu transition active:scale-95"
+                className="min-w-[36px] h-[34px] sm:min-w-[40px] sm:h-[38px] md:min-w-[44px] md:h-[40px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-sm sm:text-base font-telugu transition active:scale-95 cursor-pointer"
               >
                 {syl}
               </button>
@@ -263,13 +263,13 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
 
         {/* Active: Hallulu (Consonants) */}
         {activeCategory === 'hallulu' && (
-          <div className="flex flex-wrap gap-1.5 md:gap-2">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5">
             {TELUGU_HALLULU.map((syl) => (
               <button
                 key={syl}
                 type="button"
                 onClick={() => onInsertSyllable(syl)}
-                className="min-w-[42px] h-[40px] md:min-w-[48px] md:h-[44px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-base md:text-lg font-telugu transition active:scale-95 shadow-2xs"
+                className="min-w-[36px] h-[34px] sm:min-w-[40px] sm:h-[38px] md:min-w-[44px] md:h-[40px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-sm sm:text-base font-telugu transition active:scale-95 shadow-2xs cursor-pointer"
               >
                 {syl}
               </button>
@@ -279,13 +279,13 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
 
         {/* Active: Achchulu (Vowels) */}
         {activeCategory === 'achchulu' && (
-          <div className="flex flex-wrap gap-1.5 md:gap-2">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5">
             {TELUGU_ACHCHULU.map((syl) => (
               <button
                 key={syl}
                 type="button"
                 onClick={() => onInsertSyllable(syl)}
-                className="min-w-[42px] h-[40px] md:min-w-[48px] md:h-[44px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-base md:text-lg font-telugu transition active:scale-95 shadow-2xs"
+                className="min-w-[36px] h-[34px] sm:min-w-[40px] sm:h-[38px] md:min-w-[44px] md:h-[40px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-sm sm:text-base font-telugu transition active:scale-95 shadow-2xs cursor-pointer"
               >
                 {syl}
               </button>
@@ -295,13 +295,13 @@ export const TeluguKeypad: React.FC<TeluguKeypadProps> = ({
 
         {/* Active: Guninthalu & Signs */}
         {activeCategory === 'guninthalu' && (
-          <div className="flex flex-wrap gap-1.5 md:gap-2">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5">
             {TELUGU_GUNINTHALU.map((syl) => (
               <button
                 key={syl}
                 type="button"
                 onClick={() => onInsertSyllable(syl)}
-                className="min-w-[42px] h-[40px] md:min-w-[48px] md:h-[44px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-base md:text-lg font-telugu transition active:scale-95 shadow-2xs"
+                className="min-w-[36px] h-[34px] sm:min-w-[40px] sm:h-[38px] md:min-w-[44px] md:h-[40px] bg-stone-50 hover:bg-stone-200 border border-stone-200 text-stone-900 font-bold rounded-lg flex items-center justify-center text-sm sm:text-base font-telugu transition active:scale-95 shadow-2xs cursor-pointer"
               >
                 {syl}
               </button>

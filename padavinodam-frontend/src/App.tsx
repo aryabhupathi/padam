@@ -78,6 +78,7 @@ export function App() {
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [incorrectCells, setIncorrectCells] = useState<[number, number][]>([]);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [isSolved, setIsSolved] = useState<boolean>(false);
 
   // Language switch: 'te' (Telugu) | 'en' (English UI)
@@ -184,14 +185,20 @@ export function App() {
     loadPuzzle(initialDiff);
   }, []);
 
-  // Timer loop
+  // Timer loop: Only runs when active, not paused, not loading, and not solved
   useEffect(() => {
-    if (isSolved) return;
+    if (!isTimerRunning || isSolved || loading) return;
     const interval = setInterval(() => {
       setTimerSeconds(s => s + 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [isSolved]);
+  }, [isTimerRunning, isSolved, loading]);
+
+  const ensureTimerRunning = () => {
+    if (!isTimerRunning && !isSolved && !loading) {
+      setIsTimerRunning(true);
+    }
+  };
 
   // Passive auto-regen: 1 point every 2 hours
   useEffect(() => {
@@ -234,6 +241,7 @@ export function App() {
     setStatusMessage(t.loadingNew);
     setIncorrectCells([]);
     setIsSolved(false);
+    setIsTimerRunning(false);
     setTimerSeconds(0);
 
     const data = await fetchGeneratedPuzzle(diff);
@@ -248,6 +256,7 @@ export function App() {
     setStatusMessage(t.loadingDaily);
     setIncorrectCells([]);
     setIsSolved(false);
+    setIsTimerRunning(false);
     setTimerSeconds(0);
 
     const data = await fetchDailyPuzzle();
@@ -262,6 +271,8 @@ export function App() {
     setPuzzle(data);
     const newGrid = data.mask.map(row => row.map(isPlayable => (isPlayable ? '' : null)));
     setUserGrid(newGrid);
+    setIsTimerRunning(false);
+    setTimerSeconds(0);
 
     for (let r = 0; r < data.size; r++) {
       for (let c = 0; c < data.size; c++) {
@@ -290,6 +301,7 @@ export function App() {
   const activeClue = getActiveClue();
 
   const handleSelectCell = (r: number, c: number) => {
+    ensureTimerRunning();
     if (selectedCell.r === r && selectedCell.c === c) {
       setDirection(d => (d === 'across' ? 'down' : 'across'));
     } else {
@@ -298,12 +310,14 @@ export function App() {
   };
 
   const handleSelectClue = (clue: ClueItem, dir: 'across' | 'down') => {
+    ensureTimerRunning();
     setDirection(dir);
     setSelectedCell({ r: clue.row, c: clue.col });
   };
 
   const handleInsertSyllable = (syl: string) => {
     if (!puzzle) return;
+    ensureTimerRunning();
     templeAudio.playTileTap();
     const { r, c } = selectedCell;
     const nextGrid = userGrid.map(row => [...row]);
@@ -326,6 +340,7 @@ export function App() {
 
   const handleBackspace = () => {
     if (!puzzle) return;
+    ensureTimerRunning();
     templeAudio.playTileTap();
     const { r, c } = selectedCell;
     const nextGrid = userGrid.map(row => [...row]);
@@ -504,6 +519,7 @@ export function App() {
 
   // Gamified Hint Handler
   const handleUseHint = (hintType: HintType) => {
+    ensureTimerRunning();
     const hint = hintOptions.find(h => h.id === hintType);
     if (!hint || coins < hint.coinCost) {
       setStatusMessage(
@@ -572,6 +588,7 @@ export function App() {
   // Vocal Feature: Start listening to Telugu voice dictation with multi-syllable auto-fill
   const handleStartVoiceInput = () => {
     if (isListening) return;
+    ensureTimerRunning();
     setIsListening(true);
     setStatusMessage(
       language === 'te' 
@@ -664,9 +681,9 @@ export function App() {
   const targetTime = TARGET_TIMES[difficulty];
 
   return (
-    <div className="min-h-screen bg-[#faf6ee] text-stone-900 font-telugu p-2 sm:p-4 md:p-6 flex flex-col items-center print:bg-white print:p-0 print:m-0 print:min-h-0">
-      {/* Expanded Main Card Container - Generous Desktop Width */}
-      <div className="max-w-7xl w-full bg-[#fffdf9] border-2 border-stone-300 rounded-2xl shadow-lg p-3 sm:p-5 md:p-6 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white print:max-w-full">
+    <div className="min-h-screen bg-[#faf6ee] text-stone-900 font-telugu p-2 sm:p-3 md:p-4 lg:p-6 flex flex-col items-center print:bg-white print:p-0 print:m-0 print:min-h-0">
+      {/* Expanded Main Card Container - Generous Desktop & Tablet Width */}
+      <div className="max-w-7xl w-full bg-[#fffdf9] border-2 border-stone-300 rounded-2xl shadow-lg p-2.5 sm:p-3.5 md:p-4 lg:p-5 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white print:max-w-full">
         <Header
           onNewPuzzle={() => handleRequestNewPuzzle()}
           onDailyPuzzle={loadDailyPuzzle}
@@ -676,6 +693,12 @@ export function App() {
           difficulty={difficulty}
           onDifficultyChange={(d) => handleRequestNewPuzzle(d)}
           timerSeconds={timerSeconds}
+          isTimerRunning={isTimerRunning}
+          onToggleTimer={() => {
+            if (!isSolved && !loading) {
+              setIsTimerRunning(r => !r);
+            }
+          }}
           score={score}
           bonusTimeAlert={bonusTimeAlert}
           language={language}
@@ -710,13 +733,16 @@ export function App() {
 
         {/* 4. Clue Section (Line 1: Across/Down on top, Line 2: Complete Clue, Line 3: Symmetric Action Buttons) */}
         {activeClue && (
-          <div className="mb-3 p-3 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/90 border-2 border-amber-300 rounded-2xl shadow-xs flex flex-col gap-2 print:hidden">
+          <div className="mb-2.5 sm:mb-3 p-2.5 sm:p-3 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/90 border-2 border-amber-300 rounded-2xl shadow-xs flex flex-col gap-1.5 sm:gap-2 print:hidden">
             {/* Line 1: Across & Down on Top + Syllable Count */}
-            <div className="flex items-center justify-between border-b border-amber-200/70 pb-2">
+            <div className="flex items-center justify-between border-b border-amber-200/70 pb-1.5 sm:pb-2">
               <div className="inline-flex rounded-lg bg-stone-100 p-0.5 border border-stone-200">
                 <button
                   type="button"
-                  onClick={() => setDirection("across")}
+                  onClick={() => {
+                    ensureTimerRunning();
+                    setDirection("across");
+                  }}
                   className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
                     direction === "across"
                       ? "bg-red-600 text-white shadow-xs"
@@ -728,7 +754,10 @@ export function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setDirection("down")}
+                  onClick={() => {
+                    ensureTimerRunning();
+                    setDirection("down");
+                  }}
                   className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
                     direction === "down"
                       ? "bg-blue-600 text-white shadow-xs"
@@ -746,7 +775,7 @@ export function App() {
             </div>
 
             {/* Line 2: Complete Clue Text (Never truncated) */}
-            <div className="py-1 px-1">
+            <div className="py-0.5 sm:py-1 px-1">
               <p className="font-telugu font-bold text-sm sm:text-base md:text-lg text-stone-900 leading-snug">
                 <span className="text-amber-800 font-mono font-bold mr-1.5">
                   {activeClue.number}.
@@ -759,8 +788,11 @@ export function App() {
             <div className="grid grid-cols-4 gap-1.5 pt-1.5 border-t border-amber-200/70">
               <button
                 type="button"
-                onClick={() => speakTeluguText(activeClue.clue, (msg) => setStatusMessage(msg))}
-                className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-white hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-300 text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+                onClick={() => {
+                  ensureTimerRunning();
+                  speakTeluguText(activeClue.clue, (msg) => setStatusMessage(msg));
+                }}
+                className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-300 text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
                 title={language === "te" ? "క్లూను చదివి వినిపించు (Listen)" : "Read Clue Aloud"}
               >
                 <Volume2 size={14} className="text-amber-700 shrink-0" />
@@ -783,7 +815,10 @@ export function App() {
 
               <button
                 type="button"
-                onClick={() => setIsHintsModalOpen(true)}
+                onClick={() => {
+                  ensureTimerRunning();
+                  setIsHintsModalOpen(true);
+                }}
                 className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
                 title={language === "te" ? "సూచన తీసుకోండి (Hints)" : "Use Hint"}
               >

@@ -106,36 +106,36 @@ export const CrosswordGrid: React.FC<CrosswordGridProps> = ({
     }
   };
 
-  // Cell sizing calibrated to match authentic Telugu newspaper layouts
+  // Cell sizing calibrated to match authentic Telugu newspaper layouts and fit tablets & mobile screens
   const getCellDimensions = () => {
     if (puzzle.size <= 5) {
       return {
-        cellClass: 'w-13 h-13 sm:w-15 sm:h-15 md:w-16 md:h-16',
-        fontSize: 'text-xl sm:text-2xl md:text-3xl',
-        numSize: 'text-[10px] sm:text-xs md:text-sm',
-        flowerSize: 'w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9'
+        cellClass: 'w-12 h-12 sm:w-13 sm:h-13 md:w-14 md:h-14',
+        fontSize: 'text-xl sm:text-2xl md:text-2xl',
+        numSize: 'text-[10px] sm:text-xs md:text-xs',
+        flowerSize: 'w-6 h-6 sm:w-7 sm:h-7 md:w-7 md:h-7'
       };
     } else if (puzzle.size <= 7) {
       return {
-        cellClass: 'w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14',
-        fontSize: 'text-lg sm:text-xl md:text-2xl',
+        cellClass: 'w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12',
+        fontSize: 'text-base sm:text-lg md:text-xl',
         numSize: 'text-[9px] sm:text-[10px] md:text-xs',
-        flowerSize: 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8'
+        flowerSize: 'w-5.5 h-5.5 sm:w-6 sm:h-6 md:w-6.5 md:h-6.5'
       };
     } else if (puzzle.size <= 9) {
       return {
-        cellClass: 'w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11',
-        fontSize: 'text-sm sm:text-base md:text-lg',
-        numSize: 'text-[8px] sm:text-[9px] md:text-[10px]',
-        flowerSize: 'w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7'
+        cellClass: 'w-8.5 h-8.5 sm:w-9 sm:h-9 md:w-9.5 md:h-9.5 lg:w-10 lg:h-10',
+        fontSize: 'text-xs sm:text-sm md:text-base',
+        numSize: 'text-[8px] sm:text-[8.5px] md:text-[9px]',
+        flowerSize: 'w-4.5 h-4.5 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5'
       };
     } else {
-      // 12x12 Newspaper Classic (photo replica)
+      // 12x12 Newspaper Classic (photo replica, tablet calibrated to prevent vertical overflow)
       return {
-        cellClass: 'w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9',
-        fontSize: 'text-xs sm:text-sm md:text-base',
-        numSize: 'text-[7px] sm:text-[8px] md:text-[9px]',
-        flowerSize: 'w-4 h-4 sm:w-5 sm:h-5 md:w-5.5 md:h-5.5'
+        cellClass: 'w-7 h-7 sm:w-7.5 sm:h-7.5 md:w-8 md:h-8 lg:w-8.5 lg:h-8.5',
+        fontSize: 'text-xs sm:text-xs md:text-sm',
+        numSize: 'text-[7px] sm:text-[7.5px] md:text-[8px]',
+        flowerSize: 'w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5'
       };
     }
   };
@@ -215,7 +215,7 @@ export const CrosswordGrid: React.FC<CrosswordGridProps> = ({
         )}
       </div>
 
-      <div className="flex items-center gap-3 mt-2.5 text-xs text-stone-500 font-sans">
+      <div className="flex items-center gap-3 mt-1.5 sm:mt-2 text-xs text-stone-500 font-sans">
         <span className="inline-flex items-center gap-1">
           <kbd className="px-1.5 py-0.5 bg-stone-200 rounded text-[10px] border border-stone-300 font-mono">{t.spaceKey}</kbd>
           {t.toggleDirection}
