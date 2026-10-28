@@ -76,25 +76,25 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       `}</style>
 
       {/* Top Ornate Vijayanagara Palace Arch Outline */}
-      <div className="w-full max-w-md mx-auto flex flex-col items-center pt-3 animate-in fade-in duration-500">
-        <div className="w-full flex items-center justify-center gap-2">
+      <div className="w-full max-w-md md:max-w-xl mx-auto flex flex-col items-center pt-3 md:pt-6 animate-in fade-in duration-500">
+        <div className="w-full flex items-center justify-center gap-2 md:gap-3">
           <div className="h-0.5 w-1/3 bg-gradient-to-r from-transparent to-amber-400/80" />
-          <div className="p-1 rounded-full bg-amber-100/90 border border-amber-300 shadow-2xs">
-            <Sparkles size={14} className="text-amber-600 animate-spin" />
+          <div className="p-1 md:p-1.5 rounded-full bg-amber-100/90 border border-amber-300 shadow-2xs">
+            <Sparkles size={14} className="size-3.5 md:size-4.5 text-amber-600 animate-spin" />
           </div>
           <div className="h-0.5 w-1/3 bg-gradient-to-l from-transparent to-amber-400/80" />
         </div>
       </div>
 
       {/* Center Royal Brand Awakening */}
-      <div className="relative flex flex-col items-center text-center my-auto px-4 max-w-sm sm:max-w-md w-full">
+      <div className="relative flex flex-col items-center text-center my-auto px-4 max-w-sm sm:max-w-md md:max-w-lg w-full">
         {/* Expanding Golden Ambient Aura & Rays */}
         <div className="absolute inset-0 -m-8 flex items-center justify-center pointer-events-none">
-          <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-amber-400/25 blur-3xl animate-halo-pulse" />
+          <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-[420px] md:h-[420px] rounded-full bg-amber-400/25 blur-3xl animate-halo-pulse" />
         </div>
 
         {/* Slow Rotating Radial Light Pattern */}
-        <div className="absolute w-72 h-72 sm:w-96 sm:h-96 pointer-events-none opacity-[0.05] text-amber-900 animate-rays-rotate">
+        <div className="absolute w-72 h-72 sm:w-96 sm:h-96 md:w-[500px] md:h-[500px] pointer-events-none opacity-[0.05] text-amber-900 animate-rays-rotate">
           <svg viewBox="0 0 100 100" fill="currentColor">
             <polygon points="50,0 52,40 50,50 48,40" />
             <polygon points="100,50 60,52 50,50 60,48" />
@@ -108,7 +108,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         </div>
 
         {/* Grand Golden "పదవినోదం" Royal Emblem */}
-        <div className="relative z-10 w-full max-w-[280px] sm:max-w-[340px] drop-shadow-2xl animate-emblem-bloom">
+        <div className="relative z-10 w-full max-w-[280px] sm:max-w-[340px] md:max-w-[420px] drop-shadow-2xl animate-emblem-bloom">
           <img
             src="/assets/royal_logo.png"
             alt="పదవినోదం"
@@ -117,13 +117,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         </div>
 
         {/* Tagline & Subtitle */}
-        <div className="relative z-10 mt-4 space-y-1.5 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-300">
-          <h2 className="text-sm sm:text-base font-extrabold text-amber-950 tracking-wide">
+        <div className="relative z-10 mt-4 md:mt-6 space-y-1.5 md:space-y-2.5 animate-in fade-in slide-in-from-bottom-3 duration-700 delay-300">
+          <h2 className="text-sm sm:text-base md:text-xl font-extrabold text-amber-950 tracking-wide">
             {language === 'te'
               ? 'శ్రీకృష్ణదేవరాయల ఆస్థాన పద వినోదం'
               : 'Royal Vijayanagara Telugu Crossword'}
           </h2>
-          <p className="text-xs font-semibold text-amber-800/80">
+          <p className="text-xs md:text-sm font-semibold text-amber-800/80">
             {language === 'te'
               ? 'స్వచ్ఛమైన తెలుగు పద ప్రహేళికా వేదిక'
               : 'Pure Telugu Crossword Gaming Platform'}
@@ -132,11 +132,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       </div>
 
       {/* Bottom Loading Progress Pill & Skip Prompt */}
-      <div className="w-full max-w-xs mx-auto pb-4 flex flex-col items-center gap-2 text-center animate-in fade-in duration-700 delay-400">
-        <div className="w-full h-1.5 bg-stone-200/80 rounded-full overflow-hidden border border-amber-300/60 p-0.5">
+      <div className="w-full max-w-xs md:max-w-sm mx-auto pb-4 md:pb-8 flex flex-col items-center gap-2 text-center animate-in fade-in duration-700 delay-400">
+        <div className="w-full h-1.5 md:h-2 bg-stone-200/80 rounded-full overflow-hidden border border-amber-300/60 p-0.5">
           <div className="h-full rounded-full bg-gradient-to-r from-amber-500 via-emerald-600 to-amber-600 animate-pulse w-full" />
         </div>
-        <p className="text-[11px] font-medium text-stone-500">
+        <p className="text-[11px] md:text-xs font-medium text-stone-500">
           {language === 'te' ? 'తాకండి • ప్రారంభమవుతోంది...' : 'Tap to continue...'}
         </p>
       </div>
