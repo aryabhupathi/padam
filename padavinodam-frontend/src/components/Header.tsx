@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { GameDifficulty } from '../types/puzzle';
 import { TRANSLATIONS, type Language } from '../utils/translations';
-import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Zap, Lock, Clock, Bell, BellOff, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Calendar, CheckCircle, Eye, Trophy, Zap, Lock, Clock, Bell, BellOff, ShieldCheck, Home } from 'lucide-react';
 import { templeAudio } from '../utils/templeAudio';
 
 interface HeaderProps {
@@ -28,6 +28,7 @@ interface HeaderProps {
   isSolved?: boolean;
   onOpenPrivacy?: () => void;
   onOpenHints?: () => void;
+  onBackToHome?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -52,7 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
   isKidsUnlocked,
   targetTimeSeconds,
   isSolved,
-  onOpenPrivacy
+  onOpenPrivacy,
+  onBackToHome
 }) => {
   const t = TRANSLATIONS[language];
   const [isMuted, setIsMuted] = useState(templeAudio.isMuted());
@@ -78,9 +80,22 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="pb-2 mb-2 select-none print:hidden">
       {/* 1. Top Header Row: Just Padavinodam on left & Language (EN/TEL) + Controls on right */}
       <div className="flex items-center justify-between gap-2 pb-2 border-b border-stone-200">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-telugu">
-          {language === 'te' ? 'పదవినోదం' : 'Padavinodam'}
-        </h1>
+        <div className="flex items-center gap-2">
+          {onBackToHome && (
+            <button
+              type="button"
+              onClick={onBackToHome}
+              className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 rounded-lg text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+              title={language === 'te' ? 'హోమ్‌కి వెళ్ళు' : 'Back to Home'}
+            >
+              <Home size={15} className="text-amber-700" />
+              <span className="font-telugu hidden sm:inline">{language === 'te' ? 'హోమ్' : 'Home'}</span>
+            </button>
+          )}
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight font-telugu">
+            {language === 'te' ? 'పదవినోదం' : 'Padavinodam'}
+          </h1>
+        </div>
 
         <div className="flex items-center gap-1.5">
           {/* Language Switch Button with just EN / TEL */}

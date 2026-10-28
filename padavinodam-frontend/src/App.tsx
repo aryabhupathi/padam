@@ -15,6 +15,8 @@ import { speakTeluguText, startTeluguListening, splitIntoTeluguSyllables } from 
 import { templeAudio } from './utils/templeAudio';
 import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter, Play } from 'lucide-react';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
+import { HomeScreen } from './components/HomeScreen';
+import { LoadingScreen } from './components/LoadingScreen';
 
 const INITIAL_HINTS: HintOption[] = [
   {
@@ -81,6 +83,14 @@ export function App() {
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [hasPaused, setHasPaused] = useState<boolean>(false);
   const [isSolved, setIsSolved] = useState<boolean>(false);
+
+  // Screen Routing: 'home' | 'loading' | 'game'
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'loading' | 'game'>('home');
+  const [loadingSubTitle, setLoadingSubTitle] = useState<string>('');
+  const [activeSessionInfo, setActiveSessionInfo] = useState<{
+    difficulty: GameDifficulty;
+    timerSeconds: number;
+  } | null>(null);
 
   // Language switch: 'te' (Telugu) | 'en' (English UI)
   const [language, setLanguage] = useState<Language>('te');
@@ -161,13 +171,17 @@ export function App() {
     }
   }, [puzzle, userGrid, timerSeconds, difficulty, selectedCell, direction, isSolved]);
 
-  // Session Restore on Initial Mount
+  // Session Restore & Initial Puzzle Pre-cache on Mount
   useEffect(() => {
     const savedSessionStr = localStorage.getItem('padam_active_session');
     if (savedSessionStr) {
       try {
         const saved = JSON.parse(savedSessionStr);
         if (saved && saved.puzzle && saved.userGrid) {
+          setActiveSessionInfo({
+            difficulty: saved.difficulty || difficulty,
+            timerSeconds: saved.timerSeconds || 0
+          });
           setPuzzle(saved.puzzle);
           setUserGrid(saved.userGrid);
           setTimerSeconds(saved.timerSeconds || 0);
@@ -175,7 +189,7 @@ export function App() {
           setDifficulty(restoredDiff);
           if (saved.selectedCell) setSelectedCell(saved.selectedCell);
           if (saved.direction) setDirection(saved.direction);
-          setStatusMessage(language === 'te' ? 'గత ఆట పునరుద్ధరించబడింది! (Progress Restored)' : 'Game progress restored!');
+          setLoading(false);
           return;
         }
       } catch (e) {
@@ -183,7 +197,10 @@ export function App() {
       }
     }
     const initialDiff = (localStorage.getItem('padam_difficulty') as GameDifficulty) || difficulty;
-    loadPuzzle(initialDiff);
+    fetchGeneratedPuzzle(initialDiff).then(data => {
+      initializePuzzleState(data);
+      setLoading(false);
+    });
   }, []);
 
   // Timer loop: Only runs when active, not paused, not loading, and not solved
@@ -251,6 +268,7 @@ export function App() {
 
   const loadPuzzle = async (diff: GameDifficulty) => {
     localStorage.removeItem('padam_active_session');
+    setActiveSessionInfo(null);
     setLoading(true);
     setStatusMessage(t.loadingNew);
     setIncorrectCells([]);
@@ -267,6 +285,7 @@ export function App() {
 
   const loadDailyPuzzle = async () => {
     localStorage.removeItem('padam_active_session');
+    setActiveSessionInfo(null);
     setLoading(true);
     setStatusMessage(t.loadingDaily);
     setIncorrectCells([]);
@@ -281,6 +300,67 @@ export function App() {
     initializePuzzleState(data);
     setLoading(false);
     setStatusMessage(t.dailyStarted);
+  };
+
+  const handleStartDaily = () => {
+    setLoadingSubTitle(language === 'te' ? 'నేటి అధికారిక ఛాలెంజ్' : 'Daily Challenge');
+    setCurrentScreen('loading');
+    loadDailyPuzzle();
+  };
+
+  const handleStartClassic = (diff: GameDifficulty) => {
+    setDifficulty(diff);
+    localStorage.setItem('padam_difficulty', diff);
+    const sizeName = diff === 'kids' ? '5x5' : diff === 'easy' ? '7x7' : diff === 'medium' ? '9x9' : '12x12';
+    setLoadingSubTitle(`${language === 'te' ? 'క్లాసిక్ ఆట' : 'Classic Mode'} (${sizeName})`);
+    setCurrentScreen('loading');
+    loadPuzzle(diff);
+  };
+
+  const handleStartStory = () => {
+    setLoadingSubTitle(language === 'te' ? 'తెనాలి కథల పజిల్' : 'Tenali Story Mode');
+    setCurrentScreen('loading');
+    loadDailyPuzzle().then(() => {
+      setIsClueListDrawerOpen(true);
+    });
+  };
+
+  const handleResumeGame = () => {
+    const savedSessionStr = localStorage.getItem('padam_active_session');
+    if (savedSessionStr) {
+      try {
+        const saved = JSON.parse(savedSessionStr);
+        if (saved && saved.puzzle && saved.userGrid) {
+          setPuzzle(saved.puzzle);
+          setUserGrid(saved.userGrid);
+          setTimerSeconds(saved.timerSeconds || 0);
+          setDifficulty(saved.difficulty || difficulty);
+          if (saved.selectedCell) setSelectedCell(saved.selectedCell);
+          if (saved.direction) setDirection(saved.direction);
+          setLoading(false);
+          setCurrentScreen('game');
+          setStatusMessage(language === 'te' ? 'గత ఆట పునరుద్ధరించబడింది!' : 'Game progress restored!');
+          return;
+        }
+      } catch (e) {
+        // fallback
+      }
+    }
+    handleStartDaily();
+  };
+
+  const handleBackToHome = () => {
+    setIsTimerRunning(false);
+    if (puzzle && userGrid.length > 0 && !isSolved) {
+      const hasAnyInput = userGrid.some(row => row.some(cell => cell && cell.trim() !== ''));
+      if (hasAnyInput) {
+        setActiveSessionInfo({
+          difficulty,
+          timerSeconds
+        });
+      }
+    }
+    setCurrentScreen('home');
   };
 
   const initializePuzzleState = (data: PuzzleData) => {
@@ -703,18 +783,97 @@ export function App() {
 
   const targetTime = TARGET_TIMES[difficulty];
 
+  if (currentScreen === 'home') {
+    return (
+      <>
+        <HomeScreen
+          language={language}
+          onToggleLanguage={() => setLanguage((l) => (l === "te" ? "en" : "te"))}
+          coins={coins}
+          energyPoints={energyPoints}
+          onOpenTopUp={(mode) => {
+            setTopUpInitialMode(mode || "points");
+            setIsTopUpOpen(true);
+          }}
+          onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
+          onStartDaily={handleStartDaily}
+          onStartClassic={handleStartClassic}
+          onStartStory={handleStartStory}
+          hasActiveSession={!!activeSessionInfo}
+          activeSessionInfo={activeSessionInfo}
+          onResumeGame={handleResumeGame}
+          isKidsUnlocked={isKidsUnlocked}
+        />
+
+        {/* Instant Top-Up Modal accessible from Home */}
+        <TopUpModal
+          isOpen={isTopUpOpen}
+          onClose={() => setIsTopUpOpen(false)}
+          currentPoints={energyPoints}
+          currentCoins={coins}
+          isKidsUnlocked={isKidsUnlocked}
+          language={language}
+          onAddPoints={(energyAmt, coinsAmt) => {
+            setEnergyPoints((prev) => {
+              const updated = prev + energyAmt;
+              localStorage.setItem("padam_energy_points", String(updated));
+              return updated;
+            });
+            setCoins((prev) => {
+              const updated = prev + coinsAmt;
+              localStorage.setItem("padam_coins", String(updated));
+              return updated;
+            });
+          }}
+          onUnlockKids={handleUnlockKidsPermanent}
+          initialMode={topUpInitialMode}
+        />
+
+        {/* Privacy Policy Modal accessible from Home */}
+        <PrivacyPolicyModal
+          isOpen={isPrivacyModalOpen}
+          onClose={() => setIsPrivacyModalOpen(false)}
+          language={language}
+        />
+      </>
+    );
+  }
+
+  if (currentScreen === 'loading') {
+    return (
+      <LoadingScreen
+        language={language}
+        isLoaded={!loading && !!puzzle}
+        onFinished={() => setCurrentScreen('game')}
+        subTitle={loadingSubTitle}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#faf6ee] text-stone-900 font-telugu p-2 sm:p-3 md:p-4 lg:p-6 flex flex-col items-center print:bg-white print:p-0 print:m-0 print:min-h-0">
       {/* Expanded Main Card Container - Generous Desktop & Tablet Width */}
       <div className="max-w-7xl w-full bg-[#fffdf9] border-2 border-stone-300 rounded-2xl shadow-lg p-2.5 sm:p-3.5 md:p-4 lg:p-5 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white print:max-w-full">
         <Header
-          onNewPuzzle={() => handleRequestNewPuzzle()}
-          onDailyPuzzle={loadDailyPuzzle}
+          onNewPuzzle={() => {
+            setLoadingSubTitle(language === 'te' ? 'కొత్త పజిల్' : 'New Puzzle');
+            setCurrentScreen('loading');
+            handleRequestNewPuzzle();
+          }}
+          onDailyPuzzle={() => {
+            setLoadingSubTitle(language === 'te' ? 'నేటి ఛాలెంజ్' : 'Daily Challenge');
+            setCurrentScreen('loading');
+            loadDailyPuzzle();
+          }}
           onVerify={handleVerify}
           onReveal={handleRevealAll}
           loading={loading}
           difficulty={difficulty}
-          onDifficultyChange={(d) => handleRequestNewPuzzle(d)}
+          onDifficultyChange={(d) => {
+            setLoadingSubTitle(language === 'te' ? 'మోడ్ మార్పు' : 'Switching Mode');
+            setCurrentScreen('loading');
+            handleRequestNewPuzzle(d);
+          }}
           timerSeconds={timerSeconds}
           isTimerRunning={isTimerRunning}
           hasPaused={hasPaused}
@@ -745,6 +904,7 @@ export function App() {
           isSolved={isSolved}
           onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
           onOpenHints={() => setIsHintsModalOpen(true)}
+          onBackToHome={handleBackToHome}
         />
 
         {/* Live Status Banner (Hidden on Print) */}
