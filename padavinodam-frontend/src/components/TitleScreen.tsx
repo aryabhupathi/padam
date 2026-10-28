@@ -231,39 +231,155 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         </div>
       </header>
 
-      {/* 2. Center Branding: Grand Unified Royal Hero Showcase (One unbroken card, zero cuts) */}
-      <main className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto flex flex-col items-center text-center my-auto py-2">
-        {/* Golden Aura Glow */}
+      {/* 2. Center Branding: Grand 3D Royal Logo & Tenali Rama Medallion with Floating 3D Crossword Letter Tiles */}
+      <main className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-xl mx-auto flex flex-col items-center text-center my-auto py-2">
+        {/* Golden Sunburst Aura Glow */}
         <div className="absolute inset-0 -m-8 flex items-center justify-center pointer-events-none">
-          <div className="w-72 h-72 sm:w-96 sm:h-96 md:w-[460px] md:h-[460px] rounded-full bg-gradient-to-tr from-amber-400/30 via-orange-300/25 to-yellow-300/20 blur-3xl animate-halo-radiate" />
+          <div className="w-72 h-72 sm:w-96 sm:h-96 md:w-[500px] md:h-[500px] rounded-full bg-gradient-to-tr from-amber-400/30 via-orange-300/25 to-yellow-300/20 blur-3xl animate-halo-radiate" />
         </div>
 
-        {/* Grand Unified Royal Hero Showcase Card */}
-        <div className="relative z-10 w-full max-w-[280px] sm:max-w-[340px] md:max-w-[400px] mb-3 animate-in zoom-in-95 duration-700">
-          <div className="relative w-full aspect-[1.08] rounded-3xl md:rounded-[2.2rem] overflow-hidden shadow-2xl border-3 md:border-4 border-amber-400/90 bg-gradient-to-b from-amber-100/60 to-amber-50/80 animate-tenali-float">
-            <img
-              src="/assets/tenali_royal_hero_card.png"
-              alt="పదవినోదం - తెనాలి రామ"
-              className="w-full h-full object-cover object-center pointer-events-none"
-            />
-            {/* Automatic Diagonal Golden Light Sheen Sweep */}
-            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none animate-logo-sheen" />
+        {/* Grand Royal Vijayanagara Crown Crest */}
+        <div className="relative z-10 flex flex-col items-center mb-1 animate-in zoom-in-95 duration-700">
+          <div className="text-amber-500 drop-shadow-md mb-1 animate-pulse">
+            <svg
+              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Royal Crown / Crest SVG with jewels */}
+              <path
+                d="M24 4L29 16L42 12L36 32H12L6 12L19 16L24 4Z"
+                fill="url(#goldCrownGrad)"
+                stroke="#B45309"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M10 32C10 35 14 38 24 38C34 38 38 35 38 32V36C38 39 34 42 24 42C14 42 10 39 10 36V32Z"
+                fill="url(#goldBaseGrad)"
+                stroke="#B45309"
+                strokeWidth="1.5"
+              />
+              {/* Jewel Accents */}
+              <circle cx="24" cy="18" r="3" fill="#DC2626" stroke="#FEF08A" strokeWidth="1" />
+              <circle cx="16" cy="24" r="2.5" fill="#2563EB" stroke="#FEF08A" strokeWidth="1" />
+              <circle cx="32" cy="24" r="2.5" fill="#059669" stroke="#FEF08A" strokeWidth="1" />
+              <circle cx="24" cy="7" r="2" fill="#FEF08A" />
+              <defs>
+                <linearGradient id="goldCrownGrad" x1="6" y1="4" x2="42" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#FEF08A" />
+                  <stop offset="0.4" stopColor="#F59E0B" />
+                  <stop offset="0.8" stopColor="#D97706" />
+                  <stop offset="1" stopColor="#92400E" />
+                </linearGradient>
+                <linearGradient id="goldBaseGrad" x1="10" y1="32" x2="38" y2="42" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#F59E0B" />
+                  <stop offset="1" stopColor="#78350F" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          {/* Standalone 3D Game Title: పదవినోదం */}
+          <div className="relative inline-block">
+            <h1
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider select-none relative"
+              style={{
+                background: 'linear-gradient(180deg, #FFFBEB 0%, #FEF08A 25%, #F59E0B 60%, #B45309 85%, #78350F 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 4px 0 #78350F) drop-shadow(0 8px 18px rgba(180, 83, 9, 0.45))'
+              }}
+            >
+              {language === 'te' ? 'పదవినోదం' : 'PADAVINODAM'}
+            </h1>
+            {/* Sparkle Twinkles */}
+            <Sparkles className="absolute -top-2 -right-4 sm:-right-6 text-amber-300 w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
+            <Sparkles className="absolute -bottom-1 -left-3 sm:-left-5 text-yellow-400 w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
+            {/* Logo Sheen Sweep */}
+            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-logo-sheen" />
+          </div>
+
+          {/* Imperial Subtitle Ribbon Banner */}
+          <div className="relative inline-flex items-center px-4 py-1 sm:px-6 sm:py-1.5 rounded-full bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 text-amber-100 border-2 border-amber-400/90 shadow-lg text-xs sm:text-sm font-bold tracking-wide mt-1 animate-in fade-in duration-500">
+            <span className="text-amber-300 mr-1.5">✦</span>
+            <span>
+              {language === 'te'
+                ? 'శ్రీకృష్ణదేవరాయల ఆస్థాన ప్రహేళిక'
+                : 'The Royal Vijayanagara Crossword'}
+            </span>
+            <span className="text-amber-300 ml-1.5">✦</span>
           </div>
         </div>
 
-        {/* Royal Subtitle & Tagline */}
-        <div className="relative z-10 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <h2 className="text-base sm:text-lg md:text-2xl font-extrabold text-amber-950 tracking-wide">
-            {language === 'te'
-              ? 'శ్రీకృష్ణదేవరాయల ఆస్థాన పద వినోదం'
-              : 'Royal Vijayanagara Crossword'}
-          </h2>
-          <p className="text-xs md:text-sm font-semibold text-amber-800/90 max-w-xs sm:max-w-md mx-auto">
-            {language === 'te'
-              ? 'స్వచ్ఛమైన తెలుగు పద ప్రహేళికా వేదిక'
-              : 'Pure Telugu Crossword Gaming Experience'}
-          </p>
+        {/* Center Mascot Presentation: Tenali Rama in Royal Ornate Medallion with Floating 3D Crossword Letter Tiles */}
+        <div className="relative my-3 sm:my-4 md:my-5 flex items-center justify-center animate-in zoom-in-95 duration-700">
+          {/* Floating 3D Golden Crossword Letter Tiles around Tenali (Spelling ప - ద - వి - నో - దం) */}
+          {/* Tile 1: ప */}
+          <div
+            className="absolute -left-6 sm:-left-10 md:-left-12 top-2 sm:top-4 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none -rotate-12 cursor-default"
+            style={{ animationDuration: '3.2s' }}
+            title="ప"
+          >
+            ప
+          </div>
+
+          {/* Tile 2: ద */}
+          <div
+            className="absolute -right-6 sm:-right-10 md:-right-12 top-3 sm:top-5 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none rotate-12 cursor-default"
+            style={{ animationDuration: '3.6s', animationDelay: '0.4s' }}
+            title="ద"
+          >
+            ద
+          </div>
+
+          {/* Tile 3: వి */}
+          <div
+            className="absolute -left-5 sm:-left-9 md:-left-11 bottom-6 sm:bottom-8 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none rotate-6 cursor-default"
+            style={{ animationDuration: '3.4s', animationDelay: '0.8s' }}
+            title="వి"
+          >
+            వి
+          </div>
+
+          {/* Tile 4: నో */}
+          <div
+            className="absolute -right-5 sm:-right-9 md:-right-11 bottom-5 sm:bottom-7 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none -rotate-6 cursor-default"
+            style={{ animationDuration: '3.8s', animationDelay: '1.2s' }}
+            title="నో"
+          >
+            నో
+          </div>
+
+          {/* Tile 5: దం */}
+          <div
+            className="absolute -bottom-3.5 z-20 px-3 py-1 sm:px-4 sm:py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 border-2 border-amber-100 shadow-xl flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-pulse select-none"
+            title="దం"
+          >
+            దం
+          </div>
+
+          {/* The Royal Medallion Housing Tenali Rama */}
+          <div className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-56 md:h-56 rounded-full p-1.5 md:p-2 bg-gradient-to-b from-amber-300 via-yellow-200 to-amber-500 shadow-[0_15px_45px_rgba(217,119,6,0.35)] ring-4 sm:ring-6 ring-amber-300/35 animate-tenali-float">
+            <div className="w-full h-full rounded-full overflow-hidden border-2 border-amber-400/90 bg-gradient-to-b from-amber-100 to-amber-200 shadow-inner relative">
+              <img
+                src="/assets/tenali_portrait_clean.png"
+                alt="పదవినోదం - తెనాలి రామ"
+                className="w-full h-full object-cover object-center pointer-events-none"
+              />
+              {/* Medallion Light Sheen Sweep */}
+              <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-logo-sheen" />
+            </div>
+          </div>
         </div>
+
+        {/* Heritage Tagline */}
+        <p className="text-xs sm:text-sm font-semibold text-amber-900/90 max-w-xs sm:max-w-md mx-auto pt-1 animate-in fade-in duration-700">
+          {language === 'te'
+            ? 'స్వచ్ఛమైన తెలుగు పద ప్రహేళిక • ప్రతిరోజూ కొత్త సవాలు'
+            : 'Pure Telugu Crossword Puzzle • Fresh Everyday'}
+        </p>
       </main>
 
       {/* 3. Bottom Action Section: Loading Progress Bar OR Big Bouncing "PLAY" Button */}
