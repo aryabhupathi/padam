@@ -17,7 +17,7 @@ import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter, Play, Share2,
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { HomeScreen } from './components/HomeScreen';
 import { LoadingScreen } from './components/LoadingScreen';
-import { SplashScreen } from './components/SplashScreen';
+import { TitleScreen } from './components/TitleScreen';
 import { SPECIAL_CINEMA_PUZZLE, SPECIAL_PROVERBS_PUZZLE } from './data/specialPuzzles';
 import { speakTenaliWin, speakTenaliSpeedBonus, speakTenaliWrong, speakTenaliHint } from './utils/speech';
 
@@ -90,12 +90,8 @@ export function App() {
   // Screen Routing: 'home' | 'loading' | 'game'
   const [currentScreen, setCurrentScreen] = useState<'home' | 'loading' | 'game'>('home');
   const [loadingSubTitle, setLoadingSubTitle] = useState<string>('');
-  const [showSplash, setShowSplash] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return !sessionStorage.getItem('padam_splash_shown');
-    }
-    return true;
-  });
+  // Candy Crush-style Game Boot & Title Screen (Always presents title first on launch)
+  const [showTitleScreen, setShowTitleScreen] = useState<boolean>(true);
   const [activeSessionInfo, setActiveSessionInfo] = useState<{
     difficulty: GameDifficulty;
     timerSeconds: number;
@@ -887,13 +883,11 @@ export function App() {
   if (currentScreen === 'home') {
     return (
       <>
-        {showSplash && (
-          <SplashScreen
+        {showTitleScreen && (
+          <TitleScreen
             language={language}
-            onFinish={() => {
-              setShowSplash(false);
-              sessionStorage.setItem("padam_splash_shown", "true");
-            }}
+            onToggleLanguage={() => setLanguage((l) => (l === "te" ? "en" : "te"))}
+            onPlay={() => setShowTitleScreen(false)}
           />
         )}
 
