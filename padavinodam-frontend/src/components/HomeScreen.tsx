@@ -38,6 +38,7 @@ interface HomeScreenProps {
   onStartStory: () => void;
   onStartTwoPlayer?: () => void;
   onStartThemed?: (theme: 'cinema' | 'proverbs') => void;
+  onDeductCoins?: (amount: number) => boolean;
   hasActiveSession: boolean;
   activeSessionInfo?: {
     difficulty: GameDifficulty;
@@ -59,6 +60,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onStartStory,
   onStartTwoPlayer,
   onStartThemed,
+  onDeductCoins,
   hasActiveSession,
   activeSessionInfo,
   onResumeGame,
@@ -68,10 +70,53 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [isMuted, setIsMuted] = useState(templeAudio.isMuted());
   const [isAmbientPlaying, setIsAmbientPlaying] = useState(templeAudio.isAmbientPlaying());
   const [isClassicModalOpen, setIsClassicModalOpen] = useState(false);
+  const [pendingUnlockTheme, setPendingUnlockTheme] = useState<'cinema' | 'proverbs' | null>(null);
   const [speechBubbleText, setSpeechBubbleText] = useState<string | null>(null);
   const [isMascotBouncing, setIsMascotBouncing] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
   const [isEntered, setIsEntered] = useState(false);
+
+  const SPECIAL_COIN_COST = 30;
+  const isSunday = new Date().getDay() === 0;
+
+  const getWeekKey = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const oneJan = new Date(year, 0, 1);
+    const numberOfDays = Math.floor((d.getTime() - oneJan.getTime()) / (24 * 60 * 60 * 1000));
+    const weekNumber = Math.ceil((numberOfDays + oneJan.getDay() + 1) / 7);
+    return `${year}_W${weekNumber}`;
+  };
+
+  const isSpecialUnlocked = (theme: 'cinema' | 'proverbs') => {
+    if (isSunday) return true;
+    return localStorage.getItem(`padam_special_unlocked_${theme}_${getWeekKey()}`) === 'true';
+  };
+
+  const handleSelectTheme = (theme: 'cinema' | 'proverbs') => {
+    if (isSpecialUnlocked(theme)) {
+      setIsClassicModalOpen(false);
+      if (onStartThemed) onStartThemed(theme);
+    } else {
+      setPendingUnlockTheme(theme);
+    }
+  };
+
+  const handleConfirmUnlock = () => {
+    if (!pendingUnlockTheme) return;
+    if (onDeductCoins && onDeductCoins(SPECIAL_COIN_COST)) {
+      localStorage.setItem(`padam_special_unlocked_${pendingUnlockTheme}_${getWeekKey()}`, 'true');
+      templeAudio.playTempleBell();
+      const chosen = pendingUnlockTheme;
+      setPendingUnlockTheme(null);
+      setIsClassicModalOpen(false);
+      if (onStartThemed) onStartThemed(chosen);
+    } else {
+      setPendingUnlockTheme(null);
+      setIsClassicModalOpen(false);
+      onOpenTopUp('points');
+    }
+  };
 
   useEffect(() => {
     // Staggered cascade entrance trigger on mount
@@ -591,59 +636,172 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 ))}
               </div>
 
-              {/* Weekly Themed Specials (Idea 4: Tollywood & Proverbs) */}
+              {/* Weekly Themed Specials (Sunday Free + Weekday Coin Unlock) */}
               <div className="pt-2 md:pt-3 border-t border-amber-200 space-y-2 md:space-y-2.5">
-                <p className="text-[11px] md:text-xs font-bold text-amber-800 uppercase tracking-wider px-1 flex items-center gap-1">
-                  <Sparkles size={12} className="size-3 md:size-3.5 text-amber-600" />
-                  <span>{language === 'te' ? 'విశేష థీమ్ పజిల్స్ (Weekly Specials)' : 'Themed Specials'}</span>
-                </p>
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-[11px] md:text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                    <Sparkles size={12} className="size-3 md:size-3.5 text-amber-600" />
+                    <span>{language === 'te' ? 'విశేష థీమ్ పజిల్స్' : 'Themed Specials'}</span>
+                  </p>
+                  {isSunday ? (
+                    <span className="text-[10px] md:text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse">
+                      {t.sundayFreeToday}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] md:text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100/90 text-amber-900 border border-amber-300">
+                      {language === 'te' ? 'ఆదివారం ఉచితం • నేడు 30 🪙' : 'Free on Sun • Today 30 🪙'}
+                    </span>
+                  )}
+                </div>
 
                 {/* 1. Tollywood Cinema Special */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsClassicModalOpen(false);
-                    if (onStartThemed) onStartThemed('cinema');
-                  }}
-                  className="w-full p-3 md:p-4 rounded-2xl md:rounded-3xl border-2 border-rose-300 bg-rose-50/60 hover:bg-rose-100/70 flex items-center justify-between transition active:scale-97 cursor-pointer text-left"
+                  onClick={() => handleSelectTheme('cinema')}
+                  className="w-full p-3 md:p-4 rounded-2xl md:rounded-3xl border-2 border-rose-300 bg-rose-50/60 hover:bg-rose-100/70 flex items-center justify-between transition active:scale-97 cursor-pointer text-left group"
                 >
                   <div className="flex items-center gap-3 md:gap-4">
-                    <div className="p-2 md:p-2.5 rounded-xl md:rounded-2xl bg-white border border-rose-200 text-rose-700 shadow-2xs">
+                    <div className="p-2 md:p-2.5 rounded-xl md:rounded-2xl bg-white border border-rose-200 text-rose-700 shadow-2xs group-hover:scale-105 transition">
                       <Film size={18} className="size-4.5 md:size-5.5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-stone-900 text-xs sm:text-sm md:text-base">
-                        {t.cinemaSpecial}
-                      </h4>
-                      <p className="text-[11px] md:text-xs text-stone-600">{t.cinemaSpecialDesc}</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-bold text-stone-900 text-xs sm:text-sm md:text-base">
+                          {t.cinemaSpecial}
+                        </h4>
+                        {isSunday ? (
+                          <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] md:text-[10px] font-extrabold tracking-wide">
+                            FREE
+                          </span>
+                        ) : isSpecialUnlocked('cinema') ? (
+                          <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 text-[9px] md:text-[10px] font-bold">
+                            ✓ {t.unlockedBadge}
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded-md bg-amber-200/90 text-amber-950 border border-amber-300 text-[9px] md:text-[10px] font-bold flex items-center gap-0.5">
+                            <Lock size={10} /> 30 🪙
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] md:text-xs text-stone-600 mt-0.5">{t.cinemaSpecialDesc}</p>
                     </div>
                   </div>
-                  <ChevronRight size={16} className="size-4 md:size-5 text-stone-400" />
+                  <ChevronRight size={16} className="size-4 md:size-5 text-stone-400 group-hover:translate-x-0.5 transition" />
                 </button>
 
                 {/* 2. Telugu Proverbs Special */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsClassicModalOpen(false);
-                    if (onStartThemed) onStartThemed('proverbs');
-                  }}
-                  className="w-full p-3 md:p-4 rounded-2xl md:rounded-3xl border-2 border-indigo-300 bg-indigo-50/60 hover:bg-indigo-100/70 flex items-center justify-between transition active:scale-97 cursor-pointer text-left"
+                  onClick={() => handleSelectTheme('proverbs')}
+                  className="w-full p-3 md:p-4 rounded-2xl md:rounded-3xl border-2 border-indigo-300 bg-indigo-50/60 hover:bg-indigo-100/70 flex items-center justify-between transition active:scale-97 cursor-pointer text-left group"
                 >
                   <div className="flex items-center gap-3 md:gap-4">
-                    <div className="p-2 md:p-2.5 rounded-xl md:rounded-2xl bg-white border border-indigo-200 text-indigo-700 shadow-2xs">
+                    <div className="p-2 md:p-2.5 rounded-xl md:rounded-2xl bg-white border border-indigo-200 text-indigo-700 shadow-2xs group-hover:scale-105 transition">
                       <BookOpen size={18} className="size-4.5 md:size-5.5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-stone-900 text-xs sm:text-sm md:text-base">
-                        {t.proverbsSpecial}
-                      </h4>
-                      <p className="text-[11px] md:text-xs text-stone-600">{t.proverbsSpecialDesc}</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-bold text-stone-900 text-xs sm:text-sm md:text-base">
+                          {t.proverbsSpecial}
+                        </h4>
+                        {isSunday ? (
+                          <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] md:text-[10px] font-extrabold tracking-wide">
+                            FREE
+                          </span>
+                        ) : isSpecialUnlocked('proverbs') ? (
+                          <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 text-[9px] md:text-[10px] font-bold">
+                            ✓ {t.unlockedBadge}
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded-md bg-amber-200/90 text-amber-950 border border-amber-300 text-[9px] md:text-[10px] font-bold flex items-center gap-0.5">
+                            <Lock size={10} /> 30 🪙
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] md:text-xs text-stone-600 mt-0.5">{t.proverbsSpecialDesc}</p>
                     </div>
                   </div>
-                  <ChevronRight size={16} className="size-4 md:size-5 text-stone-400" />
+                  <ChevronRight size={16} className="size-4 md:size-5 text-stone-400 group-hover:translate-x-0.5 transition" />
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. Sunday Special Weekday Coin Unlock Confirmation Modal */}
+      {pendingUnlockTheme && (
+        <div className="fixed inset-0 z-60 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl md:rounded-[2rem] shadow-2xl max-w-sm md:max-w-md w-full border-2 md:border-3 border-amber-400 overflow-hidden font-telugu text-center p-5 md:p-6 space-y-4 animate-in zoom-in-95 duration-200">
+            {/* Top Emblem */}
+            <div className="mx-auto w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 border-2 border-amber-200 flex items-center justify-center shadow-md">
+              {pendingUnlockTheme === 'cinema' ? (
+                <Film size={28} className="text-amber-950" />
+              ) : (
+                <BookOpen size={28} className="text-amber-950" />
+              )}
+            </div>
+
+            <div>
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300 mb-1.5">
+                {language === 'te' ? 'ఆదివారం ప్రత్యేక ప్రహేళిక' : 'Sunday Special Crossword'}
+              </span>
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-stone-900">
+                {pendingUnlockTheme === 'cinema' ? t.cinemaSpecial : t.proverbsSpecial}
+              </h3>
+            </div>
+
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed px-1">
+              {t.unlockConfirmDesc}
+            </p>
+
+            {/* Wallet Balance Box */}
+            <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-center justify-between text-xs sm:text-sm">
+              <span className="font-semibold text-stone-700">
+                {language === 'te' ? 'మీ ప్రస్తుత నాణేలు:' : 'Your Coins:'}
+              </span>
+              <span className="font-mono font-bold text-amber-900 flex items-center gap-1 text-sm sm:text-base">
+                🪙 {coins}
+              </span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2 pt-1">
+              {coins >= SPECIAL_COIN_COST ? (
+                <button
+                  type="button"
+                  onClick={handleConfirmUnlock}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-700 to-orange-700 hover:from-amber-700 hover:to-orange-800 text-white font-extrabold text-sm md:text-base shadow-lg shadow-amber-900/20 active:scale-97 transition cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Sparkles size={16} />
+                  <span>{t.unlockNowBtn}</span>
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-rose-600">
+                    ⚠️ {t.notEnoughCoinsSpecial}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPendingUnlockTheme(null);
+                      setIsClassicModalOpen(false);
+                      onOpenTopUp('points');
+                    }}
+                    className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm shadow-md active:scale-97 transition cursor-pointer"
+                  >
+                    {language === 'te' ? 'నాణేలు పొందండి (Get Coins)' : 'Get Coins'}
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setPendingUnlockTheme(null)}
+                className="w-full py-2.5 px-4 rounded-xl text-stone-500 hover:text-stone-800 font-semibold text-xs transition cursor-pointer"
+              >
+                {language === 'te' ? 'ఆదివారం వరకు వేచి ఉండండి (రద్దు)' : 'Wait until Sunday (Cancel)'}
+              </button>
             </div>
           </div>
         </div>

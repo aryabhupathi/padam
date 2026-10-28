@@ -352,6 +352,16 @@ export function App() {
     });
   };
 
+  const handleDeductCoins = (amount: number): boolean => {
+    if (coins < amount) return false;
+    setCoins((prev) => {
+      const updated = Math.max(0, prev - amount);
+      localStorage.setItem('padam_coins', String(updated));
+      return updated;
+    });
+    return true;
+  };
+
   const handleStartThemed = (theme: 'cinema' | 'proverbs') => {
     setIsTwoPlayerMode(false);
     setLoadingSubTitle(
@@ -902,6 +912,7 @@ export function App() {
           onStartStory={handleStartStory}
           onStartTwoPlayer={handleStartTwoPlayer}
           onStartThemed={handleStartThemed}
+          onDeductCoins={handleDeductCoins}
           hasActiveSession={!!activeSessionInfo}
           activeSessionInfo={activeSessionInfo}
           onResumeGame={handleResumeGame}
