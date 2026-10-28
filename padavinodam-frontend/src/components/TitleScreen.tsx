@@ -137,6 +137,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        @keyframes tenaliFloat {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-7px) rotate(0.6deg); }
+        }
         .animate-letter-drift {
           animation: letterDrift ease-in-out infinite;
         }
@@ -151,6 +155,9 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         }
         .animate-slow-mandala {
           animation: slowMandala 90s linear infinite;
+        }
+        .animate-tenali-float {
+          animation: tenaliFloat 4s ease-in-out infinite;
         }
       `}</style>
 
@@ -224,43 +231,36 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         </div>
       </header>
 
-      {/* 2. Center Branding: Grand 3D Royal Logo & Tenali Rama Hero */}
+      {/* 2. Center Branding: Grand Unified Royal Hero Showcase (One unbroken card, zero cuts) */}
       <main className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto flex flex-col items-center text-center my-auto py-2">
         {/* Golden Aura Glow */}
         <div className="absolute inset-0 -m-8 flex items-center justify-center pointer-events-none">
           <div className="w-72 h-72 sm:w-96 sm:h-96 md:w-[460px] md:h-[460px] rounded-full bg-gradient-to-tr from-amber-400/30 via-orange-300/25 to-yellow-300/20 blur-3xl animate-halo-radiate" />
         </div>
 
-        {/* Grand 3D Royal Logo with Sheen Sweep */}
-        <div className="relative z-10 w-full max-w-[270px] sm:max-w-[340px] md:max-w-[420px] drop-shadow-2xl mb-2 animate-in zoom-in-95 duration-700">
-          <div className="relative overflow-hidden rounded-2xl">
+        {/* Grand Unified Royal Hero Showcase Card */}
+        <div className="relative z-10 w-full max-w-[280px] sm:max-w-[340px] md:max-w-[400px] mb-3 animate-in zoom-in-95 duration-700">
+          <div className="relative w-full aspect-[1.08] rounded-3xl md:rounded-[2.2rem] overflow-hidden shadow-2xl border-3 md:border-4 border-amber-400/90 bg-gradient-to-b from-amber-100/60 to-amber-50/80 animate-tenali-float">
             <img
-              src="/assets/royal_logo.png"
-              alt="పదవినోదం - Padavinodam"
-              className="w-full h-auto object-contain mx-auto"
+              src="/assets/tenali_royal_hero_card.png"
+              alt="పదవినోదం - తెనాలి రామ"
+              className="w-full h-full object-cover object-center pointer-events-none"
             />
-            {/* Golden Sheen Sweep */}
-            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-logo-sheen" />
+            {/* Automatic Diagonal Golden Light Sheen Sweep */}
+            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none animate-logo-sheen" />
           </div>
         </div>
 
-        {/* Mascot Avatar & Tagline */}
-        <div className="relative z-10 flex flex-col items-center mt-1 space-y-1">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-3 border-amber-400 shadow-xl overflow-hidden bg-amber-100 p-0.5">
-            <img
-              src="/assets/tenali_home_hero.png"
-              alt="తెనాలి రామ"
-              className="w-full h-full object-cover object-top rounded-full"
-            />
-          </div>
-          <h2 className="text-base sm:text-lg md:text-2xl font-extrabold text-amber-950 tracking-wide mt-1">
+        {/* Royal Subtitle & Tagline */}
+        <div className="relative z-10 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <h2 className="text-base sm:text-lg md:text-2xl font-extrabold text-amber-950 tracking-wide">
             {language === 'te'
               ? 'శ్రీకృష్ణదేవరాయల ఆస్థాన పద వినోదం'
               : 'Royal Vijayanagara Crossword'}
           </h2>
-          <p className="text-xs md:text-sm font-semibold text-amber-800/85">
+          <p className="text-xs md:text-sm font-semibold text-amber-800/90 max-w-xs sm:max-w-md mx-auto">
             {language === 'te'
-              ? 'తెలుగు భాషా సంపద • సరికొత్త ప్రహేళికా వేదిక'
+              ? 'స్వచ్ఛమైన తెలుగు పద ప్రహేళికా వేదిక'
               : 'Pure Telugu Crossword Gaming Experience'}
           </p>
         </div>
