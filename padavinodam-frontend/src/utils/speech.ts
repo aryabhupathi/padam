@@ -166,3 +166,57 @@ export const startTeluguListening = (
     return null;
   }
 };
+
+/**
+ * Tenali Rama Voice Acting & Exclamation Engine
+ * Plays witty, authentic Telugu voice reactions when Tenali interacts with the player.
+ */
+export const TENALI_QUOTES = [
+  {
+    te: "నమస్కారం! నేడు మీ మేధస్సుకు పదును పెట్టండి!",
+    en: "Namaskaram! Sharpen your intellect today!"
+  },
+  {
+    te: "రండి మిత్రమా, నేటి పదాల వేట ప్రారంభిద్దాం!",
+    en: "Come friend, let's start today's word hunt!"
+  },
+  {
+    te: "విజయనగర దర్బారు మిమ్మల్ని సాదరంగా ఆహ్వానిస్తోంది!",
+    en: "The Vijayanagara Darbar welcomes you warmly!"
+  },
+  {
+    te: "పద వినోదంలో ప్రతి అక్షరం ఒక ఆణిముత్యం!",
+    en: "In word play, every letter is a precious pearl!"
+  },
+  {
+    te: "తెలివైన ఆలోచనలే పజిల్ గెలుపుకు మూల రహస్యం!",
+    en: "Clever thinking is the key to solving the puzzle!"
+  }
+];
+
+export const getRandomTenaliQuote = () => {
+  const idx = Math.floor(Math.random() * TENALI_QUOTES.length);
+  return TENALI_QUOTES[idx];
+};
+
+export const speakTenaliGreeting = (): string => {
+  const quote = getRandomTenaliQuote();
+  speakTeluguText(quote.te);
+  return quote.te;
+};
+
+export const speakTenaliWin = () => {
+  speakTeluguText("శభాష్! అద్భుతమైన పాండిత్యం ప్రదర్శించారు!");
+};
+
+export const speakTenaliSpeedBonus = () => {
+  speakTeluguText("శరవేగంతో పదాల వేట ముగించి అదనపు నాణేలు గెలుచుకున్నారు!");
+};
+
+export const speakTenaliWrong = () => {
+  speakTeluguText("అయ్యయ్యో... మరొక్కసారి ఆలోచించి సరిచూసుకోండి!");
+};
+
+export const speakTenaliHint = () => {
+  speakTeluguText("ఆస్థాన రహస్యం మీ కోసం బయటపెట్టాను!");
+};

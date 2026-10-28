@@ -13,10 +13,12 @@ import { TopUpModal } from './components/TopUpModal';
 import { TRANSLATIONS, type Language } from './utils/translations';
 import { speakTeluguText, startTeluguListening, splitIntoTeluguSyllables } from './utils/speech';
 import { templeAudio } from './utils/templeAudio';
-import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter, Play } from 'lucide-react';
+import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter, Play, Share2, Users } from 'lucide-react';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { HomeScreen } from './components/HomeScreen';
 import { LoadingScreen } from './components/LoadingScreen';
+import { SPECIAL_CINEMA_PUZZLE, SPECIAL_PROVERBS_PUZZLE } from './data/specialPuzzles';
+import { speakTenaliWin, speakTenaliSpeedBonus, speakTenaliWrong, speakTenaliHint } from './utils/speech';
 
 const INITIAL_HINTS: HintOption[] = [
   {
@@ -91,6 +93,10 @@ export function App() {
     difficulty: GameDifficulty;
     timerSeconds: number;
   } | null>(null);
+
+  // 2-Player Pass-and-Play Mode (Idea 5)
+  const [isTwoPlayerMode, setIsTwoPlayerMode] = useState<boolean>(false);
+  const [twoPlayerScores, setTwoPlayerScores] = useState<{ p1: number; p2: number }>({ p1: 0, p2: 0 });
 
   // Language switch: 'te' (Telugu) | 'en' (English UI)
   const [language, setLanguage] = useState<Language>('te');
@@ -173,6 +179,19 @@ export function App() {
 
   // Session Restore & Initial Puzzle Pre-cache on Mount
   useEffect(() => {
+    // Check if player opened a friend's challenge link
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('challenge')) {
+        const challengeDiff = (params.get('diff') as GameDifficulty) || 'medium';
+        setDifficulty(challengeDiff);
+        setLoadingSubTitle(language === 'te' ? 'స్నేహితుని ఛాలెంజ్ (Friend Challenge)' : 'Friend Challenge');
+        setCurrentScreen('loading');
+        loadPuzzle(challengeDiff);
+        return;
+      }
+    }
+
     const savedSessionStr = localStorage.getItem('padam_active_session');
     if (savedSessionStr) {
       try {
@@ -318,11 +337,61 @@ export function App() {
   };
 
   const handleStartStory = () => {
+    setIsTwoPlayerMode(false);
     setLoadingSubTitle(language === 'te' ? 'తెనాలి కథల పజిల్' : 'Tenali Story Mode');
     setCurrentScreen('loading');
     loadDailyPuzzle().then(() => {
       setIsClueListDrawerOpen(true);
     });
+  };
+
+  const handleStartThemed = (theme: 'cinema' | 'proverbs') => {
+    setIsTwoPlayerMode(false);
+    setLoadingSubTitle(
+      theme === 'cinema'
+        ? (language === 'te' ? 'ఆదివారం సినీ వినోదం' : 'Tollywood Cinema')
+        : (language === 'te' ? 'సామెతలు & జాతీయాలు' : 'Telugu Proverbs')
+    );
+    setCurrentScreen('loading');
+    localStorage.removeItem('padam_active_session');
+    setActiveSessionInfo(null);
+    setLoading(true);
+    setIncorrectCells([]);
+    setIsSolved(false);
+    setIsTimerRunning(false);
+    setHasPaused(false);
+    setTimerSeconds(0);
+    const data = theme === 'cinema' ? SPECIAL_CINEMA_PUZZLE : SPECIAL_PROVERBS_PUZZLE;
+    initializePuzzleState(data);
+    setLoading(false);
+  };
+
+  const handleStartTwoPlayer = () => {
+    setIsTwoPlayerMode(true);
+    setTwoPlayerScores({ p1: 0, p2: 0 });
+    setLoadingSubTitle(language === 'te' ? 'పాస్ & ప్లే (2-Player)' : 'Pass & Play');
+    setCurrentScreen('loading');
+    loadPuzzle('easy');
+  };
+
+  const handleShareWhatsAppVictory = () => {
+    const m = Math.floor(timerSeconds / 60);
+    const s = timerSeconds % 60;
+    const timeFormatted = `${m}:${s.toString().padStart(2, '0')}`;
+    const streak = localStorage.getItem('padam_streak_count') || '3';
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?challenge=win&time=${timerSeconds}`;
+
+    const text =
+      language === 'te'
+        ? `🎉 నేను 'పదవినోదం' తెలుగు క్రాస్‌వర్డ్ పూర్తి చేశాను!\n⏱️ సమయం: ${timeFormatted} నిమిషాలు\n🪙 స్కోర్: ${score} పాయింట్లు\n🔥 స్ట్రీక్: ${streak} రోజులు\n\nమీరు నన్ను ఓడించగలరా? ఇప్పుడే ఆడండి:\n👉 ${shareUrl}`
+        : `🎉 I solved the Telugu crossword on Padavinodam!\n⏱️ Time: ${timeFormatted}\n🪙 Score: ${score} points\n🔥 Streak: ${streak} days\n\nCan you beat my time? Play now:\n👉 ${shareUrl}`;
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
   };
 
   const handleResumeGame = () => {
@@ -518,9 +587,22 @@ export function App() {
       localStorage.removeItem('padam_active_session');
       setMascotMoodOverride('celebrating');
       templeAudio.playSuccessFanfare();
+      speakTenaliWin();
       const targetTime = TARGET_TIMES[difficulty];
       const isUnderTime = !hasPaused && timerSeconds <= targetTime;
       const speedBonusCoins = isUnderTime ? 5 : 0;
+
+      if (isUnderTime) {
+        setTimeout(() => speakTenaliSpeedBonus(), 2400);
+      }
+
+      if (isTwoPlayerMode) {
+        if (direction === 'across') {
+          setTwoPlayerScores(prev => ({ ...prev, p1: prev.p1 + 50 }));
+        } else {
+          setTwoPlayerScores(prev => ({ ...prev, p2: prev.p2 + 50 }));
+        }
+      }
 
       const mult = difficulty === 'kids' ? 0.8 : (difficulty === 'easy' ? 1 : (difficulty === 'medium' ? 1.5 : 2));
       const baseCoins = difficulty === 'kids' ? 25 : (difficulty === 'easy' ? 40 : (difficulty === 'medium' ? 60 : 100));
@@ -552,6 +634,7 @@ export function App() {
     } else {
       setMascotMoodOverride('facepalm');
       templeAudio.playWrongChime();
+      speakTenaliWrong();
       const message = result.correct_cells > 0
         ? t.tryAgainMsg.replace('{total}', String(result.total_cells)).replace('{correct}', String(result.correct_cells))
         : t.incorrectMsg;
@@ -638,6 +721,7 @@ export function App() {
     setCoins(c => c - hint.coinCost);
     setMascotMoodOverride('hint_casting');
     templeAudio.playTempleBell();
+    speakTenaliHint();
     setHintOptions(prev =>
       prev.map(h => (h.id === hintType ? { ...h, usedCount: h.usedCount + 1 } : h))
     );
@@ -799,6 +883,8 @@ export function App() {
           onStartDaily={handleStartDaily}
           onStartClassic={handleStartClassic}
           onStartStory={handleStartStory}
+          onStartTwoPlayer={handleStartTwoPlayer}
+          onStartThemed={handleStartThemed}
           hasActiveSession={!!activeSessionInfo}
           activeSessionInfo={activeSessionInfo}
           onResumeGame={handleResumeGame}
@@ -907,16 +993,47 @@ export function App() {
           onBackToHome={handleBackToHome}
         />
 
-        {/* Live Status Banner (Hidden on Print) */}
+        {/* 2-Player Pass & Play Turn Indicator Banner */}
+        {isTwoPlayerMode && !isSolved && (
+          <div className="flex items-center justify-between bg-purple-100/90 border border-purple-300 text-purple-950 px-3.5 py-2 rounded-xl text-xs font-bold mb-3 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Users size={16} className="text-purple-700" />
+              <span>
+                {direction === 'across' ? t.player1Turn : t.player2Turn}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 font-mono text-[11px]">
+              <span className="bg-white px-2 py-0.5 rounded border border-purple-200 text-purple-900">
+                P1 (అడ్డం): {twoPlayerScores.p1}
+              </span>
+              <span className="bg-white px-2 py-0.5 rounded border border-purple-200 text-purple-900">
+                P2 (నిలువు): {twoPlayerScores.p2}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Live Status Banner with WhatsApp Victory Share (Hidden on Print) */}
         {statusMessage && (
           <div
             className={`text-center py-2 px-4 mb-3 rounded-lg font-bold text-xs md:text-sm transition-all print:hidden ${
               isSolved
-                ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                ? "bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-md"
                 : "bg-amber-100 text-amber-900 border border-amber-300"
             }`}
           >
-            {statusMessage}
+            <p>{statusMessage}</p>
+            {isSolved && (
+              <button
+                type="button"
+                onClick={handleShareWhatsAppVictory}
+                className="mt-2.5 px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 inline-flex items-center gap-1.5 cursor-pointer mx-auto"
+                title="వాట్సాప్‌లో పంచుకోండి"
+              >
+                <Share2 size={14} />
+                <span>{t.shareWhatsApp}</span>
+              </button>
+            )}
           </div>
         )}
 

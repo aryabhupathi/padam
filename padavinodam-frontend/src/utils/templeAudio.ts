@@ -8,6 +8,9 @@ class TempleAudioEngine {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
   public isUnlocked: boolean = false;
+  private ambientGain: GainNode | null = null;
+  private ambientOscillators: OscillatorNode[] = [];
+  private isAmbientActive: boolean = false;
 
   constructor() {
     // Check saved mute preference
@@ -60,7 +63,120 @@ class TempleAudioEngine {
     if (typeof window !== 'undefined') {
       localStorage.setItem('padam_sound_muted', String(this.muted));
     }
+    if (this.muted) {
+      this.pauseAmbientMusic();
+    } else {
+      const wantAmbient = localStorage.getItem('padam_ambient_music') === 'true';
+      if (wantAmbient) {
+        this.startAmbientMusic();
+      }
+    }
     return this.muted;
+  }
+
+  /**
+   * Meditative Temple Ambient Music (శాంత వీణా & తంబురా నాదం)
+   * Pure browser-synthesized acoustic drone in Raag Mohanam (Sa, Pa, High Sa).
+   * Generates a serene, focused flow state without any external audio file downloads.
+   */
+  public startAmbientMusic(): void {
+    if (this.muted || this.isAmbientActive) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      this.stopAmbientMusic();
+
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      masterGain.gain.exponentialRampToValueAtTime(0.045, ctx.currentTime + 2.5); // Very soft 4.5% volume
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(420, ctx.currentTime);
+
+      // Low Frequency Oscillator for subtle meditative breathing modulation
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      lfo.frequency.setValueAtTime(0.08, ctx.currentTime); // 0.08 Hz slow breath
+      lfoGain.gain.setValueAtTime(90, ctx.currentTime);
+      lfo.connect(lfoGain);
+      lfoGain.connect(filter.frequency);
+      lfo.start();
+
+      // Raag Mohanam harmonic base tones: D3 (146.83Hz), A3 (220Hz), D4 (293.66Hz), F#4 (369.99Hz)
+      const freqs = [146.83, 220.0, 293.66, 369.99];
+      const oscs: OscillatorNode[] = [lfo];
+
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const oscGain = ctx.createGain();
+
+        osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        const relativeVol = idx === 0 ? 0.35 : idx === 1 ? 0.25 : 0.15;
+        oscGain.gain.setValueAtTime(relativeVol, ctx.currentTime);
+
+        osc.connect(oscGain);
+        oscGain.connect(filter);
+        osc.start();
+        oscs.push(osc);
+      });
+
+      filter.connect(masterGain);
+      masterGain.connect(ctx.destination);
+
+      this.ambientGain = masterGain;
+      this.ambientOscillators = oscs;
+      this.isAmbientActive = true;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('padam_ambient_music', 'true');
+      }
+    } catch {
+      // Gracefully ignore audio autoplay block
+    }
+  }
+
+  public pauseAmbientMusic(): void {
+    if (!this.ambientGain || !this.ctx) return;
+    try {
+      this.ambientGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+    } catch {}
+  }
+
+  public stopAmbientMusic(): void {
+    if (this.ambientGain && this.ctx) {
+      try {
+        this.ambientGain.gain.linearRampToValueAtTime(0.0001, this.ctx.currentTime + 0.4);
+      } catch {}
+    }
+    this.ambientOscillators.forEach(osc => {
+      try {
+        osc.stop();
+        osc.disconnect();
+      } catch {}
+    });
+    this.ambientOscillators = [];
+    this.ambientGain = null;
+    this.isAmbientActive = false;
+  }
+
+  public toggleAmbientMusic(): boolean {
+    if (this.isAmbientActive) {
+      this.stopAmbientMusic();
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('padam_ambient_music', 'false');
+      }
+      return false;
+    } else {
+      this.startAmbientMusic();
+      return true;
+    }
+  }
+
+  public isAmbientPlaying(): boolean {
+    return this.isAmbientActive && !this.muted;
   }
 
   /**
