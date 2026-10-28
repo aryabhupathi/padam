@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { GameDifficulty } from '../types/puzzle';
 import type { Language } from '../utils/translations';
 import { TRANSLATIONS } from '../utils/translations';
@@ -71,6 +71,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [speechBubbleText, setSpeechBubbleText] = useState<string | null>(null);
   const [isMascotBouncing, setIsMascotBouncing] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
+  const [isEntered, setIsEntered] = useState(false);
+
+  useEffect(() => {
+    // Staggered cascade entrance trigger on mount
+    const timer = setTimeout(() => {
+      setIsEntered(true);
+    }, 40);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Read or calculate streak count from localStorage
   const [streakCount] = useState<number>(() => {
@@ -229,7 +238,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       )}
 
       {/* 1. Top Status & Wallet Bar */}
-      <header className="relative z-10 w-full max-w-lg mx-auto flex items-center justify-between gap-1.5 pt-1 pb-3">
+      <header
+        className={`relative z-10 w-full max-w-lg mx-auto flex items-center justify-between gap-1.5 pt-1 pb-3 transition-all duration-600 ease-out ${
+          isEntered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6'
+        }`}
+        style={{ transitionDelay: '80ms' }}
+      >
         {/* Left: Coins Pill */}
         <button
           type="button"
@@ -319,12 +333,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
           )}
 
-          {/* Breathing Animated Mascot Card */}
+          {/* Breathing Animated Mascot Card with Elastic Staggered Drop-In */}
           <div
             onClick={handleTenaliTap}
-            className={`relative max-w-[260px] sm:max-w-[310px] w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-300/85 bg-amber-50/50 cursor-pointer transition-transform duration-300 ${
+            className={`relative max-w-[260px] sm:max-w-[310px] w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-300/85 bg-amber-50/50 cursor-pointer transition-all duration-700 ${
+              isEntered ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-6'
+            } ${
               isMascotBouncing ? 'scale-105 rotate-1 animate-bounce' : 'animate-tenali-float hover:scale-102'
             }`}
+            style={{
+              transitionDelay: '220ms',
+              transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }}
             title="తెనాలి రామకృష్ణుడిని తాకండి! (Tap Tenali to speak)"
           >
             <img
@@ -341,14 +361,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
           </div>
 
-          <p className="mt-2 text-xs font-bold text-amber-900 tracking-wide bg-amber-100/70 border border-amber-200/80 px-3 py-0.5 rounded-full shadow-2xs">
+          <p
+            className={`mt-2 text-xs font-bold text-amber-900 tracking-wide bg-amber-100/70 border border-amber-200/80 px-3 py-0.5 rounded-full shadow-2xs transition-all duration-600 ${
+              isEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+            }`}
+            style={{ transitionDelay: '360ms' }}
+          >
             {t.welcomeGreeting}
           </p>
         </div>
 
         {/* 3. Resume Active Game Banner (If session exists) */}
         {hasActiveSession && activeSessionInfo && (
-          <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-2xl p-3.5 text-white shadow-lg flex items-center justify-between border border-amber-300 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div
+            className={`w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-2xl p-3.5 text-white shadow-lg flex items-center justify-between border border-amber-300 transition-all duration-600 ${
+              isEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+            style={{ transitionDelay: '420ms' }}
+          >
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-white/20 backdrop-blur-xs">
                 <RotateCcw size={18} className="text-amber-100" />
@@ -372,7 +402,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         )}
 
         {/* 4. Center Floating Hero Card: Streak & Play Daily Challenge */}
-        <div className="w-full bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-5 border-2 border-amber-300/85 shadow-xl text-center space-y-3 relative overflow-hidden">
+        <div
+          className={`w-full bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-5 border-2 border-amber-300/85 shadow-xl text-center space-y-3 relative overflow-hidden transition-all duration-700 ease-out ${
+            isEntered ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+          }`}
+          style={{ transitionDelay: '500ms' }}
+        >
           {/* Streak & Difficulty Badges with Flickering Ember Halo */}
           <div className="flex items-center justify-center gap-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100/90 border border-orange-300 text-orange-800 text-xs font-extrabold shadow-2xs animate-ember-halo">
@@ -403,7 +438,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         {/* 5. Game Mode Tiles (2-Column Grid) */}
-        <div className="w-full grid grid-cols-2 gap-2.5">
+        <div
+          className={`w-full grid grid-cols-2 gap-2.5 transition-all duration-700 ease-out ${
+            isEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'
+          }`}
+          style={{ transitionDelay: '650ms' }}
+        >
           {/* Tile 1: Classic Game (Opens Size & Specials Modal) */}
           <button
             type="button"
@@ -442,7 +482,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         {/* 6. Quick Action Row: Challenge a Friend & 2-Player Pass-and-Play (Ideas 5 & Social) */}
-        <div className="w-full grid grid-cols-2 gap-2.5">
+        <div
+          className={`w-full grid grid-cols-2 gap-2.5 transition-all duration-700 ease-out ${
+            isEntered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'
+          }`}
+          style={{ transitionDelay: '780ms' }}
+        >
           {/* Challenge a Friend via WhatsApp */}
           <button
             type="button"
@@ -468,7 +513,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </main>
 
       {/* 7. Footer */}
-      <footer className="relative z-10 w-full max-w-md mx-auto text-center pt-2 pb-1 text-[11px] text-stone-500">
+      <footer
+        className={`relative z-10 w-full max-w-md mx-auto text-center pt-2 pb-1 text-[11px] text-stone-500 transition-all duration-600 ${
+          isEntered ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{ transitionDelay: '900ms' }}
+      >
         <p className="font-medium">
           {t.appName} • {language === 'te' ? 'స్వచ్ఛమైన తెలుగు క్రాస్‌వర్డ్ ప్లాట్‌ఫామ్' : 'Pure Telugu Crossword Platform'}
         </p>
