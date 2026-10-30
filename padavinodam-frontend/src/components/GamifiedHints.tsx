@@ -76,7 +76,7 @@ export const GamifiedHints: React.FC<GamifiedHintsProps> = ({
           <button
             type="button"
             onClick={onOpenTopUp}
-            title={language === 'te' ? 'UPI ద్వారా నాణాలు కొనుగోలు చేయండి' : 'Buy Coins via UPI'}
+            title={language === 'te' ? 'నాణాలు & పాయింట్ల వివరాలు (త్వరలో అందుబాటులోకి వస్తుంది)' : 'Coins & Points (Available in Future)'}
             className="text-[10px] bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold px-2 py-0.5 rounded-full ml-1 transition shadow-2xs flex items-center gap-1 active:scale-95 cursor-pointer"
           >
             <span>+ నాణాలు</span>

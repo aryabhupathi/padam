@@ -626,7 +626,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       <div>
                         <h4 className="font-bold text-stone-900 text-xs sm:text-sm md:text-base flex items-center gap-1.5">
                           <span>{language === 'te' ? item.nameTe : item.nameEn}</span>
-                          {item.locked && <Lock size={13} className="size-3.5 md:size-4 text-amber-600" />}
+                          {item.locked && (
+                            <span className="inline-flex items-center gap-1 text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                              <Lock size={11} className="text-amber-700" />
+                              <span>{language === 'te' ? 'త్వరలో (In Future)' : 'Coming Soon'}</span>
+                            </span>
+                          )}
                         </h4>
                         <p className="text-[11px] md:text-xs text-stone-500">{item.time}</p>
                       </div>
