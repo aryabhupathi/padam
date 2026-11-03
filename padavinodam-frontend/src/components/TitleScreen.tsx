@@ -97,7 +97,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col justify-between items-center p-4 sm:p-6 md:p-10 select-none overflow-hidden font-telugu transition-all duration-500 ease-out ${
+      className={`fixed inset-0 z-50 flex flex-col justify-between items-center px-3 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 select-none overflow-hidden font-telugu transition-all duration-500 ease-out h-[100dvh] max-h-[100dvh] box-border ${
         isExiting
           ? 'opacity-0 scale-110 blur-xs pointer-events-none'
           : 'opacity-100 scale-100'
@@ -232,17 +232,17 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
       </header>
 
       {/* 2. Center Branding: Grand 3D Royal Logo & Tenali Rama Medallion with Floating 3D Crossword Letter Tiles */}
-      <main className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-xl mx-auto flex flex-col items-center text-center my-auto py-2">
+      <main className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-xl mx-auto flex flex-col items-center text-center my-auto py-1 sm:py-2 shrink min-h-0">
         {/* Golden Sunburst Aura Glow */}
         <div className="absolute inset-0 -m-8 flex items-center justify-center pointer-events-none">
-          <div className="w-72 h-72 sm:w-96 sm:h-96 md:w-[500px] md:h-[500px] rounded-full bg-gradient-to-tr from-amber-400/30 via-orange-300/25 to-yellow-300/20 blur-3xl animate-halo-radiate" />
+          <div className="w-56 h-56 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full bg-gradient-to-tr from-amber-400/30 via-orange-300/25 to-yellow-300/20 blur-3xl animate-halo-radiate" />
         </div>
 
         {/* Grand Royal Vijayanagara Crown Crest */}
-        <div className="relative z-10 flex flex-col items-center mb-1 animate-in zoom-in-95 duration-700">
-          <div className="text-amber-500 drop-shadow-md mb-1 animate-pulse">
+        <div className="relative z-10 flex flex-col items-center mb-0.5 sm:mb-1 animate-in zoom-in-95 duration-700">
+          <div className="text-amber-500 drop-shadow-md mb-0.5 sm:mb-1 animate-pulse">
             <svg
-              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12"
+              className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10"
               viewBox="0 0 48 48"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -284,41 +284,41 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* Standalone 3D Game Title: పదవినోదం */}
           <div className="relative inline-block">
             <h1
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider select-none relative"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-wider select-none relative"
               style={{
                 background: 'linear-gradient(180deg, #FFFBEB 0%, #FEF08A 25%, #F59E0B 60%, #B45309 85%, #78350F 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 4px 0 #78350F) drop-shadow(0 8px 18px rgba(180, 83, 9, 0.45))'
+                filter: 'drop-shadow(0 3px 0 #78350F) drop-shadow(0 6px 14px rgba(180, 83, 9, 0.45))'
               }}
             >
               {language === 'te' ? 'పదవినోదం' : 'PADAVINODAM'}
             </h1>
             {/* Sparkle Twinkles */}
-            <Sparkles className="absolute -top-2 -right-4 sm:-right-6 text-amber-300 w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
-            <Sparkles className="absolute -bottom-1 -left-3 sm:-left-5 text-yellow-400 w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
+            <Sparkles className="absolute -top-2 -right-4 sm:-right-6 text-amber-300 w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+            <Sparkles className="absolute -bottom-1 -left-3 sm:-left-5 text-yellow-400 w-3.5 h-3.5 sm:w-4 sm:h-4 animate-bounce" />
             {/* Logo Sheen Sweep */}
             <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-logo-sheen" />
           </div>
 
           {/* Imperial Subtitle Ribbon Banner */}
-          <div className="relative inline-flex items-center px-4 py-1 sm:px-6 sm:py-1.5 rounded-full bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 text-amber-100 border-2 border-amber-400/90 shadow-lg text-xs sm:text-sm font-bold tracking-wide mt-1 animate-in fade-in duration-500">
-            <span className="text-amber-300 mr-1.5">✦</span>
+          <div className="relative inline-flex items-center px-3 py-0.5 sm:px-5 sm:py-1 rounded-full bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 text-amber-100 border sm:border-2 border-amber-400/90 shadow-md text-[11px] sm:text-xs md:text-sm font-bold tracking-wide mt-0.5 sm:mt-1 animate-in fade-in duration-500">
+            <span className="text-amber-300 mr-1 sm:mr-1.5">✦</span>
             <span>
               {language === 'te'
                 ? 'శ్రీకృష్ణదేవరాయల ఆస్థాన ప్రహేళిక'
                 : 'The Royal Vijayanagara Crossword'}
             </span>
-            <span className="text-amber-300 ml-1.5">✦</span>
+            <span className="text-amber-300 ml-1 sm:ml-1.5">✦</span>
           </div>
         </div>
 
         {/* Center Mascot Presentation: Tenali Rama in Royal Ornate Medallion with Floating 3D Crossword Letter Tiles */}
-        <div className="relative my-3 sm:my-4 md:my-5 flex items-center justify-center animate-in zoom-in-95 duration-700">
+        <div className="relative my-2 sm:my-3 md:my-4 flex items-center justify-center animate-in zoom-in-95 duration-700">
           {/* Floating 3D Golden Crossword Letter Tiles around Tenali (Spelling ప - ద - వి - నో - దం) */}
           {/* Tile 1: ప */}
           <div
-            className="absolute -left-6 sm:-left-10 md:-left-12 top-2 sm:top-4 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none -rotate-12 cursor-default"
+            className="absolute -left-4 sm:-left-7 md:-left-9 top-1 sm:top-2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none -rotate-12 cursor-default"
             style={{ animationDuration: '3.2s' }}
             title="ప"
           >
@@ -327,7 +327,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
           {/* Tile 2: ద */}
           <div
-            className="absolute -right-6 sm:-right-10 md:-right-12 top-3 sm:top-5 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none rotate-12 cursor-default"
+            className="absolute -right-4 sm:-right-7 md:-right-9 top-2 sm:top-3 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none rotate-12 cursor-default"
             style={{ animationDuration: '3.6s', animationDelay: '0.4s' }}
             title="ద"
           >
@@ -336,7 +336,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
           {/* Tile 3: వి */}
           <div
-            className="absolute -left-5 sm:-left-9 md:-left-11 bottom-6 sm:bottom-8 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none rotate-6 cursor-default"
+            className="absolute -left-3 sm:-left-6 md:-left-8 bottom-4 sm:bottom-6 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none rotate-6 cursor-default"
             style={{ animationDuration: '3.4s', animationDelay: '0.8s' }}
             title="వి"
           >
@@ -345,7 +345,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
           {/* Tile 4: నో */}
           <div
-            className="absolute -right-5 sm:-right-9 md:-right-11 bottom-5 sm:bottom-7 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border-2 border-amber-300 shadow-xl flex items-center justify-center font-black text-amber-950 text-sm sm:text-base md:text-lg animate-bounce select-none -rotate-6 cursor-default"
+            className="absolute -right-3 sm:-right-6 md:-right-8 bottom-3 sm:bottom-5 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none -rotate-6 cursor-default"
             style={{ animationDuration: '3.8s', animationDelay: '1.2s' }}
             title="నో"
           >
@@ -354,14 +354,14 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
           {/* Tile 5: దం */}
           <div
-            className="absolute -bottom-3.5 z-20 px-3 py-1 sm:px-4 sm:py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 border-2 border-amber-100 shadow-xl flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-pulse select-none"
+            className="absolute -bottom-2.5 z-20 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg sm:rounded-xl bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 border border-amber-100 shadow-lg flex items-center justify-center font-black text-amber-950 text-[10px] sm:text-xs md:text-sm animate-pulse select-none"
             title="దం"
           >
             దం
           </div>
 
           {/* The Royal Medallion Housing Tenali Rama */}
-          <div className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-56 md:h-56 rounded-full p-1.5 md:p-2 bg-gradient-to-b from-amber-300 via-yellow-200 to-amber-500 shadow-[0_15px_45px_rgba(217,119,6,0.35)] ring-4 sm:ring-6 ring-amber-300/35 animate-tenali-float">
+          <div className="relative w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 max-h-[24vh] max-w-[24vh] aspect-square rounded-full p-1 sm:p-1.5 md:p-2 bg-gradient-to-b from-amber-300 via-yellow-200 to-amber-500 shadow-[0_10px_35px_rgba(217,119,6,0.35)] ring-3 sm:ring-4 ring-amber-300/35 animate-tenali-float">
             <div className="w-full h-full rounded-full overflow-hidden border-2 border-amber-400/90 bg-gradient-to-b from-amber-100 to-amber-200 shadow-inner relative">
               <img
                 src="/assets/tenali_portrait_clean.png"
@@ -375,7 +375,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         </div>
 
         {/* Heritage Tagline */}
-        <p className="text-xs sm:text-sm font-semibold text-amber-900/90 max-w-xs sm:max-w-md mx-auto pt-1 animate-in fade-in duration-700">
+        <p className="text-[11px] sm:text-xs md:text-sm font-semibold text-amber-900/90 max-w-xs sm:max-w-md mx-auto pt-0.5 sm:pt-1 animate-in fade-in duration-700">
           {language === 'te'
             ? 'స్వచ్ఛమైన తెలుగు పద ప్రహేళిక • ప్రతిరోజూ కొత్త సవాలు'
             : 'Pure Telugu Crossword Puzzle • Fresh Everyday'}
@@ -383,10 +383,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
       </main>
 
       {/* 3. Bottom Action Section: Loading Progress Bar OR Big Bouncing "PLAY" Button */}
-      <footer className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto pb-4 sm:pb-6 md:pb-8 flex flex-col items-center">
+      <footer className="relative z-10 w-full max-w-xs sm:max-w-sm mx-auto pb-1 sm:pb-3 md:pb-4 flex flex-col items-center shrink-0">
         {!isLoaded ? (
           /* Loading Track (0% -> 100%) */
-          <div className="w-full max-w-xs sm:max-w-sm space-y-2.5 animate-in fade-in duration-300">
+          <div className="w-full max-w-xs sm:max-w-sm space-y-2 animate-in fade-in duration-300">
             <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-stone-800 px-1">
               <span className="flex items-center gap-1.5 text-amber-950">
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
@@ -398,7 +398,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             </div>
 
             {/* Candy-style striped progress track */}
-            <div className="w-full h-5 sm:h-6 bg-stone-200/90 rounded-full p-1 border-2 border-amber-300 shadow-inner overflow-hidden relative">
+            <div className="w-full h-4 sm:h-5 bg-stone-200/90 rounded-full p-0.5 sm:p-1 border-2 border-amber-300 shadow-inner overflow-hidden relative">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 transition-all duration-150 ease-out shadow-sm relative overflow-hidden"
                 style={{ width: `${progress}%` }}
@@ -406,31 +406,31 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-logo-sheen" />
               </div>
             </div>
-            <p className="text-center text-[11px] text-stone-500 font-medium">
+            <p className="text-center text-[10px] sm:text-[11px] text-stone-500 font-medium">
               {language === 'te' ? 'ఆట సిద్ధమవుతోంది...' : 'Initializing game assets...'}
             </p>
           </div>
         ) : (
           /* Candy Crush-style Grand Bouncing "PLAY" Button */
-          <div className="w-full max-w-xs sm:max-w-sm flex flex-col items-center space-y-3 animate-in zoom-in-95 duration-400">
+          <div className="w-full max-w-xs sm:max-w-sm flex flex-col items-center space-y-1.5 sm:space-y-2 animate-in zoom-in-95 duration-400">
             <button
               type="button"
               onClick={handleStartGame}
-              className="w-full py-4 sm:py-5 px-8 md:px-10 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-700 hover:from-emerald-600 hover:to-teal-800 text-white font-extrabold text-xl sm:text-2xl md:text-3xl border-3 border-emerald-300 shadow-2xl active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-3 animate-candy-play relative overflow-hidden group"
+              className="w-full py-3 sm:py-3.5 md:py-4 px-6 sm:px-8 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-700 hover:from-emerald-600 hover:to-teal-800 text-white font-extrabold text-lg sm:text-xl md:text-2xl border-2 sm:border-3 border-emerald-300 shadow-2xl active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2.5 sm:gap-3 animate-candy-play relative overflow-hidden group"
             >
               {/* Internal Sheen Sweep */}
               <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-logo-sheen" />
 
-              <div className="p-2 rounded-full bg-white/20 group-hover:scale-110 transition shadow-inner">
-                <Play size={24} className="fill-white translate-x-0.5" />
+              <div className="p-1.5 sm:p-2 rounded-full bg-white/20 group-hover:scale-110 transition shadow-inner">
+                <Play size={20} className="fill-white translate-x-0.5" />
               </div>
               <span className="tracking-wider drop-shadow-md">
                 {language === 'te' ? 'ఆడండి' : 'PLAY'}
               </span>
-              <Sparkles size={22} className="text-emerald-200 animate-pulse" />
+              <Sparkles size={18} className="text-emerald-200 animate-pulse" />
             </button>
 
-            <p className="text-xs sm:text-sm font-bold text-amber-900/90 tracking-wide animate-pulse">
+            <p className="text-[11px] sm:text-xs font-bold text-amber-900/90 tracking-wide animate-pulse">
               {language === 'te'
                 ? '👆 ప్రారంభించడానికి తాకండి'
                 : '👆 Tap to Enter Game'}

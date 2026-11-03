@@ -89,7 +89,7 @@ export const ClueList: React.FC<ClueListProps> = ({
 
   return (
     <div
-      className={`bg-white border-2 border-stone-200 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col w-full h-[540px] md:h-[580px] lg:h-full lg:min-h-[520px] ${className}`}
+      className={`bg-white border-2 border-stone-200 rounded-2xl p-2.5 sm:p-3.5 shadow-xs flex flex-col w-full flex-1 min-h-[280px] max-h-[480px] lg:max-h-[520px] ${className}`}
     >
       {/* Clues Header with Tab Toggles for flexible viewing */}
       <div className="flex items-center justify-between border-b border-stone-200 pb-2.5 mb-2.5 shrink-0">
