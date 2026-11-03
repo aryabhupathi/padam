@@ -13,11 +13,12 @@ import { TopUpModal } from './components/TopUpModal';
 import { TRANSLATIONS, type Language } from './utils/translations';
 import { speakTeluguText, startTeluguListening, splitIntoTeluguSyllables } from './utils/speech';
 import { templeAudio } from './utils/templeAudio';
-import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter, Play, Share2, Users } from 'lucide-react';
+import { Volume2, Mic, Eye, X, ShieldCheck, Lightbulb, ListFilter, Play, Share2, Users, Trophy } from 'lucide-react';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { HomeScreen } from './components/HomeScreen';
 import { LoadingScreen } from './components/LoadingScreen';
 import { TitleScreen } from './components/TitleScreen';
+import { VictoryModal, type VictoryStats } from './components/VictoryModal';
 import { SPECIAL_CINEMA_PUZZLE, SPECIAL_PROVERBS_PUZZLE } from './data/specialPuzzles';
 import { speakTenaliWin, speakTenaliSpeedBonus, speakTenaliWrong, speakTenaliHint } from './utils/speech';
 
@@ -147,6 +148,17 @@ export function App() {
   // Vocal Feature: Voice Input Listening State
   const [isListening, setIsListening] = useState(false);
   const [isClueListDrawerOpen, setIsClueListDrawerOpen] = useState(false);
+
+  // Victory Celebration Modal State
+  const [isVictoryModalOpen, setIsVictoryModalOpen] = useState(false);
+  const [victoryStats, setVictoryStats] = useState<VictoryStats>({
+    timerSeconds: 0,
+    earnedCoins: 0,
+    speedBonusCoins: 0,
+    earnedScore: 0,
+    isUnderTime: false,
+    difficulty: 'medium'
+  });
 
   // Persist Coins & Score
   useEffect(() => {
@@ -295,6 +307,7 @@ export function App() {
     setStatusMessage(t.loadingNew);
     setIncorrectCells([]);
     setIsSolved(false);
+    setIsVictoryModalOpen(false);
     setIsTimerRunning(false);
     setHasPaused(false);
     setTimerSeconds(0);
@@ -312,6 +325,7 @@ export function App() {
     setStatusMessage(t.loadingDaily);
     setIncorrectCells([]);
     setIsSolved(false);
+    setIsVictoryModalOpen(false);
     setIsTimerRunning(false);
     setHasPaused(false);
     setTimerSeconds(0);
@@ -502,6 +516,7 @@ export function App() {
     const nextGrid = userGrid.map(row => [...row]);
     nextGrid[r][c] = syl;
     setUserGrid(nextGrid);
+    checkAndTriggerCompletion(nextGrid);
 
     // Auto-advance cursor
     if (direction === 'across') {
@@ -585,18 +600,42 @@ export function App() {
     loadPuzzle(nextDiff);
   };
 
+  // Auto-detect when every playable cell is filled
+  const checkAndTriggerCompletion = (gridToCheck: (string | null)[][]) => {
+    if (!puzzle || !puzzle.solution || isSolved) return;
+    let isFull = true;
+    for (let r = 0; r < puzzle.size; r++) {
+      for (let c = 0; c < puzzle.size; c++) {
+        if (puzzle.mask[r][c]) {
+          const val = gridToCheck[r]?.[c];
+          if (!val || val.trim() === '') {
+            isFull = false;
+            break;
+          }
+        }
+      }
+      if (!isFull) break;
+    }
+
+    if (isFull) {
+      handleVerify(gridToCheck, true);
+    }
+  };
+
   // Rule 2: Verify & award +5 Speed Coins if within target time
-  const handleVerify = async () => {
+  const handleVerify = async (gridToVerify?: (string | null)[][], isAuto = false) => {
     if (!puzzle || !puzzle.solution) {
-      setStatusMessage(t.cannotVerify);
+      if (!isAuto) setStatusMessage(t.cannotVerify);
       return;
     }
 
-    const result = await verifyPuzzleOnline(puzzle.solution, userGrid);
+    const current = gridToVerify || userGrid;
+    const result = await verifyPuzzleOnline(puzzle.solution, current);
     setIncorrectCells(result.incorrect_cells);
 
     if (result.is_complete) {
       setIsSolved(true);
+      setIsTimerRunning(false);
       localStorage.removeItem('padam_active_session');
       setMascotMoodOverride('celebrating');
       templeAudio.playSuccessFanfare();
@@ -625,6 +664,17 @@ export function App() {
       setCoins(c => c + earnedCoins);
       setScore(s => s + earnedScore);
 
+      setVictoryStats({
+        timerSeconds,
+        earnedCoins,
+        speedBonusCoins,
+        earnedScore,
+        isUnderTime,
+        difficulty,
+        isDailyChallenge: !!puzzle.meta?.is_daily
+      });
+      setIsVictoryModalOpen(true);
+
       confetti({
         particleCount: isUnderTime ? 220 : 160,
         spread: 100,
@@ -645,13 +695,15 @@ export function App() {
 
       setStatusMessage(message);
     } else {
-      setMascotMoodOverride('facepalm');
-      templeAudio.playWrongChime();
-      speakTenaliWrong();
-      const message = result.correct_cells > 0
-        ? t.tryAgainMsg.replace('{total}', String(result.total_cells)).replace('{correct}', String(result.correct_cells))
-        : t.incorrectMsg;
-      setStatusMessage(message);
+      if (!isAuto) {
+        setMascotMoodOverride('facepalm');
+        templeAudio.playWrongChime();
+        speakTenaliWrong();
+        const message = result.correct_cells > 0
+          ? t.tryAgainMsg.replace('{total}', String(result.total_cells)).replace('{correct}', String(result.correct_cells))
+          : t.incorrectMsg;
+        setStatusMessage(message);
+      }
     }
   };
 
@@ -708,7 +760,18 @@ export function App() {
     setUserGrid(filled);
     setIncorrectCells([]);
     setIsSolved(true);
+    setIsTimerRunning(false);
     setIsRevealModalOpen(false);
+    setVictoryStats({
+      timerSeconds,
+      earnedCoins: 0,
+      speedBonusCoins: 0,
+      earnedScore: 0,
+      isUnderTime: false,
+      difficulty,
+      isDailyChallenge: !!puzzle.meta?.is_daily
+    });
+    setIsVictoryModalOpen(true);
     setStatusMessage(
       language === 'te'
         ? '⚠️ పూర్తి సమాధానాలు ప్రదర్శించబడ్డాయి. మీ నాణేల బ్యాలెన్స్ మొత్తం ఖాళీ అయింది (0 🪙).'
@@ -747,6 +810,7 @@ export function App() {
         const nextGrid = userGrid.map(row => [...row]);
         nextGrid[r][c] = sol;
         setUserGrid(nextGrid);
+        checkAndTriggerCompletion(nextGrid);
         setStatusMessage(
           t.revealSylMsg
             .replace('{r}', String(r + 1))
@@ -771,6 +835,7 @@ export function App() {
         }
       }
       setUserGrid(nextGrid);
+      checkAndTriggerCompletion(nextGrid);
       setStatusMessage(
         t.revealWordMsg.replace('{word}', activeClue.word || '') + ` (-${hint.coinCost})`
       );
@@ -846,6 +911,7 @@ export function App() {
 
           setUserGrid(nextGrid);
           setSelectedCell({ r: lastR, c: lastC });
+          checkAndTriggerCompletion(nextGrid);
           setStatusMessage(
             language === 'te'
               ? `🎙️ వాయిస్ పదం: '${clean}' (${syls.join('-')}) నమోదు చేయబడింది!`
@@ -1035,26 +1101,44 @@ export function App() {
           </div>
         )}
 
-        {/* Live Status Banner with WhatsApp Victory Share (Hidden on Print) */}
+        {/* Live Status Banner with Victory Controls (Hidden on Print) */}
         {statusMessage && (
           <div
-            className={`text-center py-2 px-4 mb-3 rounded-lg font-bold text-xs md:text-sm transition-all print:hidden ${
+            className={`text-center py-2 px-4 mb-3 rounded-xl font-bold text-xs md:text-sm transition-all print:hidden ${
               isSolved
-                ? "bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-md"
+                ? "bg-gradient-to-r from-emerald-100 via-teal-50 to-emerald-100 text-emerald-950 border-2 border-emerald-400 shadow-md flex flex-col sm:flex-row items-center justify-between gap-2.5"
                 : "bg-amber-100 text-amber-900 border border-amber-300"
             }`}
           >
-            <p>{statusMessage}</p>
+            <p className={isSolved ? "text-left font-bold" : ""}>{statusMessage}</p>
             {isSolved && (
-              <button
-                type="button"
-                onClick={handleShareWhatsAppVictory}
-                className="mt-2.5 px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 inline-flex items-center gap-1.5 cursor-pointer mx-auto"
-                title="వాట్సాప్‌లో పంచుకోండి"
-              >
-                <Share2 size={14} />
-                <span>{t.shareWhatsApp}</span>
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsVictoryModalOpen(true)}
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-xs transition active:scale-95 inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <Trophy size={13} className="text-yellow-200 fill-yellow-200" />
+                  <span>{language === 'te' ? 'ఫలితాలు' : 'Results'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRequestNewPuzzle()}
+                  className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Play size={13} className="fill-white" />
+                  <span>{language === 'te' ? 'తదుపరి పజిల్' : 'Next Puzzle'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShareWhatsAppVictory}
+                  className="px-3 py-1.5 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl font-bold text-xs shadow-xs transition active:scale-95 inline-flex items-center gap-1 cursor-pointer"
+                  title="వాట్సాప్‌లో పంచుకోండి"
+                >
+                  <Share2 size={13} className="text-emerald-700" />
+                  <span>{t.shareWhatsApp}</span>
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -1568,6 +1652,65 @@ export function App() {
           </div>
         </div>
       )}
+
+      {/* Persistent Floating Completion Bar when Solved & Modal is closed for Reviewing */}
+      {isSolved && !isVictoryModalOpen && (
+        <aside
+          aria-label="Victory Actions"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4 animate-in slide-in-from-bottom duration-300 print:hidden pointer-events-auto font-telugu"
+        >
+          <div className="bg-gradient-to-r from-emerald-950 via-teal-900 to-emerald-900 text-white p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-3 border-emerald-400 flex items-center justify-between gap-3 backdrop-blur-md">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-lg shrink-0">
+                🏆
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-extrabold text-xs sm:text-sm text-emerald-100 truncate">
+                  {language === 'te' ? '🎉 పజిల్ పూర్తయింది!' : '🎉 Puzzle Solved!'}
+                </h4>
+                <p className="text-[10px] sm:text-xs text-emerald-300 font-mono truncate">
+                  ⏱️ {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')} • +{victoryStats.earnedCoins} 🪙
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsVictoryModalOpen(true)}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition active:scale-95 cursor-pointer"
+              >
+                {language === 'te' ? 'ఫలితాలు' : 'Results'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRequestNewPuzzle()}
+                className="px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-amber-950 text-xs sm:text-sm font-black shadow-lg transition active:scale-95 flex items-center gap-1.5 cursor-pointer animate-pulse"
+              >
+                <Play size={14} className="fill-amber-950" />
+                <span>{language === 'te' ? 'తదుపరి పజిల్' : 'Next Puzzle'}</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* Grand Victory & Completion Celebration Modal */}
+      <VictoryModal
+        isOpen={isVictoryModalOpen}
+        onClose={() => setIsVictoryModalOpen(false)}
+        stats={victoryStats}
+        language={language}
+        onNextPuzzle={() => {
+          setIsVictoryModalOpen(false);
+          handleRequestNewPuzzle();
+        }}
+        onGoHome={() => {
+          setIsVictoryModalOpen(false);
+          setCurrentScreen('home');
+        }}
+        onShareWhatsApp={handleShareWhatsAppVictory}
+      />
     </div>
   );
 }
