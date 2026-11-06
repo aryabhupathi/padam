@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Language } from '../utils/translations';
 import { templeAudio } from '../utils/templeAudio';
-import { Play, Sparkles, Volume2, VolumeX, Globe } from 'lucide-react';
+import { Sparkles, Volume2, VolumeX, Globe } from 'lucide-react';
 
 interface TitleScreenProps {
   language: Language;
@@ -38,9 +38,10 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
   );
 
   // Candy Crush-style asset boot simulation (0% -> 100%)
+  // Automatically transitions to game as soon as progress reaches 100% (no play button required)
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 1600; // ms
+    const duration = 1400; // ms
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -51,11 +52,27 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
       if (nextProgress >= 100) {
         clearInterval(interval);
         setIsLoaded(true);
+
+        // Directly transition into game upon loading completion
+        setTimeout(() => {
+          setIsExiting(true);
+          try {
+            templeAudio.unlockContext();
+            if (!templeAudio.isMuted()) {
+              templeAudio.playTempleBell();
+            }
+          } catch {
+            // Ignore autoplay restriction if any
+          }
+          setTimeout(() => {
+            onPlay();
+          }, 450);
+        }, 220);
       }
-    }, 35);
+    }, 30);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [onPlay]);
 
   const handleToggleSound = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -63,17 +80,20 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
     setIsMuted(next);
   };
 
-  const handleStartGame = () => {
+  const handleFastForward = () => {
     if (isExiting) return;
-    // Essential for mobile browsers to unlock AudioContext
-    templeAudio.unlockContext();
-    if (!templeAudio.isMuted()) {
-      templeAudio.playTempleBell();
-    }
     setIsExiting(true);
+    try {
+      templeAudio.unlockContext();
+      if (!templeAudio.isMuted()) {
+        templeAudio.playTempleBell();
+      }
+    } catch {
+      // ignore
+    }
     setTimeout(() => {
       onPlay();
-    }, 450);
+    }, 350);
   };
 
   const getStatusText = () => {
@@ -99,12 +119,12 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
     <div
       className={`fixed inset-0 z-50 flex flex-col justify-between items-center px-3 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 select-none overflow-hidden font-telugu transition-all duration-500 ease-out h-[100dvh] max-h-[100dvh] box-border ${
         isExiting
-          ? 'opacity-0 scale-110 blur-xs pointer-events-none'
-          : 'opacity-100 scale-100'
+          ? "opacity-0 scale-110 blur-xs pointer-events-none"
+          : "opacity-100 scale-100"
       }`}
       style={{
         background:
-          'radial-gradient(circle at 50% 35%, #FFF7ED 0%, #FDF2E2 40%, #F7E4C8 75%, #ECD0A7 100%)'
+          "radial-gradient(circle at 50% 35%, #FFF7ED 0%, #FDF2E2 40%, #F7E4C8 75%, #ECD0A7 100%)",
       }}
     >
       {/* Dynamic Keyframes for Title Animations & Button Glow */}
@@ -164,8 +184,22 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
       {/* Background Watermark Mandala */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] sm:w-[700px] sm:h-[700px] md:w-[850px] md:h-[850px] pointer-events-none opacity-[0.05] text-amber-900 animate-slow-mandala z-0">
         <svg viewBox="0 0 200 200" fill="currentColor">
-          <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="2" fill="none" />
-          <circle cx="100" cy="100" r="70" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          <circle
+            cx="100"
+            cy="100"
+            r="90"
+            stroke="currentColor"
+            strokeWidth="2"
+            fill="none"
+          />
+          <circle
+            cx="100"
+            cy="100"
+            r="70"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            fill="none"
+          />
           <path d="M100 10 L110 50 L150 60 L120 90 L130 130 L100 110 L70 130 L80 90 L50 60 L90 50 Z" />
           <path d="M100 190 L110 150 L150 140 L120 110 L130 70 L100 90 L70 70 L80 110 L50 140 L90 150 Z" />
         </svg>
@@ -183,7 +217,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               fontSize: `${p.size}px`,
               opacity: p.opacity,
               animationDuration: `${p.duration}s`,
-              animationDelay: `${p.delay}s`
+              animationDelay: `${p.delay}s`,
             }}
           >
             {p.char}
@@ -196,7 +230,9 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         <div className="flex items-center gap-2">
           <span className="px-3 py-1 rounded-full bg-amber-100/90 border border-amber-300 text-amber-900 text-[11px] md:text-xs font-bold shadow-2xs flex items-center gap-1.5">
             <Sparkles size={13} className="text-amber-600 animate-spin" />
-            <span>{language === 'te' ? 'ఆస్థాన ప్రహేళిక' : 'Vijayanagara Crossword'}</span>
+            <span>
+              {language === "te" ? "ఆస్థాన ప్రహేళిక" : "Vijayanagara Crossword"}
+            </span>
           </span>
         </div>
 
@@ -207,12 +243,16 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             onClick={handleToggleSound}
             className={`p-2 md:p-2.5 rounded-full border shadow-xs transition active:scale-95 cursor-pointer ${
               !isMuted
-                ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
-                : 'bg-white/80 text-stone-400 border-stone-200 hover:bg-stone-100'
+                ? "bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200"
+                : "bg-white/80 text-stone-400 border-stone-200 hover:bg-stone-100"
             }`}
-            title={!isMuted ? 'ధ్వని ఆన్ (Sound On)' : 'ధ్వని మ్యూట్ (Muted)'}
+            title={!isMuted ? "ధ్వని ఆన్ (Sound On)" : "ధ్వని మ్యూట్ (Muted)"}
           >
-            {!isMuted ? <Volume2 size={16} className="text-amber-700" /> : <VolumeX size={16} />}
+            {!isMuted ? (
+              <Volume2 size={16} className="text-amber-700" />
+            ) : (
+              <VolumeX size={16} />
+            )}
           </button>
 
           {/* Language Switch */}
@@ -226,7 +266,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             title="Switch Language"
           >
             <Globe size={13} className="text-amber-700" />
-            <span>{language === 'te' ? 'English' : 'తెలుగు'}</span>
+            <span>{language === "te" ? "English" : "తెలుగు"}</span>
           </button>
         </div>
       </header>
@@ -262,18 +302,53 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
                 strokeWidth="1.5"
               />
               {/* Jewel Accents */}
-              <circle cx="24" cy="18" r="3" fill="#DC2626" stroke="#FEF08A" strokeWidth="1" />
-              <circle cx="16" cy="24" r="2.5" fill="#2563EB" stroke="#FEF08A" strokeWidth="1" />
-              <circle cx="32" cy="24" r="2.5" fill="#059669" stroke="#FEF08A" strokeWidth="1" />
+              <circle
+                cx="24"
+                cy="18"
+                r="3"
+                fill="#DC2626"
+                stroke="#FEF08A"
+                strokeWidth="1"
+              />
+              <circle
+                cx="16"
+                cy="24"
+                r="2.5"
+                fill="#2563EB"
+                stroke="#FEF08A"
+                strokeWidth="1"
+              />
+              <circle
+                cx="32"
+                cy="24"
+                r="2.5"
+                fill="#059669"
+                stroke="#FEF08A"
+                strokeWidth="1"
+              />
               <circle cx="24" cy="7" r="2" fill="#FEF08A" />
               <defs>
-                <linearGradient id="goldCrownGrad" x1="6" y1="4" x2="42" y2="32" gradientUnits="userSpaceOnUse">
+                <linearGradient
+                  id="goldCrownGrad"
+                  x1="6"
+                  y1="4"
+                  x2="42"
+                  y2="32"
+                  gradientUnits="userSpaceOnUse"
+                >
                   <stop stopColor="#FEF08A" />
                   <stop offset="0.4" stopColor="#F59E0B" />
                   <stop offset="0.8" stopColor="#D97706" />
                   <stop offset="1" stopColor="#92400E" />
                 </linearGradient>
-                <linearGradient id="goldBaseGrad" x1="10" y1="32" x2="38" y2="42" gradientUnits="userSpaceOnUse">
+                <linearGradient
+                  id="goldBaseGrad"
+                  x1="10"
+                  y1="32"
+                  x2="38"
+                  y2="42"
+                  gradientUnits="userSpaceOnUse"
+                >
                   <stop stopColor="#F59E0B" />
                   <stop offset="1" stopColor="#78350F" />
                 </linearGradient>
@@ -286,13 +361,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             <h1
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-wider select-none relative"
               style={{
-                background: 'linear-gradient(180deg, #FFFBEB 0%, #FEF08A 25%, #F59E0B 60%, #B45309 85%, #78350F 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 3px 0 #78350F) drop-shadow(0 6px 14px rgba(180, 83, 9, 0.45))'
+                background:
+                  "linear-gradient(180deg, #FFFBEB 0%, #FEF08A 25%, #F59E0B 60%, #B45309 85%, #78350F 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                filter:
+                  "drop-shadow(0 3px 0 #78350F) drop-shadow(0 6px 14px rgba(180, 83, 9, 0.45))",
               }}
             >
-              {language === 'te' ? 'పదవినోదం' : 'PADAVINODAM'}
+              {language === "te" ? "పదవినోదం" : "PADAVINODAM"}
             </h1>
             {/* Sparkle Twinkles */}
             <Sparkles className="absolute -top-2 -right-4 sm:-right-6 text-amber-300 w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
@@ -305,9 +382,9 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           <div className="relative inline-flex items-center px-3 py-0.5 sm:px-5 sm:py-1 rounded-full bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 text-amber-100 border sm:border-2 border-amber-400/90 shadow-md text-[11px] sm:text-xs md:text-sm font-bold tracking-wide mt-0.5 sm:mt-1 animate-in fade-in duration-500">
             <span className="text-amber-300 mr-1 sm:mr-1.5">✦</span>
             <span>
-              {language === 'te'
-                ? 'శ్రీకృష్ణదేవరాయల ఆస్థాన ప్రహేళిక'
-                : 'The Royal Vijayanagara Crossword'}
+              {language === "te"
+                ? "శ్రీకృష్ణదేవరాయల ఆస్థాన ప్రహేళిక"
+                : "The Royal Vijayanagara Crossword"}
             </span>
             <span className="text-amber-300 ml-1 sm:ml-1.5">✦</span>
           </div>
@@ -319,7 +396,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* Tile 1: ప */}
           <div
             className="absolute -left-4 sm:-left-7 md:-left-9 top-1 sm:top-2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none -rotate-12 cursor-default"
-            style={{ animationDuration: '3.2s' }}
+            style={{ animationDuration: "3.2s" }}
             title="ప"
           >
             ప
@@ -328,7 +405,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* Tile 2: ద */}
           <div
             className="absolute -right-4 sm:-right-7 md:-right-9 top-2 sm:top-3 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none rotate-12 cursor-default"
-            style={{ animationDuration: '3.6s', animationDelay: '0.4s' }}
+            style={{ animationDuration: "3.6s", animationDelay: "0.4s" }}
             title="ద"
           >
             ద
@@ -337,7 +414,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* Tile 3: వి */}
           <div
             className="absolute -left-3 sm:-left-6 md:-left-8 bottom-4 sm:bottom-6 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none rotate-6 cursor-default"
-            style={{ animationDuration: '3.4s', animationDelay: '0.8s' }}
+            style={{ animationDuration: "3.4s", animationDelay: "0.8s" }}
             title="వి"
           >
             వి
@@ -346,7 +423,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* Tile 4: నో */}
           <div
             className="absolute -right-3 sm:-right-6 md:-right-8 bottom-3 sm:bottom-5 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-100 via-yellow-200 to-amber-400 border border-amber-300 shadow-lg flex items-center justify-center font-black text-amber-950 text-xs sm:text-sm md:text-base animate-bounce select-none -rotate-6 cursor-default"
-            style={{ animationDuration: '3.8s', animationDelay: '1.2s' }}
+            style={{ animationDuration: "3.8s", animationDelay: "1.2s" }}
             title="నో"
           >
             నో
@@ -376,67 +453,44 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
         {/* Heritage Tagline */}
         <p className="text-[11px] sm:text-xs md:text-sm font-semibold text-amber-900/90 max-w-xs sm:max-w-md mx-auto pt-0.5 sm:pt-1 animate-in fade-in duration-700">
-          {language === 'te'
-            ? 'స్వచ్ఛమైన తెలుగు పద ప్రహేళిక • ప్రతిరోజూ కొత్త సవాలు'
-            : 'Pure Telugu Crossword Puzzle • Fresh Everyday'}
+          {language === "te"
+            ? "స్వచ్ఛమైన తెలుగు పద ప్రహేళిక • ప్రతిరోజూ కొత్త సవాలు"
+            : "Pure Telugu Crossword Puzzle • Fresh Everyday"}
         </p>
       </main>
 
-      {/* 3. Bottom Action Section: Loading Progress Bar OR Big Bouncing "PLAY" Button */}
+      {/* 3. Bottom Action Section: Loading Progress Track (Auto-transitions to game once loaded) */}
       <footer className="relative z-10 w-full max-w-xs sm:max-w-sm mx-auto pb-1 sm:pb-3 md:pb-4 flex flex-col items-center shrink-0">
-        {!isLoaded ? (
-          /* Loading Track (0% -> 100%) */
-          <div className="w-full max-w-xs sm:max-w-sm space-y-2 animate-in fade-in duration-300">
-            <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-stone-800 px-1">
-              <span className="flex items-center gap-1.5 text-amber-950">
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                <span>{getStatusText()}</span>
-              </span>
-              <span className="font-mono text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full text-xs font-extrabold">
-                {progress}%
-              </span>
-            </div>
-
-            {/* Candy-style striped progress track */}
-            <div className="w-full h-4 sm:h-5 bg-stone-200/90 rounded-full p-0.5 sm:p-1 border-2 border-amber-300 shadow-inner overflow-hidden relative">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 transition-all duration-150 ease-out shadow-sm relative overflow-hidden"
-                style={{ width: `${progress}%` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-logo-sheen" />
-              </div>
-            </div>
-            <p className="text-center text-[10px] sm:text-[11px] text-stone-500 font-medium">
-              {language === 'te' ? 'ఆట సిద్ధమవుతోంది...' : 'Initializing game assets...'}
-            </p>
+        <div 
+          onClick={handleFastForward}
+          className="w-full max-w-xs sm:max-w-sm space-y-2 animate-in fade-in duration-300 cursor-pointer"
+          title={language === 'te' ? 'వేగంగా ప్రారంభించడానికి తాకండి' : 'Tap to skip'}
+        >
+          <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-stone-800 px-1">
+            <span className="flex items-center gap-1.5 text-amber-950">
+              <span className={`inline-block w-2 h-2 rounded-full ${isLoaded ? 'bg-emerald-600' : 'bg-emerald-500 animate-ping'}`} />
+              <span>{getStatusText()}</span>
+            </span>
+            <span className="font-mono text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full text-xs font-extrabold">
+              {progress}%
+            </span>
           </div>
-        ) : (
-          /* Candy Crush-style Grand Bouncing "PLAY" Button */
-          <div className="w-full max-w-xs sm:max-w-sm flex flex-col items-center space-y-1.5 sm:space-y-2 animate-in zoom-in-95 duration-400">
-            <button
-              type="button"
-              onClick={handleStartGame}
-              className="w-full py-3 sm:py-3.5 md:py-4 px-6 sm:px-8 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-700 hover:from-emerald-600 hover:to-teal-800 text-white font-extrabold text-lg sm:text-xl md:text-2xl border-2 sm:border-3 border-emerald-300 shadow-2xl active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2.5 sm:gap-3 animate-candy-play relative overflow-hidden group"
+
+          {/* Candy-style striped progress track */}
+          <div className="w-full h-4 sm:h-5 bg-stone-200/90 rounded-full p-0.5 sm:p-1 border-2 border-amber-300 shadow-inner overflow-hidden relative">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 transition-all duration-100 ease-out shadow-sm relative overflow-hidden"
+              style={{ width: `${progress}%` }}
             >
-              {/* Internal Sheen Sweep */}
-              <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none animate-logo-sheen" />
-
-              <div className="p-1.5 sm:p-2 rounded-full bg-white/20 group-hover:scale-110 transition shadow-inner">
-                <Play size={20} className="fill-white translate-x-0.5" />
-              </div>
-              <span className="tracking-wider drop-shadow-md">
-                {language === 'te' ? 'ఆడండి' : 'PLAY'}
-              </span>
-              <Sparkles size={18} className="text-emerald-200 animate-pulse" />
-            </button>
-
-            <p className="text-[11px] sm:text-xs font-bold text-amber-900/90 tracking-wide animate-pulse">
-              {language === 'te'
-                ? '👆 ప్రారంభించడానికి తాకండి'
-                : '👆 Tap to Enter Game'}
-            </p>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-logo-sheen" />
+            </div>
           </div>
-        )}
+          <p className="text-center text-[10px] sm:text-[11px] text-amber-900/80 font-medium tracking-wide">
+            {isLoaded
+              ? (language === 'te' ? 'ఆటలోకి ప్రవేశిస్తోంది...' : 'Entering game...')
+              : (language === 'te' ? 'ఆట సిద్ధమవుతోంది...' : 'Initializing game assets...')}
+          </p>
+        </div>
       </footer>
     </div>
   );

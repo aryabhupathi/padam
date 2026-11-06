@@ -1030,13 +1030,17 @@ export function App() {
       <div className="max-w-7xl w-full bg-[#fffdf9] border-2 border-stone-300 rounded-2xl shadow-lg p-2.5 sm:p-3.5 md:p-4 lg:p-5 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white print:max-w-full">
         <Header
           onNewPuzzle={() => {
-            setLoadingSubTitle(language === 'te' ? 'కొత్త పజిల్' : 'New Puzzle');
-            setCurrentScreen('loading');
+            setLoadingSubTitle(
+              language === "te" ? "కొత్త పజిల్" : "New Puzzle",
+            );
+            setCurrentScreen("loading");
             handleRequestNewPuzzle();
           }}
           onDailyPuzzle={() => {
-            setLoadingSubTitle(language === 'te' ? 'నేటి ఛాలెంజ్' : 'Daily Challenge');
-            setCurrentScreen('loading');
+            setLoadingSubTitle(
+              language === "te" ? "నేటి ఛాలెంజ్" : "Daily Challenge",
+            );
+            setCurrentScreen("loading");
             loadDailyPuzzle();
           }}
           onVerify={handleVerify}
@@ -1044,8 +1048,10 @@ export function App() {
           loading={loading}
           difficulty={difficulty}
           onDifficultyChange={(d) => {
-            setLoadingSubTitle(language === 'te' ? 'మోడ్ మార్పు' : 'Switching Mode');
-            setCurrentScreen('loading');
+            setLoadingSubTitle(
+              language === "te" ? "మోడ్ మార్పు" : "Switching Mode",
+            );
+            setCurrentScreen("loading");
             handleRequestNewPuzzle(d);
           }}
           timerSeconds={timerSeconds}
@@ -1087,7 +1093,7 @@ export function App() {
             <div className="flex items-center gap-2">
               <Users size={16} className="text-purple-700" />
               <span>
-                {direction === 'across' ? t.player1Turn : t.player2Turn}
+                {direction === "across" ? t.player1Turn : t.player2Turn}
               </span>
             </div>
             <div className="flex items-center gap-2 font-mono text-[11px]">
@@ -1106,11 +1112,13 @@ export function App() {
           <div
             className={`text-center py-2 px-4 mb-3 rounded-xl font-bold text-xs md:text-sm transition-all print:hidden ${
               isSolved
-                ? "bg-gradient-to-r from-emerald-100 via-teal-50 to-emerald-100 text-emerald-950 border-2 border-emerald-400 shadow-md flex flex-col sm:flex-row items-center justify-between gap-2.5"
+                ? "bg-linear-to-r from-emerald-100 via-teal-50 to-emerald-100 text-emerald-950 border-2 border-emerald-400 shadow-md flex flex-col sm:flex-row items-center justify-between gap-2.5"
                 : "bg-amber-100 text-amber-900 border border-amber-300"
             }`}
           >
-            <p className={isSolved ? "text-left font-bold" : ""}>{statusMessage}</p>
+            <p className={isSolved ? "text-left font-bold" : ""}>
+              {statusMessage}
+            </p>
             {isSolved && (
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -1118,8 +1126,11 @@ export function App() {
                   onClick={() => setIsVictoryModalOpen(true)}
                   className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-xs transition active:scale-95 inline-flex items-center gap-1 cursor-pointer"
                 >
-                  <Trophy size={13} className="text-yellow-200 fill-yellow-200" />
-                  <span>{language === 'te' ? 'ఫలితాలు' : 'Results'}</span>
+                  <Trophy
+                    size={13}
+                    className="text-yellow-200 fill-yellow-200"
+                  />
+                  <span>{language === "te" ? "ఫలితాలు" : "Results"}</span>
                 </button>
                 <button
                   type="button"
@@ -1127,7 +1138,9 @@ export function App() {
                   className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <Play size={13} className="fill-white" />
-                  <span>{language === 'te' ? 'తదుపరి పజిల్' : 'Next Puzzle'}</span>
+                  <span>
+                    {language === "te" ? "తదుపరి పజిల్" : "Next Puzzle"}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -1153,44 +1166,48 @@ export function App() {
                 <div
                   className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${
                     timerSeconds === 0
-                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                      : "bg-amber-100 text-amber-800 border border-amber-300"
                   }`}
                 >
-                  {timerSeconds === 0 ? '🎮' : '⏸️'}
+                  {timerSeconds === 0 ? "🎮" : "⏸️"}
                 </div>
 
                 {/* Title */}
                 <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 font-telugu">
                   {timerSeconds === 0
-                    ? (language === 'te' ? 'పదవినోదం సిద్ధంగా ఉంది' : 'Ready to Play')
-                    : (language === 'te' ? 'ఆట విరామంలో ఉంది' : 'Game Paused')}
+                    ? language === "te"
+                      ? "పదవినోదం సిద్ధంగా ఉంది"
+                      : "Ready to Play"
+                    : language === "te"
+                      ? "ఆట విరామంలో ఉంది"
+                      : "Game Paused"}
                 </h3>
 
                 {/* Description */}
                 <p className="text-xs sm:text-sm text-stone-600 font-telugu leading-relaxed">
                   {timerSeconds === 0
-                    ? (language === 'te'
-                        ? 'ఆధారాలు మరియు గడులను చూసి పరిష్కరించడానికి ఆటను ప్రారంభించండి.'
-                        : 'Start the game to reveal the clues and crossword grid.')
-                    : (language === 'te'
-                        ? 'సమయం ఆపినప్పుడు ఆధారాలు మరియు గడులు దాచబడతాయి. కొనసాగించడానికి క్రింది బటన్ నొక్కండి.'
-                        : 'Clues and grid are hidden while the timer is paused. Tap resume to continue.')}
+                    ? language === "te"
+                      ? "ఆధారాలు మరియు గడులను చూసి పరిష్కరించడానికి ఆటను ప్రారంభించండి."
+                      : "Start the game to reveal the clues and crossword grid."
+                    : language === "te"
+                      ? "సమయం ఆపినప్పుడు ఆధారాలు మరియు గడులు దాచబడతాయి. కొనసాగించడానికి క్రింది బటన్ నొక్కండి."
+                      : "Clues and grid are hidden while the timer is paused. Tap resume to continue."}
                 </p>
 
                 {/* Anti-Cheat Speed Bonus Alert */}
                 {timerSeconds > 0 && hasPaused && (
                   <div className="bg-amber-50 border border-amber-300 text-amber-900 text-[11px] sm:text-xs py-1.5 px-3 rounded-lg font-medium">
-                    {language === 'te'
-                      ? '⚠️ విరామం తీసుకున్నందున స్పీడ్ బోనస్ నాణాలు (+5 🪙) రద్దు చేయబడ్డాయి'
-                      : '⚠️ Speed bonus (+5 🪙) is forfeited for this paused run'}
+                    {language === "te"
+                      ? "⚠️ విరామం తీసుకున్నందున స్పీడ్ బోనస్ నాణాలు (+5 🪙) రద్దు చేయబడ్డాయి"
+                      : "⚠️ Speed bonus (+5 🪙) is forfeited for this paused run"}
                   </div>
                 )}
 
                 {/* Target time info on initial start */}
                 {timerSeconds === 0 && (
                   <div className="bg-stone-100 border border-stone-200 text-stone-700 text-[11px] sm:text-xs py-1 px-3 rounded-lg font-mono">
-                    {language === 'te'
+                    {language === "te"
                       ? `లక్ష్య సమయం: ${Math.floor(targetTime / 60)} నిమిషాలు • స్పీడ్ బోనస్: +5 🪙`
                       : `Target: ${Math.floor(targetTime / 60)} mins • Speed Bonus: +5 🪙`}
                   </div>
@@ -1204,29 +1221,213 @@ export function App() {
                   }}
                   className={`w-full py-2.5 sm:py-3 px-6 rounded-xl font-bold text-sm sm:text-base text-white shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2 ${
                     timerSeconds === 0
-                      ? 'bg-emerald-700 hover:bg-emerald-800'
-                      : 'bg-amber-700 hover:bg-amber-800'
+                      ? "bg-emerald-700 hover:bg-emerald-800"
+                      : "bg-amber-700 hover:bg-amber-800"
                   }`}
                 >
                   <Play size={18} className="fill-white" />
                   <span>
                     {timerSeconds === 0
-                      ? (language === 'te' ? 'ఆటను ప్రారంభించండి' : 'Start Puzzle')
-                      : (language === 'te' ? 'కొనసాగించండి' : 'Resume Puzzle')}
+                      ? language === "te"
+                        ? "ఆటను ప్రారంభించండి"
+                        : "Start Puzzle"
+                      : language === "te"
+                        ? "కొనసాగించండి"
+                        : "Resume Puzzle"}
                   </span>
                 </button>
               </div>
             </div>
           )}
 
-        {puzzle && (
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-start justify-center w-full print:hidden">
-            {/* Left Column: Crossword Grid + Telugu Keyboard */}
-            <div className="flex flex-col items-center shrink-0 w-full lg:w-[480px] xl:w-[520px] gap-3">
-              {/* Active Clue on Mobile / Tablet Screens (< 1024px) */}
-              {activeClue && (
-                <div className="w-full lg:hidden">
-                  <div className="p-2.5 sm:p-3 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/90 border-2 border-amber-300 rounded-2xl shadow-xs flex flex-col gap-1.5 sm:gap-2">
+          {puzzle && (
+            <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-start justify-center w-full print:hidden">
+              {/* Left Column: Crossword Grid + Telugu Keyboard */}
+              <div className="flex flex-col items-center shrink-0 w-full lg:w-120 xl:w-130 gap-3">
+                {/* Active Clue on Mobile / Tablet Screens (< 1024px) */}
+                {activeClue && (
+                  <div className="w-full lg:hidden">
+                    <div className="p-2.5 sm:p-3 bg-linear-to-r from-amber-50/90 via-white to-amber-50/90 border-2 border-amber-300 rounded-2xl shadow-xs flex flex-col gap-1.5 sm:gap-2">
+                      {/* Line 1: Across & Down on Top + Syllable Count */}
+                      <div className="flex items-center justify-between border-b border-amber-200/70 pb-1.5 sm:pb-2">
+                        <div className="inline-flex rounded-lg bg-stone-100 p-0.5 border border-stone-200">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              ensureTimerRunning();
+                              setDirection("across");
+                            }}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
+                              direction === "across"
+                                ? "bg-red-600 text-white shadow-xs"
+                                : "text-stone-600 hover:text-stone-900"
+                            }`}
+                          >
+                            <span>
+                              {language === "te" ? "అడ్డం" : "Across"}
+                            </span>
+                            {direction === "across" && (
+                              <span className="font-mono">
+                                #{activeClue.number}
+                              </span>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              ensureTimerRunning();
+                              setDirection("down");
+                            }}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
+                              direction === "down"
+                                ? "bg-blue-600 text-white shadow-xs"
+                                : "text-stone-600 hover:text-stone-900"
+                            }`}
+                          >
+                            <span>{language === "te" ? "నిలువు" : "Down"}</span>
+                            {direction === "down" && (
+                              <span className="font-mono">
+                                #{activeClue.number}
+                              </span>
+                            )}
+                          </button>
+                        </div>
+
+                        <span className="text-xs text-amber-900 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono font-bold shrink-0">
+                          {activeClue.length} {t.cells}
+                        </span>
+                      </div>
+
+                      {/* Line 2: Complete Clue Text (Never truncated) */}
+                      <div className="py-0.5 sm:py-1 px-1">
+                        <p className="font-telugu font-bold text-sm sm:text-base md:text-lg text-stone-900 leading-snug">
+                          <span className="text-amber-800 font-mono font-bold mr-1.5">
+                            {activeClue.number}.
+                          </span>
+                          {activeClue.clue}
+                        </p>
+                      </div>
+
+                      {/* Line 3: Symmetric & Neat Action Buttons */}
+                      <div className="grid grid-cols-4 gap-1.5 pt-1.5 border-t border-amber-200/70">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            ensureTimerRunning();
+                            speakTeluguText(activeClue.clue, (msg) =>
+                              setStatusMessage(msg),
+                            );
+                          }}
+                          className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-300 text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+                          title={
+                            language === "te"
+                              ? "క్లూను చదివి వినిపించు (Listen)"
+                              : "Read Clue Aloud"
+                          }
+                        >
+                          <Volume2
+                            size={14}
+                            className="text-amber-700 shrink-0"
+                          />
+                          <span className="text-[11px] truncate">
+                            {language === "te" ? "చదువు" : "Listen"}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleStartVoiceInput}
+                          className={`flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 rounded-xl border text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer ${
+                            isListening
+                              ? "bg-red-600 text-white animate-pulse border-red-500"
+                              : "bg-white hover:bg-stone-50 text-red-600 border-stone-300"
+                          }`}
+                          title={
+                            language === "te"
+                              ? "వాయిస్ ద్వారా సమాధానం చెప్పండి"
+                              : "Speak Answer"
+                          }
+                        >
+                          <Mic size={14} className="shrink-0" />
+                          <span className="text-[11px] truncate">
+                            {language === "te" ? "వాయిస్" : "Speak"}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            ensureTimerRunning();
+                            setIsHintsModalOpen(true);
+                          }}
+                          className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+                          title={
+                            language === "te"
+                              ? "సూచన తీసుకోండి (Hints)"
+                              : "Use Hint"
+                          }
+                        >
+                          <Lightbulb size={14} className="shrink-0" />
+                          <span className="text-[11px] truncate">
+                            {language === "te" ? "సూచన" : "Hints"}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsClueListDrawerOpen(true)}
+                          className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-stone-800 hover:bg-stone-900 text-white rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+                          title={
+                            language === "te"
+                              ? "అన్ని ఆధారాలు & తెనాలి కథ"
+                              : "All Clues & Story"
+                          }
+                        >
+                          <ListFilter size={14} className="shrink-0" />
+                          <span className="text-[11px] truncate">
+                            {language === "te" ? "ఆధారాలు" : "All Clues"}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Crossword Grid */}
+                <div className="flex flex-col items-center w-full">
+                  <CrosswordGrid
+                    puzzle={puzzle}
+                    userGrid={userGrid}
+                    selectedCell={selectedCell}
+                    direction={direction}
+                    activeClue={activeClue}
+                    incorrectCells={incorrectCells}
+                    language={language}
+                    onSelectCell={handleSelectCell}
+                    onBackspace={handleBackspace}
+                    onToggleDirection={() =>
+                      setDirection((d) => (d === "across" ? "down" : "across"))
+                    }
+                  />
+                </div>
+
+                {/* Extended Telugu Keyboard */}
+                <div className="w-full">
+                  <TeluguKeypad
+                    onInsertSyllable={handleInsertSyllable}
+                    onBackspace={handleBackspace}
+                    language={language}
+                    solutionGrid={puzzle.solution}
+                    onVoiceInput={handleStartVoiceInput}
+                    isListening={isListening}
+                  />
+                </div>
+              </div>
+
+              {/* Right Column (Desktop ONLY >= 1024px): Active Clue Card + Scrollable Clues Table */}
+              <div className="hidden lg:flex flex-col flex-1 min-w-0 w-full self-stretch gap-3">
+                {activeClue && (
+                  <div className="p-2.5 sm:p-3 bg-linear-to-r from-amber-50/90 via-white to-amber-50/90 border-2 border-amber-300 rounded-2xl shadow-xs flex flex-col gap-1.5 sm:gap-2">
                     {/* Line 1: Across & Down on Top + Syllable Count */}
                     <div className="flex items-center justify-between border-b border-amber-200/70 pb-1.5 sm:pb-2">
                       <div className="inline-flex rounded-lg bg-stone-100 p-0.5 border border-stone-200">
@@ -1243,7 +1444,11 @@ export function App() {
                           }`}
                         >
                           <span>{language === "te" ? "అడ్డం" : "Across"}</span>
-                          {direction === "across" && <span className="font-mono">#{activeClue.number}</span>}
+                          {direction === "across" && (
+                            <span className="font-mono">
+                              #{activeClue.number}
+                            </span>
+                          )}
                         </button>
                         <button
                           type="button"
@@ -1258,7 +1463,11 @@ export function App() {
                           }`}
                         >
                           <span>{language === "te" ? "నిలువు" : "Down"}</span>
-                          {direction === "down" && <span className="font-mono">#{activeClue.number}</span>}
+                          {direction === "down" && (
+                            <span className="font-mono">
+                              #{activeClue.number}
+                            </span>
+                          )}
                         </button>
                       </div>
 
@@ -1283,13 +1492,24 @@ export function App() {
                         type="button"
                         onClick={() => {
                           ensureTimerRunning();
-                          speakTeluguText(activeClue.clue, (msg) => setStatusMessage(msg));
+                          speakTeluguText(activeClue.clue, (msg) =>
+                            setStatusMessage(msg),
+                          );
                         }}
                         className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-300 text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
-                        title={language === "te" ? "క్లూను చదివి వినిపించు (Listen)" : "Read Clue Aloud"}
+                        title={
+                          language === "te"
+                            ? "క్లూను చదివి వినిపించు (Listen)"
+                            : "Read Clue Aloud"
+                        }
                       >
-                        <Volume2 size={14} className="text-amber-700 shrink-0" />
-                        <span className="text-[11px] truncate">{language === "te" ? "చదువు" : "Listen"}</span>
+                        <Volume2
+                          size={14}
+                          className="text-amber-700 shrink-0"
+                        />
+                        <span className="text-[11px] truncate">
+                          {language === "te" ? "చదువు" : "Listen"}
+                        </span>
                       </button>
 
                       <button
@@ -1300,10 +1520,16 @@ export function App() {
                             ? "bg-red-600 text-white animate-pulse border-red-500"
                             : "bg-white hover:bg-stone-50 text-red-600 border-stone-300"
                         }`}
-                        title={language === "te" ? "వాయిస్ ద్వారా సమాధానం చెప్పండి" : "Speak Answer"}
+                        title={
+                          language === "te"
+                            ? "వాయిస్ ద్వారా సమాధానం చెప్పండి"
+                            : "Speak Answer"
+                        }
                       >
                         <Mic size={14} className="shrink-0" />
-                        <span className="text-[11px] truncate">{language === "te" ? "వాయిస్" : "Speak"}</span>
+                        <span className="text-[11px] truncate">
+                          {language === "te" ? "వాయిస్" : "Speak"}
+                        </span>
                       </button>
 
                       <button
@@ -1313,183 +1539,56 @@ export function App() {
                           setIsHintsModalOpen(true);
                         }}
                         className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
-                        title={language === "te" ? "సూచన తీసుకోండి (Hints)" : "Use Hint"}
+                        title={
+                          language === "te"
+                            ? "సూచన తీసుకోండి (Hints)"
+                            : "Use Hint"
+                        }
                       >
                         <Lightbulb size={14} className="shrink-0" />
-                        <span className="text-[11px] truncate">{language === "te" ? "సూచన" : "Hints"}</span>
+                        <span className="text-[11px] truncate">
+                          {language === "te" ? "సూచన" : "Hints"}
+                        </span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setIsClueListDrawerOpen(true)}
                         className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-stone-800 hover:bg-stone-900 text-white rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
-                        title={language === "te" ? "అన్ని ఆధారాలు & తెనాలి కథ" : "All Clues & Story"}
+                        title={
+                          language === "te"
+                            ? "అన్ని ఆధారాలు & తెనాలి కథ"
+                            : "All Clues & Story"
+                        }
                       >
                         <ListFilter size={14} className="shrink-0" />
-                        <span className="text-[11px] truncate">{language === "te" ? "ఆధారాలు" : "All Clues"}</span>
+                        <span className="text-[11px] truncate">
+                          {language === "te" ? "ఆధారాలు" : "All Clues"}
+                        </span>
                       </button>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Crossword Grid */}
-              <div className="flex flex-col items-center w-full">
-                <CrosswordGrid
-                  puzzle={puzzle}
-                  userGrid={userGrid}
-                  selectedCell={selectedCell}
-                  direction={direction}
+                <ClueList
+                  clues={puzzle.clues}
                   activeClue={activeClue}
-                  incorrectCells={incorrectCells}
+                  direction={direction}
                   language={language}
-                  onSelectCell={handleSelectCell}
-                  onBackspace={handleBackspace}
-                  onToggleDirection={() =>
-                    setDirection((d) => (d === "across" ? "down" : "across"))
-                  }
-                />
-              </div>
-
-              {/* Extended Telugu Keyboard */}
-              <div className="w-full">
-                <TeluguKeypad
-                  onInsertSyllable={handleInsertSyllable}
-                  onBackspace={handleBackspace}
-                  language={language}
-                  solutionGrid={puzzle.solution}
-                  onVoiceInput={handleStartVoiceInput}
-                  isListening={isListening}
+                  onSelectClue={handleSelectClue}
                 />
               </div>
             </div>
-
-            {/* Right Column (Desktop ONLY >= 1024px): Active Clue Card + Scrollable Clues Table */}
-            <div className="hidden lg:flex flex-col flex-1 min-w-0 w-full self-stretch gap-3">
-              {activeClue && (
-                <div className="p-2.5 sm:p-3 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/90 border-2 border-amber-300 rounded-2xl shadow-xs flex flex-col gap-1.5 sm:gap-2">
-                  {/* Line 1: Across & Down on Top + Syllable Count */}
-                  <div className="flex items-center justify-between border-b border-amber-200/70 pb-1.5 sm:pb-2">
-                    <div className="inline-flex rounded-lg bg-stone-100 p-0.5 border border-stone-200">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          ensureTimerRunning();
-                          setDirection("across");
-                        }}
-                        className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                          direction === "across"
-                            ? "bg-red-600 text-white shadow-xs"
-                            : "text-stone-600 hover:text-stone-900"
-                        }`}
-                      >
-                        <span>{language === "te" ? "అడ్డం" : "Across"}</span>
-                        {direction === "across" && <span className="font-mono">#{activeClue.number}</span>}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          ensureTimerRunning();
-                          setDirection("down");
-                        }}
-                        className={`px-3 py-1 rounded-md text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                          direction === "down"
-                            ? "bg-blue-600 text-white shadow-xs"
-                            : "text-stone-600 hover:text-stone-900"
-                        }`}
-                      >
-                        <span>{language === "te" ? "నిలువు" : "Down"}</span>
-                        {direction === "down" && <span className="font-mono">#{activeClue.number}</span>}
-                      </button>
-                    </div>
-
-                    <span className="text-xs text-amber-900 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-md font-mono font-bold shrink-0">
-                      {activeClue.length} {t.cells}
-                    </span>
-                  </div>
-
-                  {/* Line 2: Complete Clue Text (Never truncated) */}
-                  <div className="py-0.5 sm:py-1 px-1">
-                    <p className="font-telugu font-bold text-sm sm:text-base md:text-lg text-stone-900 leading-snug">
-                      <span className="text-amber-800 font-mono font-bold mr-1.5">
-                        {activeClue.number}.
-                      </span>
-                      {activeClue.clue}
-                    </p>
-                  </div>
-
-                  {/* Line 3: Symmetric & Neat Action Buttons */}
-                  <div className="grid grid-cols-4 gap-1.5 pt-1.5 border-t border-amber-200/70">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        ensureTimerRunning();
-                        speakTeluguText(activeClue.clue, (msg) => setStatusMessage(msg));
-                      }}
-                      className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-300 text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
-                      title={language === "te" ? "క్లూను చదివి వినిపించు (Listen)" : "Read Clue Aloud"}
-                    >
-                      <Volume2 size={14} className="text-amber-700 shrink-0" />
-                      <span className="text-[11px] truncate">{language === "te" ? "చదువు" : "Listen"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleStartVoiceInput}
-                      className={`flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 rounded-xl border text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer ${
-                        isListening
-                          ? "bg-red-600 text-white animate-pulse border-red-500"
-                          : "bg-white hover:bg-stone-50 text-red-600 border-stone-300"
-                      }`}
-                      title={language === "te" ? "వాయిస్ ద్వారా సమాధానం చెప్పండి" : "Speak Answer"}
-                    >
-                      <Mic size={14} className="shrink-0" />
-                      <span className="text-[11px] truncate">{language === "te" ? "వాయిస్" : "Speak"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        ensureTimerRunning();
-                        setIsHintsModalOpen(true);
-                      }}
-                      className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
-                      title={language === "te" ? "సూచన తీసుకోండి (Hints)" : "Use Hint"}
-                    >
-                      <Lightbulb size={14} className="shrink-0" />
-                      <span className="text-[11px] truncate">{language === "te" ? "సూచన" : "Hints"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsClueListDrawerOpen(true)}
-                      className="flex items-center justify-center gap-1 py-1.5 px-1 sm:px-2 bg-stone-800 hover:bg-stone-900 text-white rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
-                      title={language === "te" ? "అన్ని ఆధారాలు & తెనాలి కథ" : "All Clues & Story"}
-                    >
-                      <ListFilter size={14} className="shrink-0" />
-                      <span className="text-[11px] truncate">{language === "te" ? "ఆధారాలు" : "All Clues"}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <ClueList
-                clues={puzzle.clues}
-                activeClue={activeClue}
-                direction={direction}
-                language={language}
-                onSelectClue={handleSelectClue}
-              />
-            </div>
-          </div>
-        )}
+          )}
         </div>
 
         {/* App Footer: In-App Privacy Policy & Developer Links */}
         <footer className="mt-8 pt-4 border-t border-stone-200 text-stone-500 font-telugu select-none print:hidden flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-1.5 text-stone-600">
             <span>© {new Date().getFullYear()}</span>
-            <span className="font-bold text-stone-800">పదవినోదం (Padavinodam)</span>
+            <span className="font-bold text-stone-800">
+              పదవినోదం (Padavinodam)
+            </span>
             <span>•</span>
             <span className="text-stone-500">Arya Bhupathi</span>
           </div>
@@ -1501,7 +1600,11 @@ export function App() {
               className="text-amber-800 hover:text-amber-950 font-bold underline underline-offset-4 cursor-pointer transition flex items-center gap-1.5 py-1 px-2.5 rounded-lg hover:bg-amber-50 border border-transparent hover:border-amber-300"
             >
               <ShieldCheck size={14} className="text-emerald-700" />
-              <span>{language === 'te' ? 'గోప్యతా విధానం (Privacy Policy)' : 'Privacy Policy'}</span>
+              <span>
+                {language === "te"
+                  ? "గోప్యతా విధానం (Privacy Policy)"
+                  : "Privacy Policy"}
+              </span>
             </button>
 
             <a
@@ -1698,7 +1801,9 @@ export function App() {
           selectedCell={selectedCell}
           userGrid={userGrid}
           mascotMoodOverride={mascotMoodOverride}
-          onToggleDirection={() => setDirection((d) => (d === "across" ? "down" : "across"))}
+          onToggleDirection={() =>
+            setDirection((d) => (d === "across" ? "down" : "across"))
+          }
           onUseHint={() => handleUseHint("reveal_syllable")}
           onSelectClue={handleSelectClue}
         />
@@ -1715,17 +1820,21 @@ export function App() {
       {isHintsModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 print:hidden">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border-2 border-amber-300 overflow-hidden font-telugu">
-            <div className="bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white p-4 flex items-center justify-between">
+            <div className="bg-linear-to-r from-amber-700 via-amber-800 to-amber-900 text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-amber-500/20 border border-amber-400/30 rounded-xl">
                   <Lightbulb size={20} className="text-amber-300" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold">
-                    {language === 'te' ? 'పజిల్ సహాయ సూచనలు (Hints)' : 'Puzzle Hints & Power-ups'}
+                    {language === "te"
+                      ? "పజిల్ సహాయ సూచనలు (Hints)"
+                      : "Puzzle Hints & Power-ups"}
                   </h3>
                   <p className="text-xs text-amber-200">
-                    {language === 'te' ? 'చిక్కు పదాలను సులభంగా పరిష్కరించడానికి ఎంచుకోండి' : 'Choose a hint to help solve difficult clues'}
+                    {language === "te"
+                      ? "చిక్కు పదాలను సులభంగా పరిష్కరించడానికి ఎంచుకోండి"
+                      : "Choose a hint to help solve difficult clues"}
                   </p>
                 </div>
               </div>
@@ -1749,7 +1858,7 @@ export function App() {
                 }}
                 onOpenTopUp={() => {
                   setIsHintsModalOpen(false);
-                  setTopUpInitialMode('points');
+                  setTopUpInitialMode("points");
                   setIsTopUpOpen(true);
                 }}
               />
@@ -1764,17 +1873,21 @@ export function App() {
           aria-label="Victory Actions"
           className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4 animate-in slide-in-from-bottom duration-300 print:hidden pointer-events-auto font-telugu"
         >
-          <div className="bg-gradient-to-r from-emerald-950 via-teal-900 to-emerald-900 text-white p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-3 border-emerald-400 flex items-center justify-between gap-3 backdrop-blur-md">
+          <div className="bg-linear-to-r from-emerald-950 via-teal-900 to-emerald-900 text-white p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-3 border-emerald-400 flex items-center justify-between gap-3 backdrop-blur-md">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-lg shrink-0">
                 🏆
               </div>
               <div className="min-w-0">
                 <h4 className="font-extrabold text-xs sm:text-sm text-emerald-100 truncate">
-                  {language === 'te' ? '🎉 పజిల్ పూర్తయింది!' : '🎉 Puzzle Solved!'}
+                  {language === "te"
+                    ? "🎉 పజిల్ పూర్తయింది!"
+                    : "🎉 Puzzle Solved!"}
                 </h4>
                 <p className="text-[10px] sm:text-xs text-emerald-300 font-mono truncate">
-                  ⏱️ {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')} • +{victoryStats.earnedCoins} 🪙
+                  ⏱️ {Math.floor(timerSeconds / 60)}:
+                  {(timerSeconds % 60).toString().padStart(2, "0")} • +
+                  {victoryStats.earnedCoins} 🪙
                 </p>
               </div>
             </div>
@@ -1785,15 +1898,17 @@ export function App() {
                 onClick={() => setIsVictoryModalOpen(true)}
                 className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition active:scale-95 cursor-pointer"
               >
-                {language === 'te' ? 'ఫలితాలు' : 'Results'}
+                {language === "te" ? "ఫలితాలు" : "Results"}
               </button>
               <button
                 type="button"
                 onClick={() => handleRequestNewPuzzle()}
-                className="px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-amber-950 text-xs sm:text-sm font-black shadow-lg transition active:scale-95 flex items-center gap-1.5 cursor-pointer animate-pulse"
+                className="px-3.5 sm:px-4 py-2 rounded-xl bg-linear-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-amber-950 text-xs sm:text-sm font-black shadow-lg transition active:scale-95 flex items-center gap-1.5 cursor-pointer animate-pulse"
               >
                 <Play size={14} className="fill-amber-950" />
-                <span>{language === 'te' ? 'తదుపరి పజిల్' : 'Next Puzzle'}</span>
+                <span>
+                  {language === "te" ? "తదుపరి పజిల్" : "Next Puzzle"}
+                </span>
               </button>
             </div>
           </div>
@@ -1812,7 +1927,7 @@ export function App() {
         }}
         onGoHome={() => {
           setIsVictoryModalOpen(false);
-          setCurrentScreen('home');
+          setCurrentScreen("home");
         }}
         onShareWhatsApp={handleShareWhatsAppVictory}
       />
